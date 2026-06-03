@@ -1,0 +1,660 @@
+<!-- فایل: components/header.html -->
+
+<style>
+    /* شروع استایل‌های اعلان‌های هوشمند */
+.notification-bell-container {
+    position: relative;
+    margin-left: 20px;
+}
+
+.notification-bell {
+    position: relative;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.notification-bell:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.notification-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 350px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    margin-top: 10px;
+    max-height: 500px;
+    overflow: hidden;
+}
+
+.notification-dropdown.show {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-dropdown-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.notification-dropdown-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.mark-all-read-btn,
+.refresh-notifications-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.3s;
+}
+
+.mark-all-read-btn:hover,
+.refresh-notifications-btn:hover {
+    background: #2980b9;
+}
+
+.refresh-notifications-btn {
+    background: transparent;
+    color: #7f8c8d;
+    padding: 5px;
+    font-size: 0.9rem;
+}
+
+.notification-dropdown-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-dropdown-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f5f5f5;
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.notification-dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-dropdown-item.unread {
+    background-color: #f0f8ff;
+}
+
+.notification-dropdown-item-icon {
+    margin-left: 10px;
+    color: #3498db;
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+.notification-dropdown-item-content {
+    flex: 1;
+}
+
+.notification-dropdown-item-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.notification-dropdown-item-message {
+    color: #555;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.notification-dropdown-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+}
+
+.notification-time {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.notification-priority {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.priority-critical {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.priority-high {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+.priority-medium {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.priority-low {
+    background-color: #e8f5e8;
+    color: #388e3c;
+}
+
+.notification-mark-read-btn {
+    background: none;
+    border: none;
+    color: #95a5a6;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 5px;
+    opacity: 0;
+    transition: opacity 0.3s, color 0.3s;
+}
+
+.notification-dropdown-item:hover .notification-mark-read-btn {
+    opacity: 1;
+}
+
+.notification-mark-read-btn:hover {
+    color: #27ae60;
+}
+
+.notification-dropdown-footer {
+    padding: 12px 15px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.view-all-notifications {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.view-all-notifications:hover {
+    text-decoration: underline;
+}
+
+.no-notifications {
+    text-align: center;
+    padding: 40px 20px;
+    color: #7f8c8d;
+}
+
+.no-notifications i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    display: block;
+    opacity: 0.5;
+}
+
+.no-notifications p {
+    margin: 0;
+}
+
+/* استایل desktop alerts */
+.desktop-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #3498db;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 300px;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 10000;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.desktop-alert-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 10px;
+}
+
+.desktop-alert-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-right: 5px;
+}
+
+.desktop-alert-critical {
+    background-color: #e74c3c;
+}
+
+.desktop-alert-high {
+    background-color: #e67e22;
+}
+
+.desktop-alert-medium {
+    background-color: #3498db;
+}
+
+.desktop-alert-low {
+    background-color: #2ecc71;
+}
+/* پایان استایل‌های اعلان‌های هوشمند */
+
+
+
+
+
+
+    /* شروع استایل‌های منوی کاربر */
+    .user-info {
+        position: relative;
+        gap: 12px;
+        margin-left: 20px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+    }
+
+    .user-info:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .user-avatar i {
+        font-size: 2rem;
+    }
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .user-details-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        text-align: right;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .user-role {
+        font-size: 0.75rem;
+        color: #7f8c8d;
+        margin-top: 2px;
+    }
+
+    .user-menu-toggle {
+        background: none;
+        border: none;
+        color: #7f8c8d;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 0.8rem;
+        transition: color 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .user-menu-toggle:hover {
+        color: #3498db;
+    }
+
+    /* منوی کشویی کاربر */
+    .user-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 250px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        z-index: 1001;
+        margin-top: 10px;
+        overflow: hidden;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .user-dropdown-menu.show {
+        display: block;
+    }
+
+    .user-dropdown-header {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        background: #f8f9fa;
+    }
+
+    .dropdown-user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .dropdown-user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .dropdown-user-avatar i {
+        font-size: 1.8rem;
+    }
+
+    .dropdown-user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .dropdown-user-text {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .dropdown-user-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .dropdown-user-email {
+        font-size: 0.75rem;
+        color: #7f8c8d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 2px;
+    }
+
+    .user-dropdown-items {
+        padding: 8px 0;
+    }
+
+    .user-dropdown-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        color: #2c3e50;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        gap: 12px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: right;
+        font-family: inherit;
+        font-size: 0.85rem;
+    }
+
+    .user-dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #3498db;
+    }
+
+    .user-dropdown-item i {
+        font-size: 0.9rem;
+        width: 20px;
+        text-align: center;
+        color: #7f8c8d;
+    }
+
+    .user-dropdown-item:hover i {
+        color: #3498db;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background-color: #eee;
+        margin: 8px 0;
+    }
+
+    .logout-btn-dropdown {
+        color: #e74c3c !important;
+    }
+
+    .logout-btn-dropdown i {
+        color: #e74c3c !important;
+    }
+
+    .logout-btn-dropdown:hover {
+        background-color: #ffebee !important;
+    }
+
+    /* حذف دکمه خروج اصلی از هدر */
+    .logout-btn {
+        display: none !important;
+    }
+    /* پایان استایل‌های منوی کاربر */
+
+
+</style>
+
+
+<header class="header">
+    <div class="header-left">
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="page-header-container">
+            <h1 id="pageTitle">عنوان صفحه</h1>
+            <!-- مسیر صفحه (breadcrumb) -->
+            <nav class="breadcrumb" id="breadcrumbContainer" aria-label="breadcrumb">
+                <!-- داینامیک در main.js پر می‌شود -->
+            </nav>
+        </div>
+    </div>
+    
+    <div class="header-right">
+        
+        <!-- زنگوله اعلان‌ها -->
+        <div class="notification-bell-container">
+            <div class="notification-bell" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+            </div>
+            <div class="notification-dropdown" id="notificationDropdown">
+                <div class="notification-dropdown-header">
+                    <h3>اعلان‌های شما</h3>
+                    <button class="mark-all-read-btn" id="markAllReadBtn" style="display: none;">علامت‌گذاری همه</button>
+                    <button class="refresh-notifications-btn" id="refreshNotificationsBtn" title="بروزرسانی">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="notification-dropdown-content" id="notificationDropdownContent">
+                    <div class="no-notifications">
+                        <i class="far fa-bell-slash"></i>
+                        <p>در حال بارگذاری اعلان‌ها...</p>
+                    </div>
+                </div>
+                <div class="notification-dropdown-footer">
+                    <a href="../dashboard/notifications.html" class="view-all-notifications" id="viewAllNotifications">
+                        <i class="fas fa-list"></i> مشاهده همه اعلان‌ها
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- اطلاعات کاربر با منوی کشویی -->
+        <div class="user-info" id="userInfo">
+            <div class="user-avatar" id="userAvatarContainer">
+                <!-- آیکون پیش‌فرض -->
+                <i class="fas fa-user-circle" id="defaultAvatarIcon"></i>
+                <!-- تصویر کاربر -->
+                <img src="" alt="تصویر کاربر" id="userAvatarImage" 
+                     style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"
+                     onerror="this.style.display='none'; document.getElementById('defaultAvatarIcon').style.display='block';">
+            </div>
+            
+            <div class="user-details-container">
+                <div class="user-details">
+                    <span class="user-name" id="userName">بارگذاری...</span>
+                    <span class="user-role" id="userRole">بارگذاری...</span>
+                </div>
+                <button class="user-menu-toggle" id="userMenuToggle">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            
+            <!-- منوی کشویی کاربر -->
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+                <div class="user-dropdown-header">
+                    <div class="dropdown-user-info">
+                        <div class="dropdown-user-avatar">
+                            <i class="fas fa-user-circle" id="dropdownAvatarIcon"></i>
+                            <img src="" alt="تصویر کاربر" id="dropdownAvatarImage" 
+                                 style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </div>
+                        <div class="dropdown-user-text">
+                            <span class="dropdown-user-name" id="dropdownUserName">کاربر</span>
+                            <span class="dropdown-user-email" id="dropdownUserEmail">کاربر@example.com</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-dropdown-items">
+                    <a href="../dashboard/profile.html" class="user-dropdown-item">
+                        <i class="fas fa-user-edit"></i>
+                        <span>ویرایش پروفایل</span>
+                    </a>
+                    
+                    <a href="../dashboard/change-password.html" class="user-dropdown-item">
+                        <i class="fas fa-key"></i>
+                        <span>تغییر رمز عبور</span>
+                    </a>
+                    
+                    <div class="dropdown-divider"></div>
+                    
+                    <button class="user-dropdown-item logout-btn-dropdown" id="logoutBtnDropdown">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>خروج از سیستم</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- دکمه خروج قدیمی (مخفی) -->
+        <button class="logout-btn" title="خروج از سیستم" style="display: none;">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+        
+        <!-- نمایش تاریخ -->
+        <div class="date-display">
+            <i class="fas fa-calendar"></i>
+            <span id="currentDate">...</span>
+        </div>
+    </div>
+</header>
