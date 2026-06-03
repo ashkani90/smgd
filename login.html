@@ -1,0 +1,487 @@
+<!-- فایل: login.html -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="login.page_title">ورود به سیستم سفارش گذاری</title>
+    <!-- کتابخانه آنلاین
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
+
+    <!-- کتابخانه آفلاین - CSS و فونت وزین در خط زیر تعریف شده است -->
+    <link rel="stylesheet" href="libs/font-awesome-Pro.6.7.2/web/css/all.min.css">
+    <link rel="stylesheet" href="../css/vazirmatn.css">
+
+    <style>
+
+    /* ======== start - استایل انتخابگر زبان */
+    .language-selector {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    .lang-select {
+        padding: 8px 15px;
+        border-radius: 25px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        font-size: 0.95rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .lang-select:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .lang-select option {
+        background: #1a2980;
+        color: white;
+    }
+
+    /* تنظیمات RTL برای انتخابگر */
+    [dir="rtl"] .language-selector {
+        margin-left: 0;
+        margin-right: 20px;
+    }
+
+    [dir="rtl"] .lang-select {
+        font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    /* واکنش‌گرایی برای موبایل */
+    @media (max-width: 768px) {
+        .language-selector {
+            margin: 10px 0;
+            width: 100%;
+        }
+        
+        .lang-select {
+            width: 100%;
+            text-align: center;
+        }
+    }
+    /* ============ END -  استایل انتخابگر زبان */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 48px;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .input-with-icon input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-with-icon input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .forgot-password {
+            color: #4f46e5;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+            border: 1px solid #fcc;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+
+        /* استایل جدید برای آیکون نمایش رمز عبور */
+        .password-toggle {
+            position: absolute;
+            left: 35px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: #4f46e5;
+        }
+
+        /* استایل مودال برای فراموشی رمز */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .modal p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .close-modal {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 20px;
+                padding: 30px;
+            }
+        }
+
+
+
+    </style>
+</head>
+<body>
+    <!-- مودال فراموشی رمز عبور -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <h2>بازیابی رمز عبور</h2>
+            <p>برای بازیابی رمز عبور، لطفاً با پشتیبانی سیستم تماس بگیرید یا از طریق ایمیل مدیر سیستم اقدام کنید.</p>
+            <p>ایمیل پشتیبانی: Poursan.m@gmail.com</p>
+            <button class="close-modal" onclick="closeForgotPasswordModal()">بستن</button>
+        </div>
+    </div>
+
+
+    <div class="login-container">
+        <div class="logo">
+            <!-- استفاده از لوگوی تصویری -->
+            <img src="images/logo/GD & SM.png" alt="لوگو سروش موتور و گلدن دراگون" style="height: 60px; margin-bottom: 10px;">
+
+            <!-- آیکون آچار پیچگوشتی 
+            <i class="fas fa-tools"></i>-->
+
+            <h1 data-i18n="login.system_name">سیستم مدیریت قطعات</h1>
+            <p data-i18n="login.system_description">سفارش گذاری، کلیم، محصول نامنطبق</p>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            نام کاربری یا رمز عبور اشتباه است
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username" data-i18n="login.username_label">نام کاربری</label>
+                <div class="input-with-icon">
+                    <input type="text" id="username" name="username" data-i18n-placeholder="login.username_placeholder" placeholder="نام کاربری خود را وارد کنید" required>
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" data-i18n="login.password_label">رمز عبور</label>
+                <div class="input-with-icon">
+                    <input type="password" id="password" name="password" data-i18n-placeholder="login.password_placeholder" placeholder="رمز عبور خود را وارد کنید" required>
+                    <i class="fas fa-lock"></i>
+                    <!-- آیکون نمایش/مخفی کردن رمز عبور -->
+                    <button type="button" class="password-toggle" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="remember-forgot">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember" data-i18n="login.remember_me">مرا به خاطر بسپار</label>
+                </div>
+                <a href="#" class="forgot-password" data-i18n="login.forgot_password" onclick="showForgotPasswordModal()">رمز عبور را فراموش کرده‌اید؟</a>
+            </div>
+
+            <button type="submit" class="login-btn" data-i18n="login.login_button">
+                <i class="fas fa-sign-in-alt"></i> ورود به سیستم
+            </button>
+        </form>
+    </div>
+
+    <!-- اسکریپت i18n.js - اصلاح مسیر -->
+    <script src="locales/i18n.js"></script>    
+
+    <!-- اسکریپت login -->
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // تنظیم آیکون نمایش رمز عبور
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // تغییر آیکون
+                const icon = this.querySelector('i');
+                if (type === 'text') {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+            
+            // بررسی اگر کاربر قبلاً لاگین کرده
+            const user = localStorage.getItem('user');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    if (confirm('شما قبلاً وارد شده‌اید. آیا می‌خواهید به داشبورد برگردید؟')) {
+                        window.location.href = 'dashboard/dashboard.html';
+                    } else {
+                        localStorage.removeItem('user');
+                    }
+                } catch(e) {
+                    localStorage.removeItem('user');
+                }
+            }
+        });
+
+        // تابع‌های مربوط به مودال فراموشی رمز
+        function showForgotPasswordModal() {
+            document.getElementById('forgotPasswordModal').style.display = 'flex';
+        }
+
+        function closeForgotPasswordModal() {
+            document.getElementById('forgotPasswordModal').style.display = 'none';
+        }
+
+        // بستن مودال با کلیک خارج از آن
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('forgotPasswordModal');
+            if (event.target === modal) {
+                closeForgotPasswordModal();
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('remember').checked;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // پاک کردن پیغام خطای قبلی
+            errorMessage.classList.remove('show');
+            
+            // اعتبارسنجی ساده
+            if (!username || !password) {
+                errorMessage.textContent = 'لطفاً نام کاربری و رمز عبور را وارد کنید';
+                errorMessage.classList.add('show');
+                return;
+            }
+            
+            // نمایش لودینگ
+            const submitBtn = this.querySelector('.login-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ورود...';
+            submitBtn.disabled = true;
+            
+            try {
+                // اصلاح مسیر api - بستگی به محل فایل login.html دارد
+                const response = await fetch('api/login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        remember: rememberMe
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Response:', data); // برای دیباگ
+                
+                if (data.success) {
+                    // ذخیره اطلاعات کاربر
+                    if (typeof Auth !== 'undefined') {
+                        Auth.login(
+                            data.user,
+                            data.token,
+                            data.permissions,
+                            data.remember_token
+                        );
+                    } else {
+                        // اگر Auth هنوز لود نشده
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('permissions', JSON.stringify(data.permissions));
+                    }
+                    
+                    // هدایت به داشبورد
+                    window.location.href = 'dashboard/dashboard.html';
+                } else {
+                    errorMessage.textContent = data.message;
+                    errorMessage.classList.add('show');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch(error) {
+                console.error('Login error:', error);
+
+                errorMessage.textContent = 'خطا در ارتباط با سرور';
+                errorMessage.classList.add('show');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="meta.title">سیستم سفارش گذاری</title>
+
+    <!-- فونت وزیر برای فارسی -->
+    <link href="https://cdn.fontcdn.ir/Font/Persian/Vazir/Vazir.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="libs/font-awesome-Pro.6.7.2/web/css/all.min.css">
+    <link href="./images/icons/Ordering.png" rel="shortcut icon" />  <!-- جهت نمایش آیکون در تب مرورگر-->
+
+
+    
+    <style>
+    /* ======== start - استایل انتخابگر زبان */
+    .language-selector {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    .lang-select {
+        padding: 8px 15px;
+        border-radius: 25px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        font-size: 0.95rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .lang-select:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .lang-select option {
+        background: #1a2980;
+        color: white;
+    }
+
+    /* تنظیمات RTL برای انتخابگر */
+    [dir="rtl"] .language-selector {
+        margin-left: 0;
+        margin-right: 20px;
+    }
+
+    [dir="rtl"] .lang-select {
+        font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    /* واکنش‌گرایی برای موبایل */
+    @media (max-width: 768px) {
+        .language-selector {
+            margin: 10px 0;
+            width: 100%;
+        }
+        
+        .lang-select {
+            width: 100%;
+            text-align: center;
+        }
+    }
+    /* ============ END -  استایل انتخابگر زبان */
+
+    /* سایر استایل‌های شما همانجا باقی می‌مانند */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+        color: #333;
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+    
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none" opacity="0.05"><path d="M0,0 L100,0 L100,100 Z" fill="white"/></svg>');
+        background-size: cover;
+        z-index: -1;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* هدر */
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px 0;
+        margin-bottom: 40px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .logo-icon {
+        font-size: 2.5rem;
+        color: #00d4ff;
+        background: rgba(255, 255, 255, 0.1);
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .logo-text h1 {
+        color: white;
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+    }
+    
+    .logo-text p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+    }
+    
+    .login-btn {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* بخش اصلی */
+    .hero {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+        margin-bottom: 60px;
+        flex-wrap: wrap;
+    }
+    
+    .hero-content {
+        flex: 1;
+        min-width: 300px;
+    }
+    
+    .hero-image {
+        flex: 1;
+        min-width: 300px;
+        text-align: center;
+    }
+    
+    .hero h2 {
+        font-size: 2.8rem;
+        color: white;
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 30px;
+        line-height: 1.8;
+    }
+    
+    .cta-buttons {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 16px 35px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+        color: white;
+        box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 212, 255, 0.5);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-5px);
+    }
+    
+    .hero-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* بخش ویژگی‌ها */
+    .features {
+        background: white;
+        border-radius: 25px;
+        padding: 50px 40px;
+        margin-bottom: 60px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .section-title h2 {
+        font-size: 2.2rem;
+        color: #1a2980;
+        margin-bottom: 15px;
+    }
+    
+    .section-title p {
+        color: #666;
+        font-size: 1.1rem;
+        max-width: 650px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+    }
+    
+    .feature-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 30px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        border-color: #00d4ff;
+    }
+    
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+        color: white;
+        font-size: 1.8rem;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.4rem;
+        color: #1a2980;
+        margin-bottom: 15px;
+    }
+    
+    .feature-card p {
+        color: #555;
+        line-height: 1.7;
+    }
+    
+    /* بخش مزایا */
+    .benefits {
+        margin-bottom: 60px;
+    }
+    
+    .benefits-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-top: 40px;
+    }
+    
+    .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 25px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .benefit-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #00d4ff;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+    
+    .benefit-text h4 {
+        color: white;
+        margin-bottom: 8px;
+        font-size: 1.2rem;
+    }
+    
+    .benefit-text p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    /* بخش ورود */
+    .access-section {
+        background: white;
+        border-radius: 25px;
+        padding: 60px 40px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        margin-bottom: 40px;
+    }
+    
+    .access-section h2 {
+        color: #1a2980;
+        font-size: 2.2rem;
+        margin-bottom: 20px;
+    }
+    
+    .access-section p {
+        color: #666;
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 0 auto 40px;
+        line-height: 1.7;
+    }
+    
+    .access-options {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .access-card {
+        background: #f8f9fa;
+        border-radius: 20px;
+        padding: 40px 30px;
+        width: 300px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .access-card:hover {
+        transform: translateY(-10px);
+        border-color: #00d4ff;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .access-card h3 {
+        color: #1a2980;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+    }
+    
+    .access-card ul {
+        text-align: right;
+        margin-bottom: 30px;
+        list-style: none;
+    }
+    
+    .access-card li {
+        padding: 10px 0;
+        color: #555;
+        position: relative;
+        padding-right: 25px;
+    }
+    
+    .access-card li:before {
+        content: '✓';
+        position: absolute;
+        right: 0;
+        color: #00d4ff;
+        font-weight: bold;
+    }
+    
+    /* فوتر */
+    footer {
+        text-align: center;
+        padding: 30px 0;
+        color: rgba(255, 255, 255, 0.7);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 40px;
+    }
+    
+    .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .footer-links a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+        color: #00d4ff;
+    }
+    
+    /* واکنش‌گرایی */
+    @media (max-width: 768px) {
+        .hero h2 {
+            font-size: 2.2rem;
+        }
+        
+        .cta-buttons {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .access-options {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .access-card {
+            width: 100%;
+            max-width: 350px;
+        }
+        
+        .benefit-item {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        header {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .hero h2 {
+            font-size: 1.8rem;
+        }
+        
+        .section-title h2 {
+            font-size: 1.8rem;
+        }
+        
+        .feature-card, .access-card {
+            padding: 25px 20px;
+        }
+    }
+    
+    /* انیمیشن‌ها */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+    
+    .delay-1 { animation-delay: 0.2s; opacity: 0; }
+    .delay-2 { animation-delay: 0.4s; opacity: 0; }
+    .delay-3 { animation-delay: 0.6s; opacity: 0; }
+    
+    /* دکمه شناور */
+    .floating-help {
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        text-decoration: none;
+        box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .floating-help:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 25px rgba(0, 212, 255, 0.6);
+    }
+    </style>
+
+
+
+
+</head>
+<body>
+    <!-- دکمه شناور راهنما -->
+    <a href="#features" class="floating-help" data-i18n-title="floating_help.title" aria-label="راهنما">
+        <i class="fas fa-question"></i>
+    </a>
+    
+    <div class="container">
+        <!-- هدر -->
+        <header class="animate">
+            <!-- انتخابگر زبان با برچسب داینامیک -->
+            <div class="language-selector"></div>   
+
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-bus"></i>
+                </div>
+                <div class="logo-text">
+                    <h1 data-i18n="header.system_name">Ordering</h1>
+                    <p data-i18n="header.system_name_p">سیستم سفارش گذاری</p>
+                </div>
+            </div>
+
+            <a href="login.html" class="login-btn animate delay-1" data-i18n="header.login">
+                <i class="fas fa-sign-in-alt"></i> ورود به سیستم
+            </a>
+
+            
+        </header>
+        
+        <!-- بخش اصلی معرفی -->
+        <section class="hero">
+            <div class="hero-content animate">
+                <h2 data-i18n="hero.title">مدیریت سفارش قطعات</h2>
+                <p data-i18n="hero.description">
+                این سیستم راه‌حل جامعی برای سفارش گذاری...
+                </p>
+                <div class="cta-buttons">
+                    <a href="#features" class="btn btn-primary animate delay-1">
+                        <i class="fas fa-star"></i> <span data-i18n="hero.features_btn">امکانات سیستم</span>
+                    </a>
+                    <a href="login.html" class="btn btn-secondary animate delay-2">
+                        <i class="fas fa-rocket"></i> <span data-i18n="hero.start_btn">شروع استفاده</span>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image animate delay-2">
+                <div class="hero-img-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 350px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;" data-i18n-alt="hero.hero_image_alt">
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fas fa-chart-network" style="font-size: 5rem; margin-bottom: 20px;"></i>
+                        <p data-i18n="hero.hero_image_content">سیستم مدیریت قطعات اتوبوس</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ویژگی‌های سیستم -->
+        <section id="features" class="features animate delay-1">
+            <div class="section-title">
+                <h2 data-i18n="features.title">ویژگی‌های کلیدی سیستم</h2>
+                <p data-i18n="features.subtitle">سیستم سفارش گذاری با امکاناتی که دارد شما را در مدیریت بهتر قطعات یاری می دهد</p>
+            </div>
+            
+            <div class="features-grid">
+                <!-- این قسمت توسط جاوااسکریپت پر می‌شود -->
+            </div>
+        </section>
+        
+        <!-- مزایای استفاده -->
+        <section class="benefits animate delay-2">
+            <div class="section-title" style="color: white;">
+                <h2 data-i18n="benefits.title">مزایای استفاده از سیستم مدیریت قطعات</h2>
+                <p data-i18n="benefits.subtitle">ثبت ، پیگیری و دریافت گزارش</p>
+            </div>
+            
+            <div class="benefits-list">
+                <!-- این قسمت توسط جاوااسکریپت پر می‌شود -->
+            </div>
+        </section>
+        
+        <!-- بخش ورود و دسترسی -->
+        <section class="access-section animate">
+            <h2 data-i18n="access.title">آماده شروع هستید؟</h2>
+            <p data-i18n="access.subtitle">با توجه به نیاز سازمان خود، یکی از روش‌های زیر را برای استفاده از سیستم انتخاب کنید</p>
+            
+            <div class="access-options">
+                <!-- این قسمت توسط جاوااسکریپت پر می‌شود -->
+            </div>
+        </section>
+        
+        <!-- فوتر -->
+        <footer class="animate delay-3">
+            <div class="footer-links">
+                <a href="#" data-i18n="footer.about"><i class="fas fa-info-circle"></i> درباره ما</a>
+                <a href="#" data-i18n="footer.contact"><i class="fas fa-envelope"></i> تماس با ما</a>
+                <a href="#" data-i18n="footer.terms"><i class="fas fa-file-contract"></i> شرایط استفاده</a>
+                <a href="#" data-i18n="footer.privacy"><i class="fas fa-shield-alt"></i> حریم خصوصی</a>
+            </div>
+            <p data-i18n="footer.copyright">© 2026 سیستم مدیریت قطعات - نسخه ۱.۲</p>
+            <p style="font-size: 0.9rem; margin-top: 10px; color: rgba(255, 255, 255, 0.6);" data-i18n="footer.description">
+                طراحی شده برای تبادل اطلاعات بین شرکت سروش موتور مبنا و شرکت گلدن دراگون
+            </p>
+        </footer>
+    </div>
+
+    <!-- اسکریپت i18n.js -->
+    <script src="./locales/i18n.js"></script>
+
+    <script>
+        // انیمیشن اسکرول
+        document.addEventListener('DOMContentLoaded', function() {
+            // فعال‌سازی انیمیشن‌ها
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                    }
+                });
+            }, observerOptions);
+            
+            // مشاهده تمام عناصری که باید انیمیشن داشته باشند
+            document.querySelectorAll('.features, .benefits, .access-section').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // تاریخ روز جاری
+            const currentDate = new Date().toLocaleDateString('fa-IR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // نمایش پیام خوش‌آمدگویی
+            setTimeout(() => {
+                console.log(`%c🌟 سیستم مدیریت قطعات - ${currentDate} 🌟`, 
+                    'color: #00d4ff; font-size: 16px; font-weight: bold;');
+                console.log('%cخوش آمدید! برای شروع روی دکمه "ورود به سیستم" کلیک کنید.', 
+                    'color: #4CAF50; font-size: 14px;');
+            }, 1000);
+            
+            // اسکرول نرم
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // شبیه‌سازی بارگذاری
+            const heroImage = document.querySelector('.hero-img-placeholder');
+            if (heroImage) {
+                setTimeout(() => {
+                    heroImage.innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <i class="fas fa-chart-network" style="font-size: 5rem; margin-bottom: 20px; color: white;"></i>
+                            <h3 style="color: white; margin-bottom: 10px;" data-i18n="hero.hero_image_title">سیستم مدیریت هوشمند</h3>
+                            <p style="color: rgba(255,255,255,0.9);" data-i18n="hero.hero_image_content">سفارش گذاری • کلیم • گزارش‌گیری</p>
+                        </div>
+                    `;
+                    
+                    // اگر i18n وجود دارد، محتوای جدید را نیز ترجمه کن
+                    if (window.i18n) {
+                        window.i18n.updateContent();
+                    }
+                }, 500);
+            }
+        });
+        
+        // تشخیص صفحه اول و تنظیم کوکی
+        if (document.referrer === "" || !document.referrer.includes(window.location.hostname)) {
+            sessionStorage.setItem('firstVisit', 'true');
+        }
+    </script>
+</body>
+</html>

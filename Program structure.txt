@@ -1,0 +1,69 @@
+maintenance-system/
+│
+├── index.html              # صفحه اصلی / داشبورد
+├── css/
+│   ├── style.css          # استایل اصلی
+│   ├── safety.css
+│   └── reports.css
+├── js/
+│   ├── main.js            # منطق اصلی جاوااسکریپت
+│   ├── auth.js
+│   ├── report.js
+│   ├── safety.js
+│   └── print-utilities.js 
+├── data/                  # داده‌های نمونه
+│   └── sample-data.js
+├── sidebar/                  # سایدبار یا منوی کناری
+│   ├── sidebar.js
+│   ├── sidebar.css
+│   └── sidebar.html
+├── API/                  # سایدبار یا منوی کناری
+│   ├── config.php
+│   ├── get-drafts.php
+│   ├── get-work-orders.php
+│   ├── login.php
+│   ├── logout.php
+│   ├── save-drafts.php
+│   ├── save-work-request.php
+│   ├── upload-attachments.php
+│   └── validate_token.php
+├── forms/                # صفحات فرم‌ها
+│   ├── periodic-inspection.html	#بازرسی دوره ای
+│   ├── preventive-maintenance.html	#تعمیرات پیشگیرانه
+│   ├── work-completion.html		#تکمیل کار
+│   ├── work-request.html		#درخواست کار
+│   ├── failure-report.html		#گزارش خرابی ها
+│   ├── safety-checklist.html		#چک لیست ایمنی
+│   └── forms-list.html			#همه فرم ها
+├── images/
+│   └── profiles/
+│  	        └── admin.jpg	
+├── management/            # صفحات مدیریت
+│   ├── equipment.html			#تجهیزات
+│   ├── personnel.html			#پر سنل
+│   ├── work-orders.html		#درستور کار
+│   ├── inventory.html			#انبار
+│   ├── vendors.html			#تأمین کنندگان
+│   ├── settings.html			#تنظیمات
+│   └── users.html
+├── reports/               # صفحات گزارش‌گیری
+│   ├── performance.html
+│   ├── downtime.html
+│   ├── costs.html
+│   └── preventive.html
+├── procedures/            # مستندات
+│   ├── instructions.html
+│   ├── procedures.html
+│   ├── checklists.html
+│   ├── safety.html
+│   └── manuals.html
+├── planning/              # صفحات برنامه‌ریزی
+│   ├── schedule.html
+│   ├── preventive.html
+│   ├── shutdown.html
+│   └── resources.html
+├── calendar.html
+├── help.html              # صفحه راهنما
+├── index.html
+├── login.html
+└── notifications.html
