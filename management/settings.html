@@ -1,0 +1,2924 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تنظیمات سیستم - مدیریت نگهداری و تعمیرات</title>
+    <!-- استایل‌های اصلی -->
+    <link rel="stylesheet" href="../css/style.css">
+    <!-- استایل‌های سایدبار -->
+    <link rel="stylesheet" href="../sidebar/sidebar.css">
+    <!-- آیکون ها -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- فونت‌ها -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* استایل‌های اختصاصی برای صفحه تنظیمات */
+        .settings-container {
+            padding: 20px;
+        }
+        
+        .settings-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 0.9rem;
+            color: #6c757d;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn i {
+            margin-left: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .tab-btn:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+        
+        .tab-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .settings-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .settings-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+        
+        .settings-section h2 i {
+            margin-left: 10px;
+            color: #3498db;
+        }
+        
+        .file-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        .file-upload:hover {
+            border-color: #3498db;
+        }
+        
+        .upload-area i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        
+        .logo-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .logo-preview img {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+        }
+        
+        .no-logo {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-picker input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        /* استایل‌های مدیریت کاربران */
+        .user-cell {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar-small {
+            width: 36px;
+            height: 36px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            color: #6c757d;
+        }
+        
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .role-admin { background-color: #dc3545; color: white; }
+        .role-supervisor { background-color: #007bff; color: white; }
+        .role-technician { background-color: #28a745; color: white; }
+        .role-requester { background-color: #6c757d; color: white; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #6c757d;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-icon:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+        
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .role-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.2s ease;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .role-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .role-header i {
+            font-size: 1.5rem;
+            margin-left: 10px;
+            color: #3498db;
+        }
+        
+        .role-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        .role-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .role-permissions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .permission-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        
+        /* استایل‌های اعلان‌ها */
+        .notification-category {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .notification-category:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-category h3 {
+            font-size: 1.1rem;
+            color: #495057;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .notification-category h3 i {
+            margin-left: 10px;
+            color: #6c757d;
+        }
+        
+        .notification-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+        
+        .delivery-channels {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .channel-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .channel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .channel-header i {
+            font-size: 1.5rem;
+            margin-left: 10px;
+            color: #6c757d;
+        }
+        
+        .channel-header h3 {
+            margin: 0;
+            flex: 1;
+        }
+        
+        /* استایل‌های گردش کار */
+        .workflow-visualization {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .workflow-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 20px;
+            color: #1976d2;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-content h3 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        
+        .step-content p {
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        .workflow-arrow {
+            text-align: center;
+            margin: 10px 0;
+            color: #6c757d;
+        }
+        
+        /* استایل‌های پشتیبان‌گیری */
+        .backup-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .backup-info {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .backup-stat {
+            display: flex;
+            align-items: center;
+        }
+        
+        .backup-stat i {
+            font-size: 1.5rem;
+            margin-left: 10px;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .stat-value {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .backup-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* استایل‌های API */
+        .api-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #28a745;
+        }
+        
+        .status-dot.active { background-color: #28a745; }
+        .status-dot.inactive { background-color: #dc3545; }
+        
+        .api-base-url code {
+            background-color: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .api-keys {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .api-key-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .key-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .key-header h3 {
+            margin: 0;
+        }
+        
+        .key-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .key-status.active { background-color: #d4edda; color: #155724; }
+        .key-status.inactive { background-color: #f8d7da; color: #721c24; }
+        
+        .key-value {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .key-value code {
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        
+        .key-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        .integrations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .integration-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .integration-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .integration-header i {
+            font-size: 1.5rem;
+            margin-left: 10px;
+            color: #6c757d;
+        }
+        
+        .integration-header h3 {
+            margin: 0;
+            flex: 1;
+        }
+        
+        /* استایل‌های لاگ سیستم */
+        .log-filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .logs-table {
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        
+        .log-level {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .log-level.error { background-color: #f8d7da; color: #721c24; }
+        .log-level.warning { background-color: #fff3cd; color: #856404; }
+        .log-level.info { background-color: #d1ecf1; color: #0c5460; }
+        .log-level.debug { background-color: #d4edda; color: #155724; }
+        
+        .log-error { background-color: rgba(220, 53, 69, 0.05); }
+        .log-warning { background-color: rgba(255, 193, 7, 0.05); }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .page-btn {
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* استایل‌های پیشرفته */
+        .database-settings, .server-settings, .log-settings {
+            margin-bottom: 20px;
+        }
+        
+        .db-status, .api-status {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .db-info {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .advanced-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .action-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .action-card.danger { border-left: 4px solid #dc3545; }
+        .action-card.warning { border-left: 4px solid #ffc107; }
+        .action-card.info { border-left: 4px solid #17a2b8; }
+        
+        .action-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .action-header i {
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+        
+        .action-card.danger .action-header i { color: #dc3545; }
+        .action-card.warning .action-header i { color: #ffc107; }
+        .action-card.info .action-header i { color: #17a2b8; }
+        
+        .action-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        .action-description {
+            margin-bottom: 15px;
+        }
+        
+        .action-description p {
+            margin: 0 0 10px 0;
+        }
+        
+        /* استایل‌های مودال */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .log-details {
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+        
+        .detail-item pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+        
+        /* رسپانسیو */
+        @media (max-width: 1200px) {
+            .roles-grid,
+            .integrations-grid,
+            .advanced-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .settings-tabs {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                justify-content: center;
+            }
+            
+            .backup-status {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .backup-info {
+                flex-direction: column;
+                gap: 15px;
+                width: 100%;
+            }
+            
+            .backup-stat {
+                justify-content: space-between;
+                width: 100%;
+            }
+            
+            .api-status {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .roles-grid,
+            .integrations-grid,
+            .advanced-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .workflow-step {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .step-icon {
+                margin-left: 0;
+                margin-bottom: 15px;
+            }
+            
+            .notification-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .delivery-channels {
+                grid-template-columns: 1fr;
+            }
+            
+            .log-filters {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .log-filters select,
+            .log-filters input {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .settings-section {
+                padding: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .checkbox-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- بارگذاری سایدبار -->
+    <div id="sidebar-container"></div>
+
+        <!-- محتوای اصلی -->
+        <main class="main-content">
+            <!-- هدر -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>تنظیمات سیستم نگهداری و تعمیرات</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name">علیرضا محمدی</span>
+                            <span class="user-role">سرپرست تعمیرات</span>
+                        </div>
+                        <button class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <div class="date-display">
+                        <i class="fas fa-calendar"></i>
+                        <span id="currentDate">...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- تب‌های تنظیمات -->
+            <div class="settings-container">
+                <div class="settings-tabs">
+                    <button class="tab-btn active" data-tab="general">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>تنظیمات عمومی</span>
+                    </button>
+                    <button class="tab-btn" data-tab="users">
+                        <i class="fas fa-users-cog"></i>
+                        <span>مدیریت کاربران</span>
+                    </button>
+                    <button class="tab-btn" data-tab="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span>اعلان‌ها</span>
+                    </button>
+                    <button class="tab-btn" data-tab="workflow">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>گردش کار</span>
+                    </button>
+                    <button class="tab-btn" data-tab="backup">
+                        <i class="fas fa-database"></i>
+                        <span>پشتیبان‌گیری</span>
+                    </button>
+                    <button class="tab-btn" data-tab="api">
+                        <i class="fas fa-code"></i>
+                        <span>API</span>
+                    </button>
+                    <button class="tab-btn" data-tab="logs">
+                        <i class="fas fa-history"></i>
+                        <span>لاگ سیستم</span>
+                    </button>
+                    <button class="tab-btn" data-tab="advanced">
+                        <i class="fas fa-wrench"></i>
+                        <span>پیشرفته</span>
+                    </button>
+                </div>
+
+                <!-- محتوای تب‌ها -->
+                <div class="tab-content active" id="general-tab">
+                    <div class="settings-section">
+                        <h2><i class="fas fa-info-circle"></i> اطلاعات شرکت</h2>
+                        <form id="companySettingsForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="companyName">نام شرکت <span class="required">*</span></label>
+                                    <input type="text" id="companyName" class="form-control" value="شرکت صنعتی پیشرو" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="companyLogo">لوگوی شرکت</label>
+                                    <div class="file-upload">
+                                        <input type="file" id="companyLogo" accept="image/*" class="form-control" hidden>
+                                        <div class="upload-area">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>برای آپلود لوگو کلیک کنید</p>
+                                            <small>پیشنهاد: 300×300 پیکسل، فرمت PNG یا JPG</small>
+                                        </div>
+                                        <div class="logo-preview" id="logoPreview">
+                                            <img src="" alt="لوگوی شرکت" style="display: none;">
+                                            <span class="no-logo">لوگو آپلود نشده است</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="industry">صنعت</label>
+                                    <select id="industry" class="form-control">
+                                        <option value="manufacturing">تولیدی</option>
+                                        <option value="oil_gas">نفت و گاز</option>
+                                        <option value="chemical">شیمیایی</option>
+                                        <option value="food">غذایی</option>
+                                        <option value="pharmaceutical">دارویی</option>
+                                        <option value="automotive">خودروسازی</option>
+                                        <option value="other">سایر</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timezone">منطقه زمانی <span class="required">*</span></label>
+                                    <select id="timezone" class="form-control" required>
+                                        <option value="Asia/Tehran" selected>تهران (GMT+3:30)</option>
+                                        <option value="UTC">UTC</option>
+                                        <option value="Europe/London">لندن (GMT+1)</option>
+                                        <option value="America/New_York">نیویورک (GMT-4)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="language">زبان سیستم</label>
+                                    <select id="language" class="form-control">
+                                        <option value="fa" selected>فارسی</option>
+                                        <option value="en">انگلیسی</option>
+                                        <option value="ar">عربی</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="dateFormat">فرمت تاریخ</label>
+                                    <select id="dateFormat" class="form-control">
+                                        <option value="jalali" selected>شمسی (۱۴۰۲/۰۵/۱۵)</option>
+                                        <option value="gregorian">میلادی (2023/08/06)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> ذخیره تغییرات
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-clock"></i> تنظیمات زمانی</h2>
+                        <form id="timeSettingsForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="workWeekStart">شروع هفته کاری</label>
+                                    <select id="workWeekStart" class="form-control">
+                                        <option value="0">شنبه</option>
+                                        <option value="1" selected>یکشنبه</option>
+                                        <option value="2">دوشنبه</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="workWeekEnd">پایان هفته کاری</label>
+                                    <select id="workWeekEnd" class="form-control">
+                                        <option value="3">سه‌شنبه</option>
+                                        <option value="4" selected>چهارشنبه</option>
+                                        <option value="5">پنجشنبه</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="workDayStart">شروع ساعت کاری</label>
+                                    <input type="time" id="workDayStart" class="form-control" value="08:00">
+                                </div>
+                                <div class="form-group">
+                                    <label for="workDayEnd">پایان ساعت کاری</label>
+                                    <input type="time" id="workDayEnd" class="form-control" value="17:00">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>تعطیلات آخر هفته</label>
+                                <div class="checkbox-group">
+                                    <div class="form-check">
+                                        <input type="checkbox" id="fridayHoliday" class="form-check-input" checked>
+                                        <label for="fridayHoliday" class="form-check-label">جمعه</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="thursdayHoliday" class="form-check-input" checked>
+                                        <label for="thursdayHoliday" class="form-check-label">پنجشنبه</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="saturdayHoliday" class="form-check-input">
+                                        <label for="saturdayHoliday" class="form-check-label">شنبه</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> ذخیره تغییرات
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-paint-brush"></i> ظاهر و نمایش</h2>
+                        <form id="appearanceSettingsForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="theme">تم سیستم</label>
+                                    <select id="theme" class="form-control">
+                                        <option value="light" selected>روشن</option>
+                                        <option value="dark">تاریک</option>
+                                        <option value="auto">خودکار</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="primaryColor">رنگ اصلی</label>
+                                    <div class="color-picker">
+                                        <input type="color" id="primaryColor" value="#3498db">
+                                        <span class="color-value">#3498db</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rowsPerPage">تعداد سطر در صفحات</label>
+                                    <select id="rowsPerPage" class="form-control">
+                                        <option value="10">۱۰ سطر</option>
+                                        <option value="25" selected>۲۵ سطر</option>
+                                        <option value="50">۵۰ سطر</option>
+                                        <option value="100">۱۰۰ سطر</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="autoRefresh">تازه‌سازی خودکار (دقیقه)</label>
+                                    <select id="autoRefresh" class="form-control">
+                                        <option value="0">غیرفعال</option>
+                                        <option value="1">۱ دقیقه</option>
+                                        <option value="5" selected>۵ دقیقه</option>
+                                        <option value="10">۱۰ دقیقه</option>
+                                        <option value="30">۳۰ دقیقه</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" id="showAnimations" class="form-check-input" checked>
+                                    <label for="showAnimations" class="form-check-label">نمایش انیمیشن‌ها</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" id="compactMode" class="form-check-input">
+                                    <label for="compactMode" class="form-check-label">حالت فشرده</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" id="showTutorials" class="form-check-input" checked>
+                                    <label for="showTutorials" class="form-check-label">نمایش راهنمای تعاملی</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> ذخیره تغییرات
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- تب مدیریت کاربران -->
+                <div class="tab-content" id="users-tab">
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-users"></i> کاربران سیستم</h2>
+                            <button class="btn btn-primary" id="addUserBtn">
+                                <i class="fas fa-user-plus"></i> کاربر جدید
+                            </button>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>نام کاربری</th>
+                                        <th>نام کامل</th>
+                                        <th>نقش</th>
+                                        <th>دپارتمان</th>
+                                        <th>وضعیت</th>
+                                        <th>آخرین فعالیت</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="user-cell">
+                                                <div class="user-avatar-small">
+                                                    <i class="fas fa-user-circle"></i>
+                                                </div>
+                                                <span>admin</span>
+                                            </div>
+                                        </td>
+                                        <td>علیرضا محمدی</td>
+                                        <td>
+                                            <span class="role-badge role-admin">مدیر سیستم</span>
+                                        </td>
+                                        <td>اداری</td>
+                                        <td>
+                                            <span class="status-badge status-active">فعال</span>
+                                        </td>
+                                        <td>۲ دقیقه پیش</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn-icon" title="ویرایش">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn-icon" title="تغییر رمز">
+                                                    <i class="fas fa-key"></i>
+                                                </button>
+                                                <button class="btn-icon" title="غیرفعال کردن">
+                                                    <i class="fas fa-user-slash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="user-cell">
+                                                <div class="user-avatar-small">
+                                                    <i class="fas fa-user-circle"></i>
+                                                </div>
+                                                <span>supervisor</span>
+                                            </div>
+                                        </td>
+                                        <td>محمد رضایی</td>
+                                        <td>
+                                            <span class="role-badge role-supervisor">سرپرست تعمیرات</span>
+                                        </td>
+                                        <td>تعمیرات</td>
+                                        <td>
+                                            <span class="status-badge status-active">فعال</span>
+                                        </td>
+                                        <td>۱۵ دقیقه پیش</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn-icon" title="ویرایش">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn-icon" title="تغییر رمز">
+                                                    <i class="fas fa-key"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="user-cell">
+                                                <div class="user-avatar-small">
+                                                    <i class="fas fa-user-circle"></i>
+                                                </div>
+                                                <span>technician</span>
+                                            </div>
+                                        </td>
+                                        <td>فاطمه احمدی</td>
+                                        <td>
+                                            <span class="role-badge role-technician">تکنسین</span>
+                                        </td>
+                                        <td>تعمیرات</td>
+                                        <td>
+                                            <span class="status-badge status-active">فعال</span>
+                                        </td>
+                                        <td>۱ ساعت پیش</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn-icon" title="ویرایش">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn-icon" title="تغییر رمز">
+                                                    <i class="fas fa-key"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="user-cell">
+                                                <div class="user-avatar-small">
+                                                    <i class="fas fa-user-circle"></i>
+                                                </div>
+                                                <span>requester</span>
+                                            </div>
+                                        </td>
+                                        <td>حسن کریمی</td>
+                                        <td>
+                                            <span class="role-badge role-requester">درخواست‌کننده</span>
+                                        </td>
+                                        <td>تولید</td>
+                                        <td>
+                                            <span class="status-badge status-inactive">غیرفعال</span>
+                                        </td>
+                                        <td>۳ روز پیش</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn-icon" title="فعال‌سازی">
+                                                    <i class="fas fa-user-check"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-user-shield"></i> نقش‌ها و دسترسی‌ها</h2>
+                        <div class="roles-grid">
+                            <div class="role-card">
+                                <div class="role-header">
+                                    <i class="fas fa-crown"></i>
+                                    <h3>مدیر سیستم</h3>
+                                </div>
+                                <div class="role-description">
+                                    دسترسی کامل به تمامی بخش‌های سیستم
+                                </div>
+                                <div class="role-permissions">
+                                    <span class="permission-badge">همه دسترسی‌ها</span>
+                                </div>
+                                <div class="role-users">
+                                    <span class="user-count">۱ کاربر</span>
+                                </div>
+                            </div>
+                            
+                            <div class="role-card">
+                                <div class="role-header">
+                                    <i class="fas fa-user-tie"></i>
+                                    <h3>سرپرست تعمیرات</h3>
+                                </div>
+                                <div class="role-description">
+                                    مدیریت دستورکارها، برنامه‌ریزی و گزارش‌گیری
+                                </div>
+                                <div class="role-permissions">
+                                    <span class="permission-badge">ایجاد دستورکار</span>
+                                    <span class="permission-badge">تخصیص کار</span>
+                                    <span class="permission-badge">گزارش‌گیری</span>
+                                </div>
+                                <div class="role-users">
+                                    <span class="user-count">۳ کاربر</span>
+                                </div>
+                            </div>
+                            
+                            <div class="role-card">
+                                <div class="role-header">
+                                    <i class="fas fa-tools"></i>
+                                    <h3>تکنسین</h3>
+                                </div>
+                                <div class="role-description">
+                                    مشاهده و اجرای دستورکارهای تخصیص یافته
+                                </div>
+                                <div class="role-permissions">
+                                    <span class="permission-badge">مشاهده دستورکار</span>
+                                    <span class="permission-badge">ثبت پیشرفت</span>
+                                    <span class="permission-badge">ثبت تکمیل کار</span>
+                                </div>
+                                <div class="role-users">
+                                    <span class="user-count">۸ کاربر</span>
+                                </div>
+                            </div>
+                            
+                            <div class="role-card">
+                                <div class="role-header">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <h3>درخواست‌کننده</h3>
+                                </div>
+                                <div class="role-description">
+                                    ایجاد درخواست کار و پیگیری وضعیت
+                                </div>
+                                <div class="role-permissions">
+                                    <span class="permission-badge">ایجاد درخواست</span>
+                                    <span class="permission-badge">پیگیری وضعیت</span>
+                                </div>
+                                <div class="role-users">
+                                    <span class="user-count">۱۵ کاربر</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" id="manageRolesBtn">
+                                <i class="fas fa-edit"></i> مدیریت نقش‌ها
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب تنظیمات اعلان‌ها -->
+                <div class="tab-content" id="notifications-tab">
+                    <div class="settings-section">
+                        <h2><i class="fas fa-bell"></i> تنظیمات اعلان‌ها</h2>
+                        
+                        <div class="notification-settings">
+                            <div class="notification-category">
+                                <h3><i class="fas fa-tools"></i> اعلان‌های دستورکار</h3>
+                                <div class="notification-options">
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifWorkOrderCreated" class="form-check-input" checked>
+                                        <label for="notifWorkOrderCreated" class="form-check-label">ایجاد دستورکار جدید</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifWorkOrderAssigned" class="form-check-input" checked>
+                                        <label for="notifWorkOrderAssigned" class="form-check-label">تخصیص دستورکار</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifWorkOrderCompleted" class="form-check-input" checked>
+                                        <label for="notifWorkOrderCompleted" class="form-check-label">تکمیل دستورکار</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifWorkOrderDelayed" class="form-check-input" checked>
+                                        <label for="notifWorkOrderDelayed" class="form-check-label">تأخیر در دستورکار</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-category">
+                                <h3><i class="fas fa-calendar-alt"></i> اعلان‌های برنامه پیشگیرانه</h3>
+                                <div class="notification-options">
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifPMScheduled" class="form-check-input" checked>
+                                        <label for="notifPMScheduled" class="form-check-label">برنامه‌ریزی PM</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifPMDue" class="form-check-input" checked>
+                                        <label for="notifPMDue" class="form-check-label">سررسید PM</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifPMOverdue" class="form-check-input" checked>
+                                        <label for="notifPMOverdue" class="form-check-label">تأخیر در PM</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-category">
+                                <h3><i class="fas fa-box"></i> اعلان‌های انبار</h3>
+                                <div class="notification-options">
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifInventoryLow" class="form-check-input" checked>
+                                        <label for="notifInventoryLow" class="form-check-label">موجودی کم</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifInventoryCritical" class="form-check-input" checked>
+                                        <label for="notifInventoryCritical" class="form-check-label">موجودی بحرانی</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifReorderPoint" class="form-check-input" checked>
+                                        <label for="notifReorderPoint" class="form-check-label">رسیدن به نقطه سفارش</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-category">
+                                <h3><i class="fas fa-chart-line"></i> اعلان‌های عملکرد</h3>
+                                <div class="notification-options">
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifKPIAlert" class="form-check-input" checked>
+                                        <label for="notifKPIAlert" class="form-check-label">هشدار شاخص‌های کلیدی</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifDowntimeAlert" class="form-check-input" checked>
+                                        <label for="notifDowntimeAlert" class="form-check-label">زمان توقف بیش از حد</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="notifCostOverrun" class="form-check-input" checked>
+                                        <label for="notifCostOverrun" class="form-check-label">تجاوز از بودجه</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="saveNotificationSettings">
+                                <i class="fas fa-save"></i> ذخیره تنظیمات
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-paper-plane"></i> کانال‌های ارسال</h2>
+                        
+                        <div class="delivery-channels">
+                            <div class="channel-card">
+                                <div class="channel-header">
+                                    <i class="fas fa-envelope"></i>
+                                    <h3>ایمیل</h3>
+                                    <div class="channel-status">
+                                        <span class="status-badge status-active">فعال</span>
+                                    </div>
+                                </div>
+                                <div class="channel-settings">
+                                    <div class="form-group">
+                                        <label for="emailServer">سرور ایمیل</label>
+                                        <input type="text" id="emailServer" class="form-control" value="smtp.company.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="emailPort">پورت</label>
+                                        <input type="number" id="emailPort" class="form-control" value="587">
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="emailSSL" class="form-check-input" checked>
+                                        <label for="emailSSL" class="form-check-label">استفاده از SSL</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="channel-card">
+                                <div class="channel-header">
+                                    <i class="fas fa-sms"></i>
+                                    <h3>پیامک</h3>
+                                    <div class="channel-status">
+                                        <span class="status-badge status-inactive">غیرفعال</span>
+                                    </div>
+                                </div>
+                                <div class="channel-settings">
+                                    <div class="form-group">
+                                        <label for="smsGateway">درگاه پیامک</label>
+                                        <select id="smsGateway" class="form-control" disabled>
+                                            <option value="kavenegar">کاوه‌نگار</option>
+                                            <option value="mediana">مدیانا</option>
+                                            <option value="other">سایر</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="enableSMS" class="form-check-input">
+                                        <label for="enableSMS" class="form-check-label">فعال‌سازی پیامک</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="channel-card">
+                                <div class="channel-header">
+                                    <i class="fas fa-broadcast-tower"></i>
+                                    <h3>وب‌هوک</h3>
+                                    <div class="channel-status">
+                                        <span class="status-badge status-active">فعال</span>
+                                    </div>
+                                </div>
+                                <div class="channel-settings">
+                                    <div class="form-group">
+                                        <label for="webhookURL">آدرس وب‌هوک</label>
+                                        <input type="url" id="webhookURL" class="form-control" value="https://api.company.com/webhook">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="webhookSecret">کلید مخفی</label>
+                                        <input type="password" id="webhookSecret" class="form-control" value="••••••••">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="testNotifications">
+                                <i class="fas fa-paper-plane"></i> تست ارسال اعلان
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب تنظیمات گردش کار -->
+                <div class="tab-content" id="workflow-tab">
+                    <div class="settings-section">
+                        <h2><i class="fas fa-project-diagram"></i> گردش کار دستورکارها</h2>
+                        
+                        <div class="workflow-visualization">
+                            <div class="workflow-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-clipboard"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h3>درخواست کار</h3>
+                                    <p>ایجاد درخواست توسط کاربران مجاز</p>
+                                    <div class="step-settings">
+                                        <div class="form-check">
+                                            <input type="checkbox" id="autoAssignWO" class="form-check-input" checked>
+                                            <label for="autoAssignWO" class="form-check-label">تخصیص خودکار دستورکار</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" id="requireApproval" class="form-check-input">
+                                            <label for="requireApproval" class="form-check-label">نیاز به تأیید سرپرست</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="workflow-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h3>تخصیص و برنامه‌ریزی</h3>
+                                    <p>تخصیص به تیم تعمیرات و تعیین زمان</p>
+                                    <div class="step-settings">
+                                        <div class="form-group">
+                                            <label for="defaultPriority">اولویت پیش‌فرض</label>
+                                            <select id="defaultPriority" class="form-control">
+                                                <option value="medium">متوسط</option>
+                                                <option value="low">کم</option>
+                                                <option value="high">بالا</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="workflow-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h3>اجرا</h3>
+                                    <p>انجام کار توسط تیم تعمیرات</p>
+                                    <div class="step-settings">
+                                        <div class="form-check">
+                                            <input type="checkbox" id="requireSafetyCheck" class="form-check-input" checked>
+                                            <label for="requireSafetyCheck" class="form-check-label">الزام چک‌لیست ایمنی</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" id="requireProgressUpdates" class="form-check-input" checked>
+                                            <label for="requireProgressUpdates" class="form-check-label">الزام ثبت پیشرفت کار</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="workflow-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h3>تکمیل و بستن</h3>
+                                    <p>تأیید تکمیل و بایگانی دستورکار</p>
+                                    <div class="step-settings">
+                                        <div class="form-check">
+                                            <input type="checkbox" id="requireCustomerSignoff" class="form-check-input">
+                                            <label for="requireCustomerSignoff" class="form-check-label">نیاز به تأیید درخواست‌کننده</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" id="autoCloseWO" class="form-check-input" checked>
+                                            <label for="autoCloseWO" class="form-check-label">بستن خودکار پس از ۷ روز</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="saveWorkflowSettings">
+                                <i class="fas fa-save"></i> ذخیره گردش کار
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-stopwatch"></i> تنظیمات زمان‌بندی</h2>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="escalationTime">زمان اسکالیشن (ساعت)</label>
+                                <input type="number" id="escalationTime" class="form-control" value="24" min="1">
+                                <small class="form-text">پس از این مدت، دستورکارهای تأخیری به مدیر ارشد اسکالیت می‌شوند</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="reminderInterval">فاصله یادآوری (ساعت)</label>
+                                <input type="number" id="reminderInterval" class="form-control" value="4" min="1">
+                                <small class="form-text">فاصله ارسال یادآوری برای دستورکارهای در حال انجام</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="defaultDueTime">مهلت پیش‌فرض (روز)</label>
+                                <input type="number" id="defaultDueTime" class="form-control" value="7" min="1">
+                                <small class="form-text">مهلت پیش‌فرض برای تکمیل دستورکارها</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="autoArchiveDays">بایگانی خودکار (روز)</label>
+                                <input type="number" id="autoArchiveDays" class="form-control" value="90" min="30">
+                                <small class="form-text">دستورکارهای تکمیل شده پس از این مدت بایگانی می‌شوند</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="saveSchedulingSettings">
+                                <i class="fas fa-save"></i> ذخیره تنظیمات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب پشتیبان‌گیری -->
+                <div class="tab-content" id="backup-tab">
+                    <div class="settings-section">
+                        <h2><i class="fas fa-database"></i> پشتیبان‌گیری داده‌ها</h2>
+                        
+                        <div class="backup-status">
+                            <div class="backup-info">
+                                <div class="backup-stat">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <div>
+                                        <span class="stat-label">آخرین پشتیبان</span>
+                                        <span class="stat-value">۱۴۰۲/۰۵/۱۲ ۲۲:۳۰</span>
+                                    </div>
+                                </div>
+                                <div class="backup-stat">
+                                    <i class="fas fa-hdd"></i>
+                                    <div>
+                                        <span class="stat-label">حجم داده</span>
+                                        <span class="stat-value">۲۴۵ مگابایت</span>
+                                    </div>
+                                </div>
+                                <div class="backup-stat">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <div>
+                                        <span class="stat-label">امنیت</span>
+                                        <span class="stat-value">رمزنگاری شده</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="backup-actions">
+                                <button class="btn btn-primary" id="backupNowBtn">
+                                    <i class="fas fa-download"></i> پشتیبان‌گیری فوری
+                                </button>
+                                <button class="btn btn-secondary" id="restoreBackupBtn">
+                                    <i class="fas fa-upload"></i> بازیابی پشتیبان
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="backup-settings-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="backupFrequency">فرکانس پشتیبان‌گیری</label>
+                                    <select id="backupFrequency" class="form-control">
+                                        <option value="daily">روزانه</option>
+                                        <option value="weekly" selected>هفتگی</option>
+                                        <option value="monthly">ماهانه</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="backupTime">زمان پشتیبان‌گیری</label>
+                                    <input type="time" id="backupTime" class="form-control" value="02:00">
+                                    <small class="form-text">در ساعت کم‌ترافیک تنظیم شود</small>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="backupRetention">مدت نگهداری (روز)</label>
+                                    <input type="number" id="backupRetention" class="form-control" value="90" min="7">
+                                    <small class="form-text">پشتیبان‌های قدیمی تر از این مدت حذف می‌شوند</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="backupLocation">محل ذخیره</label>
+                                    <select id="backupLocation" class="form-control">
+                                        <option value="local">سرور محلی</option>
+                                        <option value="cloud">ابر (AWS S3)</option>
+                                        <option value="both">هر دو</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" id="encryptBackup" class="form-check-input" checked>
+                                    <label for="encryptBackup" class="form-check-label">رمزنگاری پشتیبان‌ها</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" id="compressBackup" class="form-check-input" checked>
+                                    <label for="compressBackup" class="form-check-label">فشرده‌سازی پشتیبان‌ها</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" id="backupLogs" class="form-check-input" checked>
+                                    <label for="backupLogs" class="form-check-label">شامل لاگ سیستم</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" id="saveBackupSettings">
+                                    <i class="fas fa-save"></i> ذخیره تنظیمات
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-history"></i> تاریخچه پشتیبان‌ها</h2>
+                        
+                        <div class="table-container">
+                            <table class="backup-history-table">
+                                <thead>
+                                    <tr>
+                                        <th>تاریخ</th>
+                                        <th>نوع</th>
+                                        <th>حجم</th>
+                                        <th>وضعیت</th>
+                                        <th>محل ذخیره</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>۱۴۰۲/۰۵/۱۲ ۲۲:۳۰</td>
+                                        <td>خودکار</td>
+                                        <td>۲۴۵ MB</td>
+                                        <td><span class="status-badge status-success">موفق</span></td>
+                                        <td>سرور محلی + ابر</td>
+                                        <td>
+                                            <button class="btn-icon" title="دانلود">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn-icon" title="بررسی">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۴۰۲/۰۵/۰۵ ۲۲:۳۰</td>
+                                        <td>خودکار</td>
+                                        <td>۲۴۰ MB</td>
+                                        <td><span class="status-badge status-success">موفق</span></td>
+                                        <td>سرور محلی + ابر</td>
+                                        <td>
+                                            <button class="btn-icon" title="دانلود">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۴۰۲/۰۴/۲۸ ۲۲:۳۰</td>
+                                        <td>خودکار</td>
+                                        <td>۲۳۸ MB</td>
+                                        <td><span class="status-badge status-success">موفق</span></td>
+                                        <td>سرور محلی + ابر</td>
+                                        <td>
+                                            <button class="btn-icon" title="دانلود">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۴۰۲/۰۴/۲۱ ۰۲:۱۵</td>
+                                        <td>دستی</td>
+                                        <td>۲۳۵ MB</td>
+                                        <td><span class="status-badge status-success">موفق</span></td>
+                                        <td>سرور محلی</td>
+                                        <td>
+                                            <button class="btn-icon" title="دانلود">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب API و یکپارچه‌سازی -->
+                <div class="tab-content" id="api-tab">
+                    <div class="settings-section">
+                        <h2><i class="fas fa-code"></i> تنظیمات API</h2>
+                        
+                        <div class="api-settings">
+                            <div class="api-status">
+                                <div class="status-indicator">
+                                    <div class="status-dot active"></div>
+                                    <span>API فعال است</span>
+                                </div>
+                                <div class="api-base-url">
+                                    <strong>آدرس پایه:</strong>
+                                    <code>https://api.cmms.company.com/v1</code>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="apiRateLimit">محدودیت نرخ (درخواست در دقیقه)</label>
+                                <input type="number" id="apiRateLimit" class="form-control" value="100" min="10">
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" id="apiLogging" class="form-check-input" checked>
+                                <label for="apiLogging" class="form-check-label">ثبت لاگ تمامی درخواست‌های API</label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" id="apiRequireAuth" class="form-check-input" checked>
+                                <label for="apiRequireAuth" class="form-check-label">الزام احراز هویت برای تمامی endpointها</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="saveApiSettings">
+                                <i class="fas fa-save"></i> ذخیره تنظیمات
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-key"></i> کلیدهای API</h2>
+                        
+                        <div class="api-keys">
+                            <div class="api-key-card">
+                                <div class="key-header">
+                                    <h3>کلید اصلی</h3>
+                                    <span class="key-status active">فعال</span>
+                                </div>
+                                <div class="key-value">
+                                    <code class="api-key">cmms_live_sk_4j2k8f9s7d3l5p6q1w0e2r8t9y4u6i7o3p</code>
+                                    <button class="btn-icon copy-key" title="کپی">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                                <div class="key-meta">
+                                    <span>ایجاد شده: ۱۴۰۲/۰۳/۱۵</span>
+                                    <span>آخرین استفاده: ۲ ساعت پیش</span>
+                                </div>
+                                <div class="key-actions">
+                                    <button class="btn-icon" title="غیرفعال کردن">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button class="btn-icon" title="تولید مجدد">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="api-key-card">
+                                <div class="key-header">
+                                    <h3>کلید تست</h3>
+                                    <span class="key-status inactive">غیرفعال</span>
+                                </div>
+                                <div class="key-value">
+                                    <code class="api-key">cmms_test_sk_8d5f7g3h2j9k1l4m6n2b3v5c7x9z1q2w</code>
+                                    <button class="btn-icon copy-key" title="کپی">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                                <div class="key-meta">
+                                    <span>ایجاد شده: ۱۴۰۲/۰۴/۲۰</span>
+                                    <span>آخرین استفاده: ۲ هفته پیش</span>
+                                </div>
+                                <div class="key-actions">
+                                    <button class="btn-icon" title="فعال کردن">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn-icon" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="generateApiKeyBtn">
+                                <i class="fas fa-plus-circle"></i> ایجاد کلید جدید
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-plug"></i> یکپارچه‌سازی‌ها</h2>
+                        
+                        <div class="integrations-grid">
+                            <div class="integration-card">
+                                <div class="integration-header">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                    <h3>سیستم مالی</h3>
+                                    <div class="integration-status">
+                                        <span class="status-badge status-active">متصل</span>
+                                    </div>
+                                </div>
+                                <div class="integration-details">
+                                    <p>اتصال با سیستم حسابداری برای ثبت هزینه‌های تعمیرات</p>
+                                    <div class="integration-meta">
+                                        <span>آخرین همگام‌سازی: ۲ ساعت پیش</span>
+                                    </div>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-icon" title="تنظیمات">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                    <button class="btn-icon" title="همگام‌سازی دستی">
+                                        <i class="fas fa-sync"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="integration-card">
+                                <div class="integration-header">
+                                    <i class="fas fa-warehouse"></i>
+                                    <h3>سیستم انبار</h3>
+                                    <div class="integration-status">
+                                        <span class="status-badge status-active">متصل</span>
+                                    </div>
+                                </div>
+                                <div class="integration-details">
+                                    <p>اتصال با سیستم انبارداری برای مدیریت موجودی قطعات</p>
+                                    <div class="integration-meta">
+                                        <span>آخرین همگام‌سازی: ۱۵ دقیقه پیش</span>
+                                    </div>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-icon" title="تنظیمات">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="integration-card">
+                                <div class="integration-header">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <h3>تقویم سازمانی</h3>
+                                    <div class="integration-status">
+                                        <span class="status-badge status-inactive">قطع</span>
+                                    </div>
+                                </div>
+                                <div class="integration-details">
+                                    <p>اتصال با تقویم شرکت برای برنامه‌ریزی تعمیرات</p>
+                                    <div class="integration-meta">
+                                        <span>آخرین اتصال: ۳ روز پیش</span>
+                                    </div>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-icon" title="اتصال مجدد">
+                                        <i class="fas fa-plug"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب لاگ سیستم -->
+                <div class="tab-content" id="logs-tab">
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-history"></i> لاگ سیستم</h2>
+                            <div class="log-filters">
+                                <select id="logLevelFilter" class="form-control">
+                                    <option value="all">همه سطوح</option>
+                                    <option value="error">خطا</option>
+                                    <option value="warning">هشدار</option>
+                                    <option value="info">اطلاعات</option>
+                                    <option value="debug">دیباگ</option>
+                                </select>
+                                <input type="date" id="logDateFilter" class="form-control">
+                                <button class="btn btn-secondary" id="exportLogsBtn">
+                                    <i class="fas fa-download"></i> خروجی
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="logs-table">
+                                <thead>
+                                    <tr>
+                                        <th>زمان</th>
+                                        <th>سطح</th>
+                                        <th>منبع</th>
+                                        <th>کاربر</th>
+                                        <th>پیام</th>
+                                        <th>جزئیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="log-error">
+                                        <td>۱۴۰۲/۰۵/۱۲ ۱۴:۲۲:۳۰</td>
+                                        <td><span class="log-level error">خطا</span></td>
+                                        <td>API</td>
+                                        <td>system</td>
+                                        <td>خطا در اتصال به پایگاه داده</td>
+                                        <td>
+                                            <button class="btn-icon view-details" title="مشاهده جزئیات">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="log-warning">
+                                        <td>۱۴۰۲/۰۵/۱۲ ۱۳:۱۵:۴۵</td>
+                                        <td><span class="log-level warning">هشدار</span></td>
+                                        <td>Backup</td>
+                                        <td>automated</td>
+                                        <td>پشتیبان‌گیری هفتگی با تأخیر مواجه شد</td>
+                                        <td>
+                                            <button class="btn-icon view-details" title="مشاهده جزئیات">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="log-info">
+                                        <td>۱۴۰۲/۰۵/۱۲ ۱۲:۰۸:۲۰</td>
+                                        <td><span class="log-level info">اطلاعات</span></td>
+                                        <td>Authentication</td>
+                                        <td>admin</td>
+                                        <td>ورود موفق کاربر admin از IP 192.168.1.100</td>
+                                        <td>
+                                            <button class="btn-icon view-details" title="مشاهده جزئیات">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="log-info">
+                                        <td>۱۴۰۲/۰۵/۱۲ ۱۱:۴۵:۱۰</td>
+                                        <td><span class="log-level info">اطلاعات</span></td>
+                                        <td>Work Order</td>
+                                        <td>supervisor</td>
+                                        <td>دستورکار WO-2023-045 ایجاد شد</td>
+                                        <td>
+                                            <button class="btn-icon view-details" title="مشاهده جزئیات">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="log-debug">
+                                        <td>۱۴۰۲/۰۵/۱۲ ۱۱:۴۰:۳۵</td>
+                                        <td><span class="log-level debug">دیباگ</span></td>
+                                        <td>Cache</td>
+                                        <td>system</td>
+                                        <td>کش گزارش‌ها پاکسازی شد</td>
+                                        <td>
+                                            <button class="btn-icon view-details" title="مشاهده جزئیات">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination">
+                            <button class="page-btn" disabled>قبلی</button>
+                            <span class="page-info">صفحه ۱ از ۵</span>
+                            <button class="page-btn">بعدی</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-sliders-h"></i> تنظیمات لاگ</h2>
+                        
+                        <div class="log-settings">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="logRetentionDays">مدت نگهداری لاگ (روز)</label>
+                                    <input type="number" id="logRetentionDays" class="form-control" value="90" min="7">
+                                    <small class="form-text">لاگ‌های قدیمی‌تر از این مدت حذف می‌شوند</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="logRotationSize">حداکثر حجم لاگ (مگابایت)</label>
+                                    <input type="number" id="logRotationSize" class="form-control" value="100" min="10">
+                                    <small class="form-text">پس از رسیدن به این حجم، لاگ‌ها چرخش می‌کنند</small>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>سطح لاگ‌گیری</label>
+                                <div class="log-level-settings">
+                                    <div class="form-check">
+                                        <input type="checkbox" id="logErrors" class="form-check-input" checked disabled>
+                                        <label for="logErrors" class="form-check-label">خطاها</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="logWarnings" class="form-check-input" checked>
+                                        <label for="logWarnings" class="form-check-label">هشدارها</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="logInfo" class="form-check-input" checked>
+                                        <label for="logInfo" class="form-check-label">اطلاعات</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="logDebug" class="form-check-input">
+                                        <label for="logDebug" class="form-check-label">دیباگ</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" id="logToDatabase" class="form-check-input" checked>
+                                <label for="logToDatabase" class="form-check-label">ذخیره لاگ در پایگاه داده</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="logToFile" class="form-check-input" checked>
+                                <label for="logToFile" class="form-check-label">ذخیره لاگ در فایل</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="logUserActions" class="form-check-input" checked>
+                                <label for="logUserActions" class="form-check-label">ثبت فعالیت‌های کاربران</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="saveLogSettings">
+                                <i class="fas fa-save"></i> ذخیره تنظیمات
+                            </button>
+                            <button type="button" class="btn btn-danger" id="clearLogsBtn">
+                                <i class="fas fa-trash"></i> پاکسازی لاگ‌ها
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تب تنظیمات پیشرفته -->
+                <div class="tab-content" id="advanced-tab">
+                    <div class="settings-section">
+                        <h2><i class="fas fa-database"></i> تنظیمات پایگاه داده</h2>
+                        
+                        <div class="database-settings">
+                            <div class="db-status">
+                                <div class="status-indicator">
+                                    <div class="status-dot active"></div>
+                                    <span>پایگاه داده متصل است</span>
+                                </div>
+                                <div class="db-info">
+                                    <span><strong>نوع:</strong> PostgreSQL 14</span>
+                                    <span><strong>اندازه:</strong> ۲.۴ گیگابایت</span>
+                                    <span><strong>جدول‌ها:</strong> ۴۸</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="dbConnectionPool">اندازه Pool اتصال</label>
+                                    <input type="number" id="dbConnectionPool" class="form-control" value="20" min="5" max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="dbTimeout">Timeout اتصال (ثانیه)</label>
+                                    <input type="number" id="dbTimeout" class="form-control" value="30" min="5" max="300">
+                                </div>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" id="dbPooling" class="form-check-input" checked>
+                                <label for="dbPooling" class="form-check-label">فعال‌سازی Connection Pooling</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="dbSSL" class="form-check-input">
+                                <label for="dbSSL" class="form-check-label">استفاده از SSL برای اتصال</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="saveDbSettings">
+                                <i class="fas fa-save"></i> ذخیره تنظیمات
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="optimizeDbBtn">
+                                <i class="fas fa-magic"></i> بهینه‌سازی پایگاه داده
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-server"></i> تنظیمات سرور</h2>
+                        
+                        <div class="server-settings">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sessionTimeout">Timeout نشست (دقیقه)</label>
+                                    <input type="number" id="sessionTimeout" class="form-control" value="30" min="5" max="480">
+                                    <small class="form-text">پس از این مدت عدم فعالیت، کاربر خارج می‌شود</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cacheTTL">مدت اعتبار کش (ثانیه)</label>
+                                    <input type="number" id="cacheTTL" class="form-control" value="300" min="60" max="3600">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="maxUploadSize">حداکثر حجم آپلود (مگابایت)</label>
+                                    <input type="number" id="maxUploadSize" class="form-control" value="50" min="1" max="500">
+                                </div>
+                                <div class="form-group">
+                                    <label for="maxRequestSize">حداکثر حجم درخواست (مگابایت)</label>
+                                    <input type="number" id="maxRequestSize" class="form-control" value="100" min="10" max="1000">
+                                </div>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" id="gzipCompression" class="form-check-input" checked>
+                                <label for="gzipCompression" class="form-check-label">فعال‌سازی فشرده‌سازی GZIP</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="corsEnabled" class="form-check-input">
+                                <label for="corsEnabled" class="form-check-label">فعال‌سازی CORS</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="rateLimiting" class="form-check-input" checked>
+                                <label for="rateLimiting" class="form-check-label">فعال‌سازی محدودیت نرخ درخواست</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="saveServerSettings">
+                                <i class="fas fa-save"></i> ذخیره تنظیمات
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2><i class="fas fa-exclamation-triangle"></i> عملیات پیشرفته</h2>
+                        
+                        <div class="advanced-actions">
+                            <div class="action-card danger">
+                                <div class="action-header">
+                                    <i class="fas fa-redo"></i>
+                                    <h3>بازنشانی سیستم</h3>
+                                </div>
+                                <div class="action-description">
+                                    <p>بازنشانی تمامی تنظیمات به مقادیر پیش‌فرض</p>
+                                    <small class="text-danger">این عمل غیرقابل بازگشت است!</small>
+                                </div>
+                                <div class="action-button">
+                                    <button class="btn btn-danger" id="resetSystemBtn">
+                                        <i class="fas fa-redo"></i> بازنشانی
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="action-card warning">
+                                <div class="action-header">
+                                    <i class="fas fa-trash"></i>
+                                    <h3>پاکسازی داده‌ها</h3>
+                                </div>
+                                <div class="action-description">
+                                    <p>حذف داده‌های قدیمی و غیرضروری</p>
+                                    <small>داده‌های بایگانی شده و موقت حذف می‌شوند</small>
+                                </div>
+                                <div class="action-button">
+                                    <button class="btn btn-warning" id="cleanupDataBtn">
+                                        <i class="fas fa-broom"></i> پاکسازی
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="action-card info">
+                                <div class="action-header">
+                                    <i class="fas fa-stethoscope"></i>
+                                    <h3>تشخیص سلامت سیستم</h3>
+                                </div>
+                                <div class="action-description">
+                                    <p>بررسی وضعیت کلی سیستم و شناسایی مشکلات</p>
+                                    <small>سیستم را برای مشکلات احتمالی بررسی می‌کند</small>
+                                </div>
+                                <div class="action-button">
+                                    <button class="btn btn-info" id="systemDiagnosticsBtn">
+                                        <i class="fas fa-search"></i> اجرای تشخیص
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="action-card">
+                                <div class="action-header">
+                                    <i class="fas fa-file-export"></i>
+                                    <h3>خروجی کامل داده‌ها</h3>
+                                </div>
+                                <div class="action-description">
+                                    <p>تهیه خروجی از تمامی داده‌های سیستم</p>
+                                    <small>برای مهاجرت یا آرشیو کردن</small>
+                                </div>
+                                <div class="action-button">
+                                    <button class="btn btn-secondary" id="exportAllDataBtn">
+                                        <i class="fas fa-download"></i> خروجی
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    <!-- مودال مدیریت کاربر -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> ایجاد کاربر جدید</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newUsername">نام کاربری <span class="required">*</span></label>
+                            <input type="text" id="newUsername" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newEmail">ایمیل <span class="required">*</span></label>
+                            <input type="email" id="newEmail" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newFullName">نام کامل <span class="required">*</span></label>
+                            <input type="text" id="newFullName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPhone">شماره تماس</label>
+                            <input type="tel" id="newPhone" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newRole">نقش <span class="required">*</span></label>
+                            <select id="newRole" class="form-control" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="admin">مدیر سیستم</option>
+                                <option value="supervisor">سرپرست تعمیرات</option>
+                                <option value="technician">تکنسین</option>
+                                <option value="requester">درخواست‌کننده</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="newDepartment">دپارتمان</label>
+                            <select id="newDepartment" class="form-control">
+                                <option value="">انتخاب کنید</option>
+                                <option value="maintenance">تعمیرات</option>
+                                <option value="production">تولید</option>
+                                <option value="quality">کنترل کیفی</option>
+                                <option value="facilities">تاسیسات</option>
+                                <option value="warehouse">انبار</option>
+                                <option value="admin">اداری</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" id="sendWelcomeEmail" class="form-check-input" checked>
+                            <label for="sendWelcomeEmail" class="form-check-label">ارسال ایمیل خوش‌آمدگویی</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" id="forcePasswordChange" class="form-check-input">
+                            <label for="forcePasswordChange" class="form-check-label">اجبار به تغییر رمز در اولین ورود</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary modal-close">انصراف</button>
+                        <button type="submit" class="btn btn-primary">ایجاد کاربر</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تأیید عملیات -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> تأیید عملیات</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">آیا از انجام این عملیات اطمینان دارید؟</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-close">انصراف</button>
+                <button type="button" class="btn btn-danger" id="confirmActionBtn">تأیید</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال جزئیات لاگ -->
+    <div class="modal" id="logDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> جزئیات لاگ</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="log-details">
+                    <div class="detail-item">
+                        <strong>زمان:</strong>
+                        <span id="logTime">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>سطح:</strong>
+                        <span id="logLevel">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>منبع:</strong>
+                        <span id="logSource">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>کاربر:</strong>
+                        <span id="logUser">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>پیام:</strong>
+                        <span id="logMessage">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>جزئیات کامل:</strong>
+                        <pre id="logFullDetails">-</pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-close">بستن</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- اسکریپت‌ها -->
+
+    <!-- اسکریپت بارگذاری منوی کناری یا سایدبار-->
+    <script>
+        // 1. اجرای فوری: قبل از هر چیزی چک کن آیا پین است؟
+        // اگر بله، کلاس را به بادی اضافه کن تا CSS فوراً اعمال شود
+        (function() {
+            const isPinned = localStorage.getItem('sidebarPinned') === 'true';
+            if (isPinned) {
+                document.body.classList.add('sidebar-pinned');
+            }
+        })();
+
+        // تابع تزریق HTML
+        function injectSidebarHTML(html) {
+            const container = document.getElementById('sidebar-container');
+            if (container.querySelector('.sidebar')) return;
+
+            container.innerHTML = html;
+            executeSidebarScript();
+        }
+
+        function loadSidebar() {
+            // 2. تلاش برای خواندن از کش (سرعت بالا)
+            const cachedHTML = localStorage.getItem('sidebarHTML_Cache');
+            if (cachedHTML) {
+                injectSidebarHTML(cachedHTML);
+            }
+
+            // 3. دانلود در پس‌زمینه برای آپدیت
+            fetch('../sidebar/sidebar.html?v=' + Date.now())
+                .then(response => response.text())
+                .then(html => {
+                    // اگر کش نبود، الان نمایش بده
+                    if (!cachedHTML) {
+                        injectSidebarHTML(html);
+                    }
+                    // آپدیت کش
+                    if (html !== cachedHTML) {
+                        localStorage.setItem('sidebarHTML_Cache', html);
+                    }
+                })
+                .catch(console.error);
+        }
+        
+        function executeSidebarScript() {
+            const existingScript = document.querySelector('script[src*="../sidebar/sidebar.js"]');
+            if (existingScript) existingScript.remove();
+            
+            const script = document.createElement('script');
+            script.src = '../sidebar/sidebar.js?v=' + Date.now();
+            script.async = false;
+            document.body.appendChild(script);
+        }
+        
+        // اجرا
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSidebar);
+        } else {
+            loadSidebar();
+        }
+    </script>
+
+    <!-- داده‌های نمونه -->
+    <script src="../data/sample-data.js"></script>
+    <!-- اسکریپت اصلی -->
+    <script src="../js/main.js"></script>
+
+    <!-- اسکریپت‌های اختصاصی صفحه تنظیمات -->
+    <script>
+        // مدیریت تب‌ها
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // غیرفعال کردن همه تب‌ها
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // فعال کردن تب انتخاب شده
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // مدیریت تاریخ امروز
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                const today = new Date().toLocaleDateString('fa-IR');
+                dateElement.textContent = today;
+            }
+            
+            // مدیریت آپلود لوگو
+            const logoUpload = document.querySelector('.upload-area');
+            const logoInput = document.getElementById('companyLogo');
+            const logoPreview = document.getElementById('logoPreview');
+            
+            if (logoUpload && logoInput) {
+                logoUpload.addEventListener('click', function() {
+                    logoInput.click();
+                });
+                
+                logoInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const img = logoPreview.querySelector('img');
+                            const noLogo = logoPreview.querySelector('.no-logo');
+                            
+                            img.src = e.target.result;
+                            img.style.display = 'block';
+                            noLogo.style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            // مدیریت رنگ اصلی
+            const colorPicker = document.getElementById('primaryColor');
+            const colorValue = document.querySelector('.color-value');
+            
+            if (colorPicker && colorValue) {
+                colorPicker.addEventListener('input', function() {
+                    colorValue.textContent = this.value;
+                });
+            }
+            
+            // مدیریت فرم‌ها
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    showToast('تنظیمات با موفقیت ذخیره شد', 'success');
+                    
+                    // شبیه‌سازی ذخیره در پایگاه داده
+                    setTimeout(() => {
+                        console.log('Settings saved:', getFormData(this));
+                    }, 500);
+                });
+            });
+            
+            // مدیریت دکمه اضافه کردن کاربر
+            const addUserBtn = document.getElementById('addUserBtn');
+            const userModal = document.getElementById('userModal');
+            
+            if (addUserBtn && userModal) {
+                addUserBtn.addEventListener('click', function() {
+                    userModal.classList.add('show');
+                });
+            }
+            
+            // مدیریت بستن مودال‌ها
+            const modalCloses = document.querySelectorAll('.modal-close');
+            modalCloses.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.modal').classList.remove('show');
+                });
+            });
+            
+            // مدیریت کپی کردن کلید API
+            const copyButtons = document.querySelectorAll('.copy-key');
+            copyButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const key = this.closest('.key-value').querySelector('.api-key').textContent;
+                    navigator.clipboard.writeText(key).then(() => {
+                        showToast('کلید API کپی شد', 'success');
+                    });
+                });
+            });
+            
+            // مدیریت مشاهده جزئیات لاگ
+            const viewDetailsBtns = document.querySelectorAll('.view-details');
+            const logDetailsModal = document.getElementById('logDetailsModal');
+            
+            viewDetailsBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const cells = row.querySelectorAll('td');
+                    
+                    document.getElementById('logTime').textContent = cells[0].textContent;
+                    document.getElementById('logLevel').textContent = cells[1].querySelector('.log-level').textContent;
+                    document.getElementById('logSource').textContent = cells[2].textContent;
+                    document.getElementById('logUser').textContent = cells[3].textContent;
+                    document.getElementById('logMessage').textContent = cells[4].textContent;
+                    
+                    // جزئیات نمونه
+                    document.getElementById('logFullDetails').textContent = JSON.stringify({
+                        timestamp: cells[0].textContent,
+                        level: cells[1].querySelector('.log-level').textContent,
+                        source: cells[2].textContent,
+                        user: cells[3].textContent,
+                        message: cells[4].textContent,
+                        ip: '192.168.1.100',
+                        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }, null, 2);
+                    
+                    logDetailsModal.classList.add('show');
+                });
+            });
+            
+            // مدیریت عملیات پیشرفته
+            const resetSystemBtn = document.getElementById('resetSystemBtn');
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmMessage = document.getElementById('confirmMessage');
+            const confirmActionBtn = document.getElementById('confirmActionBtn');
+            
+            if (resetSystemBtn && confirmModal) {
+                resetSystemBtn.addEventListener('click', function() {
+                    confirmMessage.textContent = 'آیا از بازنشانی تمامی تنظیمات سیستم به مقادیر پیش‌فرض اطمینان دارید؟ این عمل غیرقابل بازگشت است.';
+                    confirmActionBtn.textContent = 'بازنشانی سیستم';
+                    
+                    confirmActionBtn.onclick = function() {
+                        showToast('سیستم با موفقیت بازنشانی شد', 'success');
+                        confirmModal.classList.remove('show');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    };
+                    
+                    confirmModal.classList.add('show');
+                });
+            }
+            
+            // مدیریت تست ارسال اعلان
+            const testNotificationsBtn = document.getElementById('testNotifications');
+            if (testNotificationsBtn) {
+                testNotificationsBtn.addEventListener('click', function() {
+                    showToast('اعلان تست با موفقیت ارسال شد', 'info');
+                });
+            }
+            
+            // مدیریت پشتیبان‌گیری فوری
+            const backupNowBtn = document.getElementById('backupNowBtn');
+            if (backupNowBtn) {
+                backupNowBtn.addEventListener('click', function() {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال پشتیبان‌گیری...';
+                    this.disabled = true;
+                    
+                    // شبیه‌سازی پشتیبان‌گیری
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-download"></i> پشتیبان‌گیری فوری';
+                        this.disabled = false;
+                        showToast('پشتیبان‌گیری با موفقیت انجام شد', 'success');
+                        
+                        // به‌روزرسانی تاریخ آخرین پشتیبان
+                        const lastBackupElement = document.querySelector('.backup-stat:nth-child(1) .stat-value');
+                        if (lastBackupElement) {
+                            const now = new Date();
+                            const timeString = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+                            lastBackupElement.textContent = `${now.toLocaleDateString('fa-IR')} ${timeString}`;
+                        }
+                    }, 3000);
+                });
+            }
+            
+            // مدیریت بهینه‌سازی پایگاه داده
+            const optimizeDbBtn = document.getElementById('optimizeDbBtn');
+            if (optimizeDbBtn) {
+                optimizeDbBtn.addEventListener('click', function() {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال بهینه‌سازی...';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-magic"></i> بهینه‌سازی پایگاه داده';
+                        this.disabled = false;
+                        showToast('پایگاه داده با موفقیت بهینه‌سازی شد', 'success');
+                    }, 2000);
+                });
+            }
+            
+            // مدیریت فیلترهای لاگ
+            const logLevelFilter = document.getElementById('logLevelFilter');
+            const logDateFilter = document.getElementById('logDateFilter');
+            
+            if (logLevelFilter) {
+                logLevelFilter.addEventListener('change', function() {
+                    filterLogs();
+                });
+            }
+            
+            if (logDateFilter) {
+                logDateFilter.addEventListener('change', function() {
+                    filterLogs();
+                });
+            }
+            
+            function filterLogs() {
+                const level = logLevelFilter?.value || 'all';
+                const date = logDateFilter?.value;
+                
+                // شبیه‌سازی فیلتر
+                showToast('لاگ‌ها فیلتر شدند', 'info');
+            }
+            
+            // مدیریت پاکسازی لاگ‌ها
+            const clearLogsBtn = document.getElementById('clearLogsBtn');
+            if (clearLogsBtn) {
+                clearLogsBtn.addEventListener('click', function() {
+                    confirmMessage.textContent = 'آیا از پاکسازی تمامی لاگ‌های سیستم اطمینان دارید؟';
+                    confirmActionBtn.textContent = 'پاکسازی لاگ‌ها';
+                    
+                    confirmActionBtn.onclick = function() {
+                        // شبیه‌سازی پاکسازی
+                        setTimeout(() => {
+                            showToast('لاگ‌ها با موفقیت پاکسازی شدند', 'success');
+                            confirmModal.classList.remove('show');
+                        }, 1000);
+                    };
+                    
+                    confirmModal.classList.add('show');
+                });
+            }
+            
+            // مدیریت ایجاد کلید API جدید
+            const generateApiKeyBtn = document.getElementById('generateApiKeyBtn');
+            if (generateApiKeyBtn) {
+                generateApiKeyBtn.addEventListener('click', function() {
+                    const newKey = generateApiKey();
+                    
+                    confirmMessage.innerHTML = `
+                        کلید API جدید ایجاد شد:<br>
+                        <code style="display: block; margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px;">${newKey}</code>
+                        لطفاً این کلید را در محل امنی ذخیره کنید، زیرا دیگر نمایش داده نخواهد شد.
+                    `;
+                    confirmActionBtn.textContent = 'کپی و بستن';
+                    
+                    confirmActionBtn.onclick = function() {
+                        navigator.clipboard.writeText(newKey).then(() => {
+                            showToast('کلید API کپی شد', 'success');
+                            confirmModal.classList.remove('show');
+                        });
+                    };
+                    
+                    confirmModal.classList.add('show');
+                });
+            }
+            
+            function generateApiKey() {
+                const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+                const prefix = 'cmms_live_sk_';
+                let key = prefix;
+                
+                for (let i = 0; i < 32; i++) {
+                    key += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                
+                return key;
+            }
+            
+            // مدیریت خروجی لاگ‌ها
+            const exportLogsBtn = document.getElementById('exportLogsBtn');
+            if (exportLogsBtn) {
+                exportLogsBtn.addEventListener('click', function() {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال تهیه خروجی...';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-download"></i> خروجی';
+                        showToast('خروجی لاگ‌ها با موفقیت تهیه شد', 'success');
+                        
+                        // شبیه‌سازی دانلود
+                        const link = document.createElement('a');
+                        link.href = '#';
+                        link.download = `logs-${new Date().toISOString().slice(0,10)}.json`;
+                        link.click();
+                    }, 2000);
+                });
+            }
+            
+            // مدیریت تشخیص سلامت سیستم
+            const systemDiagnosticsBtn = document.getElementById('systemDiagnosticsBtn');
+            if (systemDiagnosticsBtn) {
+                systemDiagnosticsBtn.addEventListener('click', function() {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال تشخیص...';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-search"></i> اجرای تشخیص';
+                        this.disabled = false;
+                        
+                        // نمایش نتایج تشخیص
+                        confirmMessage.innerHTML = `
+                            <strong>نتایج تشخیص سلامت سیستم:</strong><br><br>
+                            <div style="text-align: right;">
+                                <div>✓ پایگاه داده: <span style="color: green;">سالم</span></div>
+                                <div>✓ اتصال شبکه: <span style="color: green;">سالم</span></div>
+                                <div>✓ فضای ذخیره‌سازی: <span style="color: green;">کافی</span></div>
+                                <div>✓ مصرف حافظه: <span style="color: orange;">متوسط (۷۲٪)</span></div>
+                                <div>✓ لاگ‌های خطا: <span style="color: green;">۰ مورد</span></div>
+                                <div>✓ آخرین پشتیبان: <span style="color: green;">امروز</span></div>
+                            </div>
+                        `;
+                        confirmActionBtn.textContent = 'متوجه شدم';
+                        
+                        confirmActionBtn.onclick = function() {
+                            confirmModal.classList.remove('show');
+                        };
+                        
+                        confirmModal.classList.add('show');
+                    }, 3000);
+                });
+            }
+            
+            // مدیریت پاکسازی داده‌ها
+            const cleanupDataBtn = document.getElementById('cleanupDataBtn');
+            if (cleanupDataBtn) {
+                cleanupDataBtn.addEventListener('click', function() {
+                    confirmMessage.textContent = 'آیا از پاکسازی داده‌های قدیمی (دستورکارهای بایگانی شده، لاگ‌های قدیمی، فایل‌های موقت) اطمینان دارید؟';
+                    confirmActionBtn.textContent = 'پاکسازی داده‌ها';
+                    
+                    confirmActionBtn.onclick = function() {
+                        setTimeout(() => {
+                            showToast('داده‌های قدیمی با موفقیت پاکسازی شدند', 'success');
+                            confirmModal.classList.remove('show');
+                        }, 1500);
+                    };
+                    
+                    confirmModal.classList.add('show');
+                });
+            }
+            
+            // مدیریت خروجی کامل داده‌ها
+            const exportAllDataBtn = document.getElementById('exportAllDataBtn');
+            if (exportAllDataBtn) {
+                exportAllDataBtn.addEventListener('click', function() {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال تهیه خروجی...';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-download"></i> خروجی';
+                        showToast('خروجی کامل داده‌ها با موفقیت تهیه شد', 'success');
+                        
+                        // شبیه‌سازی دانلود
+                        const link = document.createElement('a');
+                        link.href = '#';
+                        link.download = `cmms-full-export-${new Date().toISOString().slice(0,10)}.zip`;
+                        link.click();
+                    }, 3000);
+                });
+            }
+        });
+    </script>
+ 
+
+    
+</body>
+</html>

@@ -1,0 +1,1240 @@
+<!-- فایل: management/users.html -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت کاربران - CMMS</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../sidebar/sidebar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+
+/* استایل جدول درختی دسترسی‌ها */
+.permissions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+    font-size: 14px;
+}
+
+.permissions-table th, 
+.permissions-table td {
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    text-align: center;
+}
+
+.permissions-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+}
+
+.module-column {
+    text-align: right !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none !important;
+}
+
+.indent {
+    display: inline-block;
+    width: 25px; /* میزان تورفتگی برای فرزندان */
+}
+
+/* حالت پیش‌فرض: فلش رو به پایین (یعنی وضعیت باز) */
+.toggle-btn {
+    cursor: pointer;
+    width: 20px;
+    color: #64748b;
+    transition: transform 0.2s ease;
+    display: inline-block;
+    text-align: center;
+}
+
+/* حالت بسته: فلش ۹۰ درجه می‌چرخد تا در RTL رو به سمت چپ قرار بگیرد */
+.toggle-btn.collapsed {
+    transform: rotate(90deg); /* در RTL معمولاً 90 درجه به سمت چپ/راست نشان‌دهنده بسته بودن است */
+}
+
+.row-hidden {
+    display: none;
+}
+
+.permissions-table tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* استایل چک‌باکس‌های کوچک داخل جدول */
+.permissions-table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+
+        /* استایل‌های فوتر */
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 17rem;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .footer p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+                
+        .users-management {
+            padding: 20px;
+        }
+        
+        .users-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .users-header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .add-user-btn {
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Vazirmatn';
+        }
+        
+        .users-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .users-table th {
+            background: #f8fafc;
+            padding: 16px;
+            text-align: right;
+            color: #64748b;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .users-table td {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .user-avatar .fallback-icon {
+            font-size: 40px;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .user-avatar i {
+            font-size: 40px;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .user-avatar strong {
+            font-size: 14px !important;  /* تنظیم اندازه اسم کاربر */
+            font-weight: 600;
+            display: block;
+            line-height: 1.4;
+        }
+
+        .user-avatar div:last-child {
+            line-height: 1.4;
+        }
+       
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .role-admin {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .role-supervisor {
+            background: #f0f9ff;
+            color: #0c4a6e;
+        }
+        
+        .role-technician {
+            background: #f0fdf4;
+            color: #166534;
+        }
+        
+        .role-operator {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 10px;
+        }
+
+        .action-btn i {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .edit-btn {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .edit-btn:hover {
+            background: #bfdbfe;
+        }
+        
+        .delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+        
+        .permissions-btn {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+        
+        .permissions-btn:hover {
+            background: #dcfce7;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            
+        }
+
+        .modal-overlay.show {
+            display: flex !important;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: block !important;
+            position: relative;   
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Vazirmatn';
+        }
+        
+        .form-group-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .form-group-checkbox label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        
+        .form-group-checkbox input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .image-upload {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .image-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 10px;
+            border: 3px solid #e2e8f0;
+        }
+        
+        .upload-btn {
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #64748b;
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto;
+            height: 150px; /* ارتفاع ثابت برای دکمه */
+        }
+
+        .upload-btn.has-image {
+            padding: 0;
+            border: 2px solid #4f46e5;
+            background: #f8fafc;
+        }
+
+        .image-preview-in-btn {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+            pointer-events: none;
+        }
+
+        .upload-btn-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .upload-btn.has-image .upload-btn-content {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            opacity: 1;
+            justify-content: center;
+            pointer-events: auto;
+        }
+
+        .upload-btn i {
+            font-size: 24px;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        /* ساختار درختی دسترسی‌ها */
+        .permissions-tree {
+            margin-top: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .tree-node {
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .node-header {
+            padding: 5px 15px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .node-header:hover {
+            background: #e2e8f0;
+        }
+        
+        .toggle-icon {
+            font-size: 12px;
+            transition: transform 0.2s;
+            color: #64748b;
+        }
+        
+        .node-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .node-header i.fa-chevron-down {
+            margin-left: 5px;
+        }
+        
+        .node-header i:not(.toggle-icon) {
+            color: #4f46e5;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .node-header span {
+            font-weight: 600;
+            color: #334155;
+        }
+        
+        .node-permissions {
+            padding: 5px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .node-children {
+            padding-right: 30px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .permission-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .permission-checkbox:hover {
+            background: #f1f5f9;
+        }
+        
+        .permission-checkbox input[type="checkbox"] {
+            margin: 0;
+            width: auto;
+        }
+        
+        .child-node {
+            margin: 10px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            background: white;
+            margin-right: 15px;
+        }
+        
+        .child-node .node-header {
+            background: white;
+            padding: 5px 15px;
+            border-bottom: none;
+        }
+        
+        .child-node .node-permissions {
+            padding: 5px 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- بارگذاری سایدبار -->
+    <div id="sidebar-container"></div>
+
+    <!-- محتوای اصلی -->
+    <main class="main-content">
+            <!-- هدر -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>مدیریت کاربران</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name">علیرضا محمدی</span>
+                            <span class="user-role">سرپرست تعمیرات</span>
+                        </div>
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                    </div>
+                    <div class="date-display">
+                        <i class="fas fa-calendar"></i>
+                        <span id="currentDate">...</span>
+                    </div>
+                </div>
+            </header>
+            
+        <div class="users-management">
+            <div class="users-header">
+                <h1><i class="fas fa-users-cog"></i> مدیریت کاربران</h1>
+                <button class="add-user-btn" id="addUserBtn">
+                    <i class="fas fa-user-plus"></i> افزودن کاربر جدید
+                </button>
+            </div>
+            
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>کاربر</th>
+                            <th>نقش</th>
+                            <th>دپارتمان</th>
+                            <th>وضعیت</th>
+                            <th>آخرین ورود</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- داده‌ها با JavaScript پر می‌شوند -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>© ۲۰۲۶ - سیستم جامع نگهداری و تعمیرات CMMS Pro. تمامی حقوق محفوظ است.</p>
+            <p>نسخه ۰.۰.۱ | آخرین بروزرسانی: ۱۴۰۴/۱۰/۱۱</p>
+            <p>محمــد پورسـان دلیــر - 09127557315</p>
+        </div>
+
+    </main>
+    
+    <!-- Modal افزودن/ویرایش کاربر -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">افزودن کاربر جدید</h2>
+                <button onclick="closeModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    
+                    <div class="image-upload">
+                        <label class="upload-btn" id="uploadBtn">
+                            <div class="upload-btn-content">
+                                <i class="fas fa-camera"></i> انتخاب تصویر پروفایل
+                            </div>
+                            <input type="file" id="profileImage" accept="image/*" style="display:none;">
+                        </label>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">نام کامل</label>
+                            <input type="text" id="fullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="username">نام کاربری</label>
+                            <input type="text" id="username" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">ایمیل</label>
+                            <input type="email" id="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">تلفن</label>
+                            <input type="tel" id="phone">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="role">نقش کاربری</label>
+                            <select id="role">
+                                <option value="admin">مدیر سیستم</option>
+                                <option value="supervisor">سرپرست</option>
+                                <option value="technician">تکنسین</option>
+                                <option value="operator">اپراتور</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">دپارتمان</label>
+                            <select id="department">
+                                <option value="production">تولید</option>
+                                <option value="quality">کنترل کیفیت</option>
+                                <option value="maintenance">تعمیرات</option>
+                                <option value="facilities">تاسیسات</option>
+                                <option value="warehouse">انبار</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password">رمز عبور</label>
+                            <input type="password" id="password">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">تکرار رمز عبور</label>
+                            <input type="password" id="confirmPassword">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group-checkbox">
+                        <input type="checkbox" id="isActive" checked>
+                        <label for="isActive">کاربر فعال است</label>
+                    </div>
+                    
+                    <!-- سطح‌های دسترسی به صورت درختی -->
+<div id="permissionsSection" style="display:none;">
+    <h3>سطح‌های دسترسی</h3>
+    <div class="permissions-table-container">
+        <table class="permissions-table">
+            <thead>
+                <tr>
+                    <th style="width: 40%;">ماژول / زیرمجموعه</th>
+                    <th>مشاهده</th>
+                    <th>ایجاد</th>
+                    <th>ویرایش</th>
+                    <th>حذف</th>
+                </tr>
+            </thead>
+            <tbody id="permissionsTableBody">
+                <!-- ردیف‌ها توسط جاوااسکریپت ساخته می‌شوند -->
+            </tbody>
+        </table>
+    </div>
+</div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">انصراف</button>
+                <button class="btn btn-primary" onclick="saveUser()">ذخیره کاربر</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- اسکریپت بارگذاری منوی کناری یا سایدبار-->
+    <script>
+        // 1. اجرای فوری: قبل از هر چیزی چک کن آیا پین است؟
+        // اگر بله، کلاس را به بادی اضافه کن تا CSS فوراً اعمال شود
+        (function() {
+            const isPinned = localStorage.getItem('sidebarPinned') === 'true';
+            if (isPinned) {
+                document.body.classList.add('sidebar-pinned');
+            }
+        })();
+
+        // تابع تزریق HTML
+        function injectSidebarHTML(html) {
+            const container = document.getElementById('sidebar-container');
+            if (container.querySelector('.sidebar')) return;
+
+            container.innerHTML = html;
+            executeSidebarScript();
+        }
+
+        function loadSidebar() {
+            // 2. تلاش برای خواندن از کش (سرعت بالا)
+            const cachedHTML = localStorage.getItem('sidebarHTML_Cache');
+            if (cachedHTML) {
+                injectSidebarHTML(cachedHTML);
+            }
+
+            // 3. دانلود در پس‌زمینه برای آپدیت
+            fetch('../sidebar/sidebar.html?v=' + Date.now())
+                .then(response => response.text())
+                .then(html => {
+                    // اگر کش نبود، الان نمایش بده
+                    if (!cachedHTML) {
+                        injectSidebarHTML(html);
+                    }
+                    // آپدیت کش
+                    if (html !== cachedHTML) {
+                        localStorage.setItem('sidebarHTML_Cache', html);
+                    }
+                })
+                .catch(console.error);
+        }
+        
+        function executeSidebarScript() {
+            const existingScript = document.querySelector('script[src*="../sidebar/sidebar.js"]');
+            if (existingScript) existingScript.remove();
+            
+            const script = document.createElement('script');
+            script.src = '../sidebar/sidebar.js?v=' + Date.now();
+            script.async = false;
+            document.body.appendChild(script);
+        }
+        
+        // اجرا
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSidebar);
+        } else {
+            loadSidebar();
+        }
+    </script>
+
+    <script src="../js/main.js"></script>
+
+    <!-- اسکریپت اصلی -->
+<script>
+    // متغیرهای سراسری
+    let currentEditingUserId = null;
+    let currentImageData = null;
+
+    // تابع دریافت کاربران از دیتابیس
+    async function loadUsers() {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">در حال بارگذاری...</td></tr>';
+        
+        try {
+            const response = await fetch('../api/get-users.php');
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                displayUsers(result.data);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">خطا در دریافت اطلاعات</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">خطا در ارتباط با سرور</td></tr>';
+        }
+    }
+    
+    // نمایش کاربران در جدول
+    function displayUsers(users) {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        
+        if (users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">هیچ کاربری یافت نشد</td></tr>';
+            return;
+        }
+        
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            
+            // ساخت تصویر پروفایل یا آیکون پیش‌فرض
+            let avatarContent = '';
+            if (user.profileImage && user.profileImage !== '' && user.profileImage !== 'null') {
+                let imgSrc = user.profileImage;
+                // تصحیح مسیر تصویر
+                if (imgSrc.includes('http:\\\\')) {
+                    imgSrc = imgSrc.replace(/http:\\\\/g, 'http://').replace(/\\\\/g, '/');
+                }
+                avatarContent = `<img src="${imgSrc}" class="user-avatar-img" alt="${escapeHtml(user.fullname)}" 
+                            onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.user-avatar-fallback').style.display='flex'">`;
+            }
+            
+            row.innerHTML = `
+                <td style="vertical-align: middle; padding: 12px 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="position: relative; width: 40px; height: 40px; flex-shrink: 0;">
+                            ${avatarContent}
+                            <i class="fas fa-user-circle user-avatar-fallback" style="font-size: 40px; color: #94a3b8; display: ${avatarContent ? 'none' : 'flex'}; position: absolute; top: 0; left: 0; width: 100%; height: 100%; align-items: center; justify-content: center;"></i>
+                        </div>
+                        <div style="display: flex; flex-direction: column; line-height: 1.3;">
+                            <strong style="font-size: 14px; color: #075de9; white-space: nowrap;">${escapeHtml(user.fullname)}</strong>
+                            <span style="font-size: 12px; color: #64748b;">${escapeHtml(user.username)}</span>
+                        </div>
+                    </div>
+                </td>
+                <td style="vertical-align: middle; padding: 12px 16px;">
+                    <span class="role-badge role-${user.role}">${getRoleName(user.role)}</span>
+                </td>
+                <td style="vertical-align: middle; padding: 12px 16px;">
+                    ${getDepartmentName(user.department)}
+                </td>
+                <td style="vertical-align: middle; padding: 12px 16px;">
+                    <span class="status-badge ${user.isActive ? 'status-active' : 'status-inactive'}">
+                        ${user.isActive ? 'فعال' : 'غیرفعال'}
+                    </span>
+                </td>
+                <td style="vertical-align: middle; padding: 12px 16px;">
+                    ${user.lastLogin || 'هرگز وارد نشده'}
+                </td>
+                <td style="vertical-align: middle; padding: 12px 16px;">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="action-btn edit-btn" onclick='editUser(${JSON.stringify(user).replace(/'/g, "&#39;")})' title="ویرایش" style="background: #dbeafe; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer;">
+                            <i class="fas fa-edit" style="color: #1e40af; font-size: 14px;"></i>
+                        </button>
+                        <button class="action-btn permissions-btn" onclick="managePermissions(${user.id})" title="سطح دسترسی" style="background: #f0fdf4; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer;">
+                            <i class="fas fa-shield-alt" style="color: #16a34a; font-size: 14px;"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteUser(${user.id})" title="حذف" style="background: #fee2e2; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer;">
+                            <i class="fas fa-trash" style="color: #dc2626; font-size: 14px;"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+    
+    // تابع کمکی برای escape کردن HTML
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function getRoleName(role) {
+        const roles = {
+            'admin': 'مدیر سیستم',
+            'supervisor': 'سرپرست',
+            'technician': 'تکنسین',
+            'operator': 'اپراتور'
+        };
+        return roles[role] || role;
+    }
+    
+    function getDepartmentName(dept) {
+        const departments = {
+            'production': 'تولید',
+            'quality': 'کنترل کیفیت',
+            'maintenance': 'تعمیرات',
+            'facilities': 'تاسیسات',
+            'warehouse': 'انبار'
+        };
+        return departments[dept] || dept;
+    }
+    
+    // باز کردن مودال
+    function openModal(user = null) {
+        const modal = document.getElementById('userModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const permissionsSection = document.getElementById('permissionsSection');
+        
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+        
+        if (user) {
+            modalTitle.textContent = 'ویرایش کاربر';
+            currentEditingUserId = user.id;
+            document.getElementById('fullName').value = user.fullname || '';
+            document.getElementById('username').value = user.username || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('role').value = user.role || 'operator';
+            document.getElementById('department').value = user.department || '';
+            document.getElementById('isActive').checked = user.isActive === true || user.isActive === 1;
+            
+            if (user.profileImage) {
+                currentImageData = user.profileImage;
+                updateUploadButtonWithImage(user.profileImage);
+            } else {
+                currentImageData = null;
+                resetUploadButton();
+            }
+            
+            if (user.role === 'admin') {
+                permissionsSection.style.display = 'block';
+                loadPermissionsTree();
+            } else {
+                permissionsSection.style.display = 'none';
+            }
+        } else {
+            modalTitle.textContent = 'افزودن کاربر جدید';
+            document.getElementById('userForm').reset();
+            currentEditingUserId = null;
+            currentImageData = null;
+            permissionsSection.style.display = 'none';
+            resetUploadButton();
+        }
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('userModal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            currentImageData = null;
+        }, 300);
+    }
+    
+    // ذخیره کاربر
+    async function saveUser() {
+        const formData = {
+            id: currentEditingUserId,
+            fullName: document.getElementById('fullName').value,
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            role: document.getElementById('role').value,
+            department: document.getElementById('department').value,
+            isActive: document.getElementById('isActive').checked,
+            password: document.getElementById('password').value,
+            profileImage: currentImageData
+        };
+        
+        // اعتبارسنجی
+        if (!formData.fullName || !formData.username) {
+            alert('لطفاً نام کامل و نام کاربری را وارد کنید');
+            return;
+        }
+        
+        // اگر کاربر جدید است و رمز عبور وارد نشده، رمز پیش‌فرض
+        if (!formData.id && !formData.password) {
+            formData.password = '12345678';
+        }
+        
+        // اگر رمز عبور و تکرار آن مطابقت ندارند
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        if (formData.password && formData.password !== confirmPassword) {
+            alert('رمز عبور و تکرار آن مطابقت ندارند');
+            return;
+        }
+        
+        try {
+            const response = await fetch('../api/save-user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message);
+                closeModal();
+                loadUsers(); // بازخوانی لیست کاربران
+            } else {
+                alert('خطا: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error saving user:', error);
+            alert('خطا در ارتباط با سرور');
+        }
+    }
+    
+    // ویرایش کاربر
+    function editUser(user) {
+        openModal(user);
+    }
+    
+    // حذف کاربر
+    async function deleteUser(userId) {
+        if (confirm('آیا از حذف این کاربر اطمینان دارید؟')) {
+            try {
+                const response = await fetch('../api/delete-user.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: userId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    loadUsers();
+                } else {
+                    alert('خطا: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('خطا در ارتباط با سرور');
+            }
+        }
+    }
+    
+    function managePermissions(userId) {
+        // می‌توانید لاگیک مدیریت دسترسی را اینجا پیاده‌سازی کنید
+        alert('مدیریت دسترسی‌ها برای کاربر ' + userId);
+    }
+    
+    // توابع مربوط به تصویر پروفایل
+    function updateUploadButtonWithImage(imageUrl) {
+        const uploadBtn = document.getElementById('uploadBtn');
+        uploadBtn.classList.add('has-image');
+        uploadBtn.innerHTML = `
+            <img src="${imageUrl}" class="image-preview-in-btn" alt="پیش‌نمایش">
+            <div class="upload-btn-content">
+                <i class="fas fa-camera"></i> تغییر تصویر
+            </div>
+            <input type="file" accept="image/*" style="display:none;">
+        `;
+        setupImageUpload();
+    }
+    
+    function resetUploadButton() {
+        const uploadBtn = document.getElementById('uploadBtn');
+        uploadBtn.classList.remove('has-image');
+        uploadBtn.innerHTML = `
+            <div class="upload-btn-content">
+                <i class="fas fa-camera"></i> انتخاب تصویر پروفایل
+            </div>
+            <input type="file" accept="image/*" style="display:none;">
+        `;
+        setupImageUpload();
+    }
+    
+    function setupImageUpload() {
+        const uploadBtn = document.getElementById('uploadBtn');
+        const newUploadBtn = uploadBtn.cloneNode(true);
+        uploadBtn.parentNode.replaceChild(newUploadBtn, uploadBtn);
+        
+        const fileInput = newUploadBtn.querySelector('input[type="file"]');
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentImageData = event.target.result;
+                    updateUploadButtonWithImage(currentImageData);
+                };
+                reader.readAsDataURL(file);
+            }
+            this.value = '';
+        });
+    }
+    
+    // بارگذاری ساختار درختی دسترسی‌ها
+    function loadPermissionsTree() {
+        const tbody = document.getElementById('permissionsTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        
+        const permissionsTree = [
+            { id: 'dashboard', name: 'داشبورد', icon: 'fas fa-tachometer-alt', permissions: ['view', 'create', 'edit', 'delete'], children: [] },
+            { id: 'work_orders', name: 'دستورکارها', icon: 'fas fa-clipboard-list', permissions: ['view', 'create', 'edit', 'delete'], 
+              children: [
+                  { id: 'work_orders_pending', name: 'دستورکارهای در انتظار', icon: 'fas fa-clock', permissions: ['view', 'edit'] },
+                  { id: 'work_orders_completed', name: 'دستورکارهای تکمیل شده', icon: 'fas fa-check-circle', permissions: ['view'] }
+              ] 
+            },
+            { id: 'equipment', name: 'تجهیزات', icon: 'fas fa-cogs', permissions: ['view', 'create', 'edit', 'delete'], children: [] },
+            { id: 'inventory', name: 'انبار', icon: 'fas fa-boxes', permissions: ['view', 'create', 'edit', 'delete'], children: [] },
+            { id: 'reports', name: 'گزارش‌ها', icon: 'fas fa-chart-bar', permissions: ['view', 'create', 'export'], 
+              children: [
+                  { id: 'reports_daily', name: 'گزارش‌های روزانه', icon: 'fas fa-calendar-day', permissions: ['view', 'export'] },
+                  { id: 'reports_monthly', name: 'گزارش‌های ماهانه', icon: 'fas fa-calendar-alt', permissions: ['view', 'create', 'export'] }
+              ] 
+            },
+            { id: 'users', name: 'مدیریت کاربران', icon: 'fas fa-users-cog', permissions: ['view', 'create', 'edit', 'delete'], children: [] }
+        ];
+        
+        function renderNode(node, level = 0, parentId = null) {
+            const row = document.createElement('tr');
+            if (parentId) row.classList.add(`parent-${parentId}`, 'row-hidden');
+            row.dataset.id = node.id;
+            
+            const hasChildren = node.children && node.children.length > 0;
+            let indentHtml = '';
+            for(let i=0; i<level; i++) indentHtml += '<span class="indent"></span>';
+            
+            row.innerHTML = `
+                <td style="text-align: right;">
+                    <div class="module-column">
+                        ${indentHtml}
+                        ${hasChildren ? 
+                            `<i class="fas fa-chevron-down toggle-btn" onclick="toggleTreeRow('${node.id}', this)"></i>` : 
+                            '<span style="width:20px; display:inline-block"></span>'}
+                        <i class="${node.icon}" style="color:#4f46e5; width:20px"></i>
+                        <span>${node.name}</span>
+                    </div>
+                </td>
+                <td>${node.permissions.includes('view') ? `<input type="checkbox" data-module="${node.id}" data-action="view">` : '-'}</td>
+                <td>${node.permissions.includes('create') ? `<input type="checkbox" data-module="${node.id}" data-action="create">` : '-'}</td>
+                <td>${node.permissions.includes('edit') ? `<input type="checkbox" data-module="${node.id}" data-action="edit">` : '-'}</td>
+                <td>${node.permissions.includes('delete') ? `<input type="checkbox" data-module="${node.id}" data-action="delete">` : '-'}</td>
+            `;
+            tbody.appendChild(row);
+            
+            if (hasChildren) {
+                node.children.forEach(child => renderNode(child, level + 1, node.id));
+            }
+        }
+        
+        permissionsTree.forEach(node => renderNode(node));
+    }
+    
+    function toggleTreeRow(nodeId, btn) {
+        btn.classList.toggle('collapsed');
+        const children = document.querySelectorAll(`.parent-${nodeId}`);
+        const isCollapsed = btn.classList.contains('collapsed');
+        children.forEach(child => {
+            if (isCollapsed) {
+                child.classList.add('row-hidden');
+            } else {
+                child.classList.remove('row-hidden');
+            }
+        });
+    }
+    
+    // بارگذاری اولیه
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUsers();
+        
+        document.getElementById('addUserBtn').addEventListener('click', () => {
+            currentImageData = null;
+            openModal();
+        });
+        
+        setupImageUpload();
+        
+        document.getElementById('role').addEventListener('change', function() {
+            const permissionsSection = document.getElementById('permissionsSection');
+            if (this.value === 'admin') {
+                permissionsSection.style.display = 'block';
+                loadPermissionsTree();
+            } else {
+                permissionsSection.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

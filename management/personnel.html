@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت پرسنل - سیستم نگهداری و تعمیرات</title>
+    <!-- استایل‌های اصلی -->
+    <link rel="stylesheet" href="../css/style.css">
+    <!-- استایل‌های سایدبار -->
+    <link rel="stylesheet" href="../sidebar/sidebar.css">
+    <!-- آیکون ها -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- فونت‌ها -->        
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* استایل‌های اضافی برای مدیریت پرسنل */
+        .employee-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+        
+        .skill-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 2px;
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid #bbdefb;
+        }
+        
+        .cert-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 2px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        
+        .status-active {
+            background-color: #27ae60;
+        }
+        
+        .status-on-leave {
+            background-color: #f39c12;
+        }
+        
+        .status-inactive {
+            background-color: #e74c3c;
+        }
+        
+        .employee-detail-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .detail-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .modal-lg {
+            max-width: 900px;
+        }
+        
+        .employee-form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .rating-stars {
+            color: #f39c12;
+            font-size: 1.2rem;
+        }
+        
+        .availability-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+        
+        .calendar-day {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        .day-available {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .day-unavailable {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .day-planned-leave {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .day-normal {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-right: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #3498db;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #3498db;
+        }
+        
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            right: 6px;
+            top: 15px;
+            width: 2px;
+            height: calc(100% + 5px);
+            background: #e0e0e0;
+        }
+        
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        
+        .tab-content {
+            padding: 20px 0;
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 12px 20px;
+            transition: all 0.3s;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+            background: none;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .employee-detail-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- بارگذاری سایدبار -->
+    <div id="sidebar-container"></div>
+
+        <!-- محتوای اصلی -->
+        <main class="main-content">
+            <!-- هدر -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>مدیریت پرسنل تعمیرات</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name">علیرضا محمدی</span>
+                            <span class="user-role">سرپرست تعمیرات</span>
+                        </div>
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                    </div>
+                    <div class="date-display">
+                        <i class="fas fa-calendar"></i>
+                        <span id="currentDate">...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- کارت‌های آمار -->
+            <div class="key-metrics">
+                <div class="metric-card">
+                    <div class="metric-icon bg-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="metric-info">
+                        <h3>کل پرسنل</h3>
+                        <div class="metric-value" id="totalPersonnel">24</div>
+                        <div class="metric-change up">+۲ از ماه قبل</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon bg-success">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="metric-info">
+                        <h3>پرسنل فعال</h3>
+                        <div class="metric-value" id="activePersonnel">22</div>
+                        <div class="metric-change">بدون تغییر</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon bg-warning">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <div class="metric-info">
+                        <h3>در مرخصی</h3>
+                        <div class="metric-value" id="onLeavePersonnel">2</div>
+                        <div class="metric-change down">-۱ از هفته قبل</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon bg-info">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="metric-info">
+                        <h3>میانگین تجربه</h3>
+                        <div class="metric-value">۵.۲</div>
+                        <div class="metric-change up">سال</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon bg-secondary">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="metric-info">
+                        <h3>میانگین رضایت</h3>
+                        <div class="metric-value">۸.۷/۱۰</div>
+                        <div class="metric-change up">+۰.۳</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon bg-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="metric-info">
+                        <h3>گواهی‌های منقضی</h3>
+                        <div class="metric-value">۳</div>
+                        <div class="metric-change down">نیاز به تمدید</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بخش اصلی مدیریت پرسنل -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2 class="table-title"><i class="fas fa-users-cog"></i> فهرست پرسنل تعمیرات</h2>
+                    <div class="table-actions">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                            <i class="fas fa-user-plus"></i> افزودن پرسنل جدید
+                        </button>
+                        <div class="export-buttons">
+                            <button class="btn btn-secondary" id="exportExcel">
+                                <i class="fas fa-file-excel"></i> خروجی Excel
+                            </button>
+                            <button class="btn btn-secondary" id="exportPDF">
+                                <i class="fas fa-file-pdf"></i> خروجی PDF
+                            </button>
+                            <button class="btn btn-secondary print-btn no-print">
+                                <i class="fas fa-print"></i> چاپ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- فیلترها و جستجو -->
+                <div class="report-filters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>جستجوی پیشرفته</label>
+                            <input type="text" id="searchInput" class="form-control" placeholder="جستجو بر اساس نام، مهارت، موقعیت...">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>فیلتر بر اساس دپارتمان</label>
+                            <select id="departmentFilter" class="form-control">
+                                <option value="">همه دپارتمان‌ها</option>
+                                <option value="mechanical">مکانیک</option>
+                                <option value="electrical">الکتریک</option>
+                                <option value="instrumentation">ابزار دقیق</option>
+                                <option value="facilities">تاسیسات</option>
+                                <option value="planning">برنامه‌ریزی</option>
+                                <option value="supervision">سرپرستی</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>فیلتر بر اساس وضعیت</label>
+                            <select id="statusFilter" class="form-control">
+                                <option value="">همه وضعیت‌ها</option>
+                                <option value="active">فعال</option>
+                                <option value="on_leave">در مرخصی</option>
+                                <option value="inactive">غیرفعال</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <button class="btn btn-secondary" id="clearFilters">
+                                <i class="fas fa-filter-circle-xmark"></i> پاک کردن فیلترها
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- جدول پرسنل -->
+                <div class="table-responsive">
+                    <table id="personnelTable" class="display">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>پرسنل</th>
+                                <th>موقعیت شغلی</th>
+                                <th>دپارتمان</th>
+                                <th>مهارت‌های کلیدی</th>
+                                <th>وضعیت</th>
+                                <th>تاریخ استخدام</th>
+                                <th>رضایت</th>
+                                <th class="no-print">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="personnelTableBody">
+                            <!-- داده‌ها توسط JavaScript پر می‌شوند -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- جزئیات پرسنل (Modal) -->
+            <div class="modal fade" id="employeeDetailModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="fas fa-user-tie"></i> جزئیات پرسنل</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="employeeDetailContent">
+                            <!-- محتوای جزئیات توسط JavaScript پر می‌شود -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                            <button type="button" class="btn btn-primary" id="editEmployeeBtn">ویرایش</button>
+                            <button type="button" class="btn btn-success" id="printEmployeeBtn">
+                                <i class="fas fa-print"></i> چاپ پرونده
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal افزودن/ویرایش پرسنل -->
+            <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="fas fa-user-plus"></i> افزودن پرسنل جدید</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="employeeForm">
+                            <div class="modal-body">
+                                <ul class="nav nav-tabs" id="employeeFormTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">اطلاعات پایه</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="skills-tab" data-bs-toggle="tab" data-bs-target="#skills" type="button" role="tab">مهارت‌ها و گواهینامه‌ها</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="employment-tab" data-bs-toggle="tab" data-bs-target="#employment" type="button" role="tab">اطلاعات استخدام</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="emergency-tab" data-bs-toggle="tab" data-bs-target="#emergency" type="button" role="tab">اطلاعات اضطراری</button>
+                                    </li>
+                                </ul>
+                                
+                                <div class="tab-content" id="employeeFormTabContent">
+                                    <!-- تب اطلاعات پایه -->
+                                    <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                                        <div class="employee-form-section">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="empFirstName">نام <span class="required">*</span></label>
+                                                    <input type="text" id="empFirstName" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empLastName">نام خانوادگی <span class="required">*</span></label>
+                                                    <input type="text" id="empLastName" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empNationalCode">کد ملی <span class="required">*</span></label>
+                                                    <input type="text" id="empNationalCode" class="form-control" maxlength="10" required>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="empBirthDate">تاریخ تولد</label>
+                                                    <input type="date" id="empBirthDate" class="form-control">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empGender">جنسیت</label>
+                                                    <select id="empGender" class="form-control">
+                                                        <option value="">انتخاب کنید</option>
+                                                        <option value="male">مرد</option>
+                                                        <option value="female">زن</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empMaritalStatus">وضعیت تأهل</label>
+                                                    <select id="empMaritalStatus" class="form-control">
+                                                        <option value="">انتخاب کنید</option>
+                                                        <option value="single">مجرد</option>
+                                                        <option value="married">متأهل</option>
+                                                        <option value="divorced">مطلقه</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="empPhone">تلفن همراه <span class="required">*</span></label>
+                                                    <input type="tel" id="empPhone" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empEmail">ایمیل</label>
+                                                    <input type="email" id="empEmail" class="form-control">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empAddress">آدرس</label>
+                                                    <input type="text" id="empAddress" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- تب مهارت‌ها و گواهینامه‌ها -->
+                                    <div class="tab-pane fade" id="skills" role="tabpanel">
+                                        <div class="employee-form-section">
+                                            <div class="form-group">
+                                                <label>مهارت‌های فنی</label>
+                                                <div class="skills-container">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="skillElectrical" value="الکتریک صنعتی">
+                                                        <label class="form-check-label" for="skillElectrical">الکتریک صنعتی</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="skillMechanical" value="مکانیک">
+                                                        <label class="form-check-label" for="skillMechanical">مکانیک</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="skillPLC" value="PLC">
+                                                        <label class="form-check-label" for="skillPLC">PLC</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="skillWelding" value="جوشکاری">
+                                                        <label class="form-check-label" for="skillWelding">جوشکاری</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="skillInstrumentation" value="ابزار دقیق">
+                                                        <label class="form-check-label" for="skillInstrumentation">ابزار دقیق</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="skillHVAC" value="تاسیسات">
+                                                        <label class="form-check-label" for="skillHVAC">تاسیسات</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="skillHydraulic" value="هیدرولیک">
+                                                        <label class="form-check-label" for="skillHydraulic">هیدرولیک</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="skillPneumatic" value="پنوماتیک">
+                                                        <label class="form-check-label" for="skillPneumatic">پنوماتیک</label>
+                                                    </div>
+                                                </div>
+                                                <input type="text" id="otherSkills" class="form-control mt-2" placeholder="مهارت‌های دیگر (با کاما جدا کنید)">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label>گواهینامه‌ها و مدارک</label>
+                                                <div id="certificationsContainer">
+                                                    <div class="certification-item form-row">
+                                                        <div class="form-group col-md-5">
+                                                            <input type="text" class="form-control" placeholder="نام گواهینامه">
+                                                        </div>
+                                                        <div class="form-group col-md-3">
+                                                            <input type="text" class="form-control" placeholder="شماره مدرک">
+                                                        </div>
+                                                        <div class="form-group col-md-2">
+                                                            <input type="date" class="form-control" placeholder="تاریخ صدور">
+                                                        </div>
+                                                        <div class="form-group col-md-2">
+                                                            <input type="date" class="form-control" placeholder="تاریخ انقضا">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addCertificationBtn">
+                                                    <i class="fas fa-plus"></i> افزودن گواهینامه
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="empEducation">تحصیلات</label>
+                                                <select id="empEducation" class="form-control">
+                                                    <option value="">انتخاب کنید</option>
+                                                    <option value="diploma">دیپلم</option>
+                                                    <option value="associate">کاردانی</option>
+                                                    <option value="bachelor">کارشناسی</option>
+                                                    <option value="master">کارشناسی ارشد</option>
+                                                    <option value="phd">دکترا</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="empFieldOfStudy">رشته تحصیلی</label>
+                                                <input type="text" id="empFieldOfStudy" class="form-control" placeholder="مثال: مهندسی مکانیک">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- تب اطلاعات استخدام -->
+                                    <div class="tab-pane fade" id="employment" role="tabpanel">
+                                        <div class="employee-form-section">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="empEmployeeId">کد پرسنلی <span class="required">*</span></label>
+                                                    <input type="text" id="empEmployeeId" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empPosition">موقعیت شغلی <span class="required">*</span></label>
+                                                    <select id="empPosition" class="form-control" required>
+                                                        <option value="">انتخاب کنید</option>
+                                                        <option value="supervisor">سرپرست تعمیرات</option>
+                                                        <option value="technician_lead">تکنسین ارشد</option>
+                                                        <option value="technician">تکنسین</option>
+                                                        <option value="electrician">برقکار صنعتی</option>
+                                                        <option value="mechanic">مکانیک</option>
+                                                        <option value="planner">برنامه‌ریز</option>
+                                                        <option value="inspector">بازرس</option>
+                                                        <option value="welder">جوشکار</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empDepartment">دپارتمان <span class="required">*</span></label>
+                                                    <select id="empDepartment" class="form-control" required>
+                                                        <option value="">انتخاب کنید</option>
+                                                        <option value="mechanical">مکانیک</option>
+                                                        <option value="electrical">الکتریک</option>
+                                                        <option value="instrumentation">ابزار دقیق</option>
+                                                        <option value="facilities">تاسیسات</option>
+                                                        <option value="planning">برنامه‌ریزی</option>
+                                                        <option value="supervision">سرپرستی</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="empHireDate">تاریخ استخدام <span class="required">*</span></label>
+                                                    <input type="date" id="empHireDate" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empStatus">وضعیت استخدام <span class="required">*</span></label>
+                                                    <select id="empStatus" class="form-control" required>
+                                                        <option value="">انتخاب کنید</option>
+                                                        <option value="active">فعال</option>
+                                                        <option value="on_leave">در مرخصی</option>
+                                                        <option value="inactive">غیرفعال</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empEmploymentType">نوع استخدام</label>
+                                                    <select id="empEmploymentType" class="form-control">
+                                                        <option value="full_time">تمام وقت</option>
+                                                        <option value="part_time">پاره وقت</option>
+                                                        <option value="contractual">قراردادی</option>
+                                                        <option value="seasonal">فصلی</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="empSalary">حقوق پایه</label>
+                                                    <input type="number" id="empSalary" class="form-control" placeholder="به ریال">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empWorkShift">شیفت کاری</label>
+                                                    <select id="empWorkShift" class="form-control">
+                                                        <option value="morning">صبح</option>
+                                                        <option value="evening">عصر</option>
+                                                        <option value="night">شب</option>
+                                                        <option value="rotating">چرخشی</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empWorkHours">ساعات کاری هفتگی</label>
+                                                    <input type="number" id="empWorkHours" class="form-control" value="44" min="0" max="60">
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="empSupervisor">سرپرست مستقیم</label>
+                                                <select id="empSupervisor" class="form-control">
+                                                    <option value="">انتخاب کنید</option>
+                                                    <!-- توسط JavaScript پر می‌شود -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- تب اطلاعات اضطراری -->
+                                    <div class="tab-pane fade" id="emergency" role="tabpanel">
+                                        <div class="employee-form-section">
+                                            <div class="form-group">
+                                                <label for="empEmergencyContact">نام تماس اضطراری</label>
+                                                <input type="text" id="empEmergencyContact" class="form-control">
+                                            </div>
+                                            
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="empEmergencyPhone">تلفن تماس اضطراری</label>
+                                                    <input type="tel" id="empEmergencyPhone" class="form-control">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="empEmergencyRelation">نسبت</label>
+                                                    <input type="text" id="empEmergencyRelation" class="form-control" placeholder="مثال: پدر، همسر">
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="empBloodType">گروه خونی</label>
+                                                <select id="empBloodType" class="form-control">
+                                                    <option value="">نامشخص</option>
+                                                    <option value="A+">A+</option>
+                                                    <option value="A-">A-</option>
+                                                    <option value="B+">B+</option>
+                                                    <option value="B-">B-</option>
+                                                    <option value="AB+">AB+</option>
+                                                    <option value="AB-">AB-</option>
+                                                    <option value="O+">O+</option>
+                                                    <option value="O-">O-</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="empMedicalConditions">شرایط پزشکی خاص</label>
+                                                <textarea id="empMedicalConditions" class="form-control" rows="3" placeholder="حساسیت‌ها، بیماری‌های خاص، محدودیت‌های فیزیکی"></textarea>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="empNotes">توضیحات و یادداشت‌ها</label>
+                                                <textarea id="empNotes" class="form-control" rows="4" placeholder="یادداشت‌های اضافی درباره پرسنل"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لغو</button>
+                                <button type="submit" class="btn btn-primary" id="saveEmployeeBtn">ذخیره پرسنل</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    <!-- اسکریپت‌های -->
+
+    <!-- اسکریپت بارگذاری منوی کناری یا سایدبار-->
+    <script>
+        // 1. اجرای فوری: قبل از هر چیزی چک کن آیا پین است؟
+        // اگر بله، کلاس را به بادی اضافه کن تا CSS فوراً اعمال شود
+        (function() {
+            const isPinned = localStorage.getItem('sidebarPinned') === 'true';
+            if (isPinned) {
+                document.body.classList.add('sidebar-pinned');
+            }
+        })();
+
+        // تابع تزریق HTML
+        function injectSidebarHTML(html) {
+            const container = document.getElementById('sidebar-container');
+            if (container.querySelector('.sidebar')) return;
+
+            container.innerHTML = html;
+            executeSidebarScript();
+        }
+
+        function loadSidebar() {
+            // 2. تلاش برای خواندن از کش (سرعت بالا)
+            const cachedHTML = localStorage.getItem('sidebarHTML_Cache');
+            if (cachedHTML) {
+                injectSidebarHTML(cachedHTML);
+            }
+
+            // 3. دانلود در پس‌زمینه برای آپدیت
+            fetch('../sidebar/sidebar.html?v=' + Date.now())
+                .then(response => response.text())
+                .then(html => {
+                    // اگر کش نبود، الان نمایش بده
+                    if (!cachedHTML) {
+                        injectSidebarHTML(html);
+                    }
+                    // آپدیت کش
+                    if (html !== cachedHTML) {
+                        localStorage.setItem('sidebarHTML_Cache', html);
+                    }
+                })
+                .catch(console.error);
+        }
+        
+        function executeSidebarScript() {
+            const existingScript = document.querySelector('script[src*="../sidebar/sidebar.js"]');
+            if (existingScript) existingScript.remove();
+            
+            const script = document.createElement('script');
+            script.src = '../sidebar/sidebar.js?v=' + Date.now();
+            script.async = false;
+            document.body.appendChild(script);
+        }
+        
+        // اجرا
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSidebar);
+        } else {
+            loadSidebar();
+        }
+    </script>
+
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+    
+    <!-- اسکریپت اصلی -->
+    <script src="../js/main.js"></script>
+    
+    <!-- اسکریپت مدیریت پرسنل -->
+    <script>
+        // داده‌های نمونه پرسنل
+        const personnelData = [
+            {
+                id: "EMP-001",
+                firstName: "علیرضا",
+                lastName: "محمدی",
+                fullName: "علیرضا محمدی",
+                position: "سرپرست تعمیرات",
+                department: "سرپرستی",
+                departmentCode: "supervision",
+                phone: "0912-1234567",
+                email: "a.mohammadi@company.com",
+                skills: ["الکتریک صنعتی", "مکانیک", "عایق‌کاری", "مدیریت پروژه"],
+                certifications: ["HSE Level 2", "برق صنعتی درجه ۱", "مدیریت تعمیرات"],
+                education: "کارشناسی ارشد",
+                fieldOfStudy: "مهندسی مکانیک",
+                hireDate: "1398/03/15",
+                experience: "۵.۲ سال",
+                status: "active",
+                statusText: "فعال",
+                employmentType: "full_time",
+                salary: 85000000,
+                workShift: "morning",
+                workHours: 44,
+                supervisor: "",
+                nationalCode: "0123456789",
+                birthDate: "1365/05/20",
+                gender: "male",
+                maritalStatus: "married",
+                address: "تهران، خیابان ولیعصر",
+                emergencyContact: "فاطمه محمدی",
+                emergencyPhone: "0910-9876543",
+                emergencyRelation: "همسر",
+                bloodType: "O+",
+                medicalConditions: "فاقد شرایط خاص",
+                notes: "پرسنل نمونه و فعال",
+                rating: 9.2,
+                avatarColor: "#3498db"
+            },
+            {
+                id: "EMP-002",
+                firstName: "محمد",
+                lastName: "رضایی",
+                fullName: "محمد رضایی",
+                position: "تکنسین مکانیک",
+                department: "مکانیک",
+                departmentCode: "mechanical",
+                phone: "0918-7654321",
+                email: "m.rezaei@company.com",
+                skills: ["مکانیک سیالات", "جوشکاری", "تراشکاری", "تعمیر پمپ"],
+                certifications: ["جوشکاری قوس الکتریکی", "مکانیک درجه ۲", "ایمنی جوشکاری"],
+                education: "کارشناسی",
+                fieldOfStudy: "مهندسی مکانیک",
+                hireDate: "1399/08/22",
+                experience: "۳.۸ سال",
+                status: "active",
+                statusText: "فعال",
+                employmentType: "full_time",
+                salary: 65000000,
+                workShift: "morning",
+                workHours: 44,
+                supervisor: "EMP-001",
+                nationalCode: "9876543210",
+                birthDate: "1370/11/05",
+                gender: "male",
+                maritalStatus: "single",
+                address: "کرج، میدان آزادی",
+                emergencyContact: "حسن رضایی",
+                emergencyPhone: "0912-3456789",
+                emergencyRelation: "پدر",
+                bloodType: "A+",
+                medicalConditions: "",
+                notes: "تخصص در تعمیر پمپ‌های صنعتی",
+                rating: 8.5,
+                avatarColor: "#2ecc71"
+            },
+            {
+                id: "EMP-003",
+                firstName: "فاطمه",
+                lastName: "احمدی",
+                fullName: "فاطمه احمدی",
+                position: "تکنسین برق",
+                department: "الکتریک",
+                departmentCode: "electrical",
+                phone: "0935-9876543",
+                email: "f.ahmadi@company.com",
+                skills: ["الکترونیک صنعتی", "PLC", "عیب‌یابی", "اتوماسیون"],
+                certifications: ["برق صنعتی درجه ۲", "PLC Siemens", "ایمنی برق"],
+                education: "کارشناسی",
+                fieldOfStudy: "مهندسی برق",
+                hireDate: "1400/01/10",
+                experience: "۳.۲ سال",
+                status: "active",
+                statusText: "فعال",
+                employmentType: "full_time",
+                salary: 62000000,
+                workShift: "evening",
+                workHours: 44,
+                supervisor: "EMP-001",
+                nationalCode: "4567890123",
+                birthDate: "1372/07/15",
+                gender: "female",
+                maritalStatus: "married",
+                address: "تهران، شهرک غرب",
+                emergencyContact: "محمد احمدی",
+                emergencyPhone: "0913-4567890",
+                emergencyRelation: "همسر",
+                bloodType: "B+",
+                medicalConditions: "",
+                notes: "متخصص در سیستم‌های کنترل صنعتی",
+                rating: 8.8,
+                avatarColor: "#9b59b6"
+            },
+            {
+                id: "EMP-004",
+                firstName: "حسن",
+                lastName: "کریمی",
+                fullName: "حسن کریمی",
+                position: "تکنسین ابزار دقیق",
+                department: "ابزار دقیق",
+                departmentCode: "instrumentation",
+                phone: "0910-1122334",
+                email: "h.karimi@company.com",
+                skills: ["ابزار دقیق", "کالیبراسیون", "اتوماسیون", "سنسورها"],
+                certifications: ["ابزار دقیق درجه ۱", "کالیبراسیون", "PLC Allen Bradley"],
+                education: "کاردانی",
+                fieldOfStudy: "ابزار دقیق",
+                hireDate: "1399/11/05",
+                experience: "۳.۹ سال",
+                status: "on_leave",
+                statusText: "در مرخصی",
+                employmentType: "full_time",
+                salary: 60000000,
+                workShift: "morning",
+                workHours: 44,
+                supervisor: "EMP-001",
+                nationalCode: "7890123456",
+                birthDate: "1368/03/22",
+                gender: "male",
+                maritalStatus: "married",
+                address: "شهریار، بلوار آزادی",
+                emergencyContact: "مریم کریمی",
+                emergencyPhone: "0915-6789012",
+                emergencyRelation: "همسر",
+                bloodType: "AB+",
+                medicalConditions: "آسم خفیف",
+                notes: "تا ۱۴۰۲/۰۶/۱۵ در مرخصی استعلاجی",
+                rating: 8.2,
+                avatarColor: "#e74c3c"
+            },
+            {
+                id: "EMP-005",
+                firstName: "رضا",
+                lastName: "جعفری",
+                fullName: "رضا جعفری",
+                position: "تکنسین تاسیسات",
+                department: "تاسیسات",
+                departmentCode: "facilities",
+                phone: "0919-4455667",
+                email: "r.jafari@company.com",
+                skills: ["تعمیرات تاسیسات", "تعمیر چیلر", "لوله‌کشی صنعتی", "جوش آرگون"],
+                certifications: ["تاسیسات درجه ۱", "جوشکاری آرگون", "ایمنی فشار"],
+                education: "دیپلم",
+                fieldOfStudy: "تاسیسات",
+                hireDate: "1401/04/18",
+                experience: "۲.۱ سال",
+                status: "active",
+                statusText: "فعال",
+                employmentType: "full_time",
+                salary: 55000000,
+                workShift: "rotating",
+                workHours: 48,
+                supervisor: "EMP-001",
+                nationalCode: "2345678901",
+                birthDate: "1375/09/30",
+                gender: "male",
+                maritalStatus: "single",
+                address: "قدس، خیابان امام",
+                emergencyContact: "علی جعفری",
+                emergencyPhone: "0916-7890123",
+                emergencyRelation: "پدر",
+                bloodType: "O-",
+                medicalConditions: "",
+                notes: "مهارت عالی در تعمیر چیلرهای صنعتی",
+                rating: 7.9,
+                avatarColor: "#f39c12"
+            },
+            {
+                id: "EMP-006",
+                firstName: "سارا",
+                lastName: "نظری",
+                fullName: "سارا نظری",
+                position: "برنامه‌ریز تعمیرات",
+                department: "برنامه‌ریزی",
+                departmentCode: "planning",
+                phone: "0936-5566778",
+                email: "s.nazari@company.com",
+                skills: ["برنامه‌ریزی نگهداری", "نرم‌افزار CMMS", "مدیریت موجودی", "آنالیز داده"],
+                certifications: ["مدیریت پروژه", "نرم‌افزار SAP PM", "Excel پیشرفته"],
+                education: "کارشناسی",
+                fieldOfStudy: "مهندسی صنایع",
+                hireDate: "1400/09/12",
+                experience: "۲.۸ سال",
+                status: "active",
+                statusText: "فعال",
+                employmentType: "full_time",
+                salary: 70000000,
+                workShift: "morning",
+                workHours: 44,
+                supervisor: "EMP-001",
+                nationalCode: "3456789012",
+                birthDate: "1373/12/10",
+                gender: "female",
+                maritalStatus: "single",
+                address: "تهران، پاسداران",
+                emergencyContact: "محمد نظری",
+                emergencyPhone: "0917-8901234",
+                emergencyRelation: "پدر",
+                bloodType: "A-",
+                medicalConditions: "",
+                notes: "مسئول برنامه‌ریزی PM های ماهانه",
+                rating: 9.0,
+                avatarColor: "#1abc9c"
+            }
+        ];
+
+        // متغیرهای جهانی
+        let personnelTable;
+        let currentEmployeeId = null;
+        let isEditMode = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // بارگذاری داده‌ها در جدول
+            initializePersonnelTable();
+            
+            // تنظیم تاریخ امروز
+            const today = new Date().toLocaleDateString('fa-IR');
+            document.getElementById('currentDate').textContent = today;
+            
+            // مدیریت Modal‌ها
+            initializeModals();
+            
+            // مدیریت رویدادها
+            setupEventListeners();
+            
+            // به‌روزرسانی آمار
+            updateStatistics();
+            
+            // پر کردن لیست سرپرستان
+            populateSupervisorsList();
+        });
+
+        // مقداردهی اولیه جدول DataTable
+        function initializePersonnelTable() {
+            personnelTable = $('#personnelTable').DataTable({
+                data: personnelData,
+                columns: [
+                    { 
+                        data: null,
+                        render: function(data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                    { 
+                        data: 'fullName',
+                        render: function(data, type, row) {
+                            const initials = row.firstName.charAt(0) + row.lastName.charAt(0);
+                            return `
+                                <div class="d-flex align-items-center">
+                                    <div class="employee-avatar" style="background: ${row.avatarColor}">
+                                        ${initials}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">${row.fullName}</div>
+                                        <small class="text-muted">${row.id}</small>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    },
+                    { 
+                        data: 'position',
+                        render: function(data, type, row) {
+                            return `
+                                <div>${row.position}</div>
+                                <small class="text-muted">${row.experience} تجربه</small>
+                            `;
+                        }
+                    },
+                    { 
+                        data: 'department',
+                        render: function(data, type, row) {
+                            let badgeColor = '';
+                            switch(row.departmentCode) {
+                                case 'mechanical': badgeColor = 'bg-info'; break;
+                                case 'electrical': badgeColor = 'bg-warning'; break;
+                                case 'instrumentation': badgeColor = 'bg-primary'; break;
+                                case 'facilities': badgeColor = 'bg-success'; break;
+                                case 'planning': badgeColor = 'bg-secondary'; break;
+                                case 'supervision': badgeColor = 'bg-dark'; break;
+                                default: badgeColor = 'bg-light';
+                            }
+                            return `<span class="badge ${badgeColor}">${row.department}</span>`;
+                        }
+                    },
+                    { 
+                        data: 'skills',
+                        render: function(data, type, row) {
+                            return row.skills.slice(0, 2).map(skill => 
+                                `<span class="skill-badge">${skill}</span>`
+                            ).join(' ') + (row.skills.length > 2 ? ' ...' : '');
+                        }
+                    },
+                    { 
+                        data: 'status',
+                        render: function(data, type, row) {
+                            let statusClass = '';
+                            let statusText = row.statusText;
+                            
+                            switch(row.status) {
+                                case 'active':
+                                    statusClass = 'status-active';
+                                    break;
+                                case 'on_leave':
+                                    statusClass = 'status-on-leave';
+                                    break;
+                                case 'inactive':
+                                    statusClass = 'status-inactive';
+                                    break;
+                            }
+                            
+                            return `
+                                <div class="d-flex align-items-center">
+                                    <span class="status-indicator ${statusClass}"></span>
+                                    ${statusText}
+                                </div>
+                            `;
+                        }
+                    },
+                    { 
+                        data: 'hireDate',
+                        render: function(data) {
+                            return data;
+                        }
+                    },
+                    { 
+                        data: 'rating',
+                        render: function(data) {
+                            const stars = Math.round(data / 2);
+                            let starsHtml = '';
+                            for(let i = 1; i <= 5; i++) {
+                                if(i <= stars) {
+                                    starsHtml += '<i class="fas fa-star"></i>';
+                                } else {
+                                    starsHtml += '<i class="far fa-star"></i>';
+                                }
+                            }
+                            return `
+                                <div class="rating-stars">${starsHtml}</div>
+                                <small>${data}/10</small>
+                            `;
+                        }
+                    },
+                    { 
+                        data: null,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary view-employee" data-id="${row.id}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success edit-employee" data-id="${row.id}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger delete-employee" data-id="${row.id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json'
+                },
+                pageLength: 10,
+                responsive: true,
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'excel', 'pdf', 'print'
+                ]
+            });
+        }
+
+        // مقداردهی اولیه Modal‌ها
+        function initializeModals() {
+            const employeeDetailModal = new bootstrap.Modal(document.getElementById('employeeDetailModal'));
+            const addEmployeeModal = new bootstrap.Modal(document.getElementById('addEmployeeModal'));
+            
+            // مدیریت بستن Modal
+            document.getElementById('employeeDetailModal').addEventListener('hidden.bs.modal', function() {
+                currentEmployeeId = null;
+                isEditMode = false;
+            });
+            
+            document.getElementById('addEmployeeModal').addEventListener('hidden.bs.modal', function() {
+                resetEmployeeForm();
+                currentEmployeeId = null;
+                isEditMode = false;
+            });
+            
+            // افزودن گواهینامه جدید
+            document.getElementById('addCertificationBtn').addEventListener('click', function() {
+                addCertificationField();
+            });
+            
+            // ذخیره پرسنل
+            document.getElementById('employeeForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveEmployee();
+            });
+        }
+
+        // تنظیم رویدادها
+        function setupEventListeners() {
+            // جستجو
+            document.getElementById('searchInput').addEventListener('keyup', function() {
+                personnelTable.search(this.value).draw();
+            });
+            
+            // فیلتر دپارتمان
+            document.getElementById('departmentFilter').addEventListener('change', function() {
+                filterTable();
+            });
+            
+            // فیلتر وضعیت
+            document.getElementById('statusFilter').addEventListener('change', function() {
+                filterTable();
+            });
+            
+            // پاک کردن فیلترها
+            document.getElementById('clearFilters').addEventListener('click', function() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('departmentFilter').value = '';
+                document.getElementById('statusFilter').value = '';
+                filterTable();
+            });
+            
+            // خروجی Excel
+            document.getElementById('exportExcel').addEventListener('click', function() {
+                exportToExcel();
+            });
+            
+            // خروجی PDF
+            document.getElementById('exportPDF').addEventListener('click', function() {
+                exportToPDF();
+            });
+            
+            // چاپ پرونده پرسنل
+            document.getElementById('printEmployeeBtn').addEventListener('click', function() {
+                printEmployeeDetails();
+            });
+            
+            // ویرایش پرسنل
+            document.getElementById('editEmployeeBtn').addEventListener('click', function() {
+                if(currentEmployeeId) {
+                    editEmployee(currentEmployeeId);
+                }
+            });
+            
+            // رویدادهای دینامیک جدول
+            document.getElementById('personnelTableBody').addEventListener('click', function(e) {
+                const target = e.target;
+                const button = target.closest('button');
+                
+                if(!button) return;
+                
+                const employeeId = button.getAttribute('data-id');
+                
+                if(button.classList.contains('view-employee')) {
+                    viewEmployeeDetails(employeeId);
+                } else if(button.classList.contains('edit-employee')) {
+                    editEmployee(employeeId);
+                } else if(button.classList.contains('delete-employee')) {
+                    deleteEmployee(employeeId);
+                }
+            });
+        }
+
+        // فیلتر کردن جدول
+        function filterTable() {
+            const departmentFilter = document.getElementById('departmentFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    const row = personnelTable.row(dataIndex).data();
+                    let departmentMatch = true;
+                    let statusMatch = true;
+                    
+                    if(departmentFilter && row.departmentCode !== departmentFilter) {
+                        departmentMatch = false;
+                    }
+                    
+                    if(statusFilter && row.status !== statusFilter) {
+                        statusMatch = false;
+                    }
+                    
+                    return departmentMatch && statusMatch;
+                }
+            );
+            
+            personnelTable.draw();
+            $.fn.dataTable.ext.search.pop();
+        }
+
+        // مشاهده جزئیات پرسنل
+        function viewEmployeeDetails(employeeId) {
+            const employee = personnelData.find(emp => emp.id === employeeId);
+            if(!employee) return;
+            
+            currentEmployeeId = employeeId;
+            
+            // محاسبه سن
+            let age = 'نامشخص';
+            if(employee.birthDate) {
+                const birthYear = parseInt(employee.birthDate.split('/')[0]);
+                const currentYear = new Date().getFullYear() - 621; // سال شمسی جاری
+                age = (currentYear - birthYear) + ' سال';
+            }
+            
+            // پیدا کردن نام سرپرست
+            let supervisorName = 'ندارد';
+            if(employee.supervisor) {
+                const supervisor = personnelData.find(emp => emp.id === employee.supervisor);
+                if(supervisor) {
+                    supervisorName = supervisor.fullName;
+                }
+            }
+            
+            const modalContent = document.getElementById('employeeDetailContent');
+            modalContent.innerHTML = `
+                <div class="employee-detail-card">
+                    <div class="detail-section">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="employee-avatar" style="background: ${employee.avatarColor}; width: 100px; height: 100px; margin: 0 auto 20px;">
+                                    ${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}
+                                </div>
+                                <h4 class="text-center">${employee.fullName}</h4>
+                                <p class="text-center text-muted">${employee.id}</p>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5><i class="fas fa-id-card"></i> اطلاعات شخصی</h5>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td width="40%">کد ملی:</td>
+                                                <td>${employee.nationalCode || 'ثبت نشده'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>تاریخ تولد:</td>
+                                                <td>${employee.birthDate || 'ثبت نشده'} (${age})</td>
+                                            </tr>
+                                            <tr>
+                                                <td>جنسیت:</td>
+                                                <td>${employee.gender === 'male' ? 'مرد' : employee.gender === 'female' ? 'زن' : 'ثبت نشده'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>وضعیت تأهل:</td>
+                                                <td>${employee.maritalStatus === 'single' ? 'مجرد' : employee.maritalStatus === 'married' ? 'متأهل' : employee.maritalStatus === 'divorced' ? 'مطلقه' : 'ثبت نشده'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>گروه خونی:</td>
+                                                <td>${employee.bloodType || 'نامشخص'}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5><i class="fas fa-phone"></i> اطلاعات تماس</h5>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td width="40%">تلفن همراه:</td>
+                                                <td>${employee.phone}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>ایمیل:</td>
+                                                <td>${employee.email || 'ثبت نشده'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>آدرس:</td>
+                                                <td>${employee.address || 'ثبت نشده'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>تماس اضطراری:</td>
+                                                <td>${employee.emergencyContact || 'ثبت نشده'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>تلفن اضطراری:</td>
+                                                <td>${employee.emergencyPhone || 'ثبت نشده'}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h5><i class="fas fa-briefcase"></i> اطلاعات شغلی</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td width="50%">موقعیت:</td>
+                                        <td><strong>${employee.position}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>دپارتمان:</td>
+                                        <td><span class="badge bg-primary">${employee.department}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>نوع استخدام:</td>
+                                        <td>${employee.employmentType === 'full_time' ? 'تمام وقت' : employee.employmentType === 'part_time' ? 'پاره وقت' : employee.employmentType === 'contractual' ? 'قراردادی' : 'فصلی'}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-4">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td width="50%">تاریخ استخدام:</td>
+                                        <td>${employee.hireDate}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>تجربه کاری:</td>
+                                        <td>${employee.experience}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>سرپرست مستقیم:</td>
+                                        <td>${supervisorName}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-4">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td width="50%">شیفت کاری:</td>
+                                        <td>${employee.workShift === 'morning' ? 'صبح' : employee.workShift === 'evening' ? 'عصر' : employee.workShift === 'night' ? 'شب' : 'چرخشی'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>ساعات هفتگی:</td>
+                                        <td>${employee.workHours} ساعت</td>
+                                    </tr>
+                                    <tr>
+                                        <td>وضعیت:</td>
+                                        <td>
+                                            <span class="status-indicator ${employee.status === 'active' ? 'status-active' : employee.status === 'on_leave' ? 'status-on-leave' : 'status-inactive'}"></span>
+                                            ${employee.statusText}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h5><i class="fas fa-graduation-cap"></i> تحصیلات و مهارت‌ها</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td width="50%">تحصیلات:</td>
+                                        <td>${employee.education || 'ثبت نشده'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>رشته:</td>
+                                        <td>${employee.fieldOfStudy || 'ثبت نشده'}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-8">
+                                <p><strong>مهارت‌ها:</strong></p>
+                                ${employee.skills.map(skill => `<span class="skill-badge">${skill}</span>`).join(' ')}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <p><strong>گواهینامه‌ها:</strong></p>
+                            ${employee.certifications.map(cert => `<span class="cert-badge">${cert}</span>`).join(' ')}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h5><i class="fas fa-clipboard-check"></i> ارزیابی عملکرد</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="rating-stars">
+                                        ${Array(Math.round(employee.rating / 2)).fill('<i class="fas fa-star"></i>').join('')}
+                                        ${Array(5 - Math.round(employee.rating / 2)).fill('<i class="far fa-star"></i>').join('')}
+                                    </div>
+                                    <div class="ms-3">
+                                        <h4>${employee.rating}/10</h4>
+                                        <small class="text-muted">امتیاز کلی</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stats-card">
+                                    <div class="stats-number">۹۵%</div>
+                                    <div>رضایت از عملکرد</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h5><i class="fas fa-stethoscope"></i> اطلاعات پزشکی</h5>
+                        <p>${employee.medicalConditions || 'فاقد شرایط پزشکی خاص'}</p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h5><i class="fas fa-sticky-note"></i> یادداشت‌ها</h5>
+                        <p>${employee.notes || 'یادداشتی ثبت نشده است'}</p>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('employeeDetailModal'));
+            modal.show();
+        }
+
+        // ویرایش پرسنل
+        function editEmployee(employeeId) {
+            const employee = personnelData.find(emp => emp.id === employeeId);
+            if(!employee) return;
+            
+            currentEmployeeId = employeeId;
+            isEditMode = true;
+            
+            // پر کردن فرم با اطلاعات پرسنل
+            document.getElementById('empFirstName').value = employee.firstName;
+            document.getElementById('empLastName').value = employee.lastName;
+            document.getElementById('empNationalCode').value = employee.nationalCode;
+            document.getElementById('empBirthDate').value = convertToGregorian(employee.birthDate);
+            document.getElementById('empGender').value = employee.gender;
+            document.getElementById('empMaritalStatus').value = employee.maritalStatus;
+            document.getElementById('empPhone').value = employee.phone;
+            document.getElementById('empEmail').value = employee.email;
+            document.getElementById('empAddress').value = employee.address;
+            
+            // مهارت‌ها
+            const skills = ['Electrical', 'Mechanical', 'PLC', 'Welding', 'Instrumentation', 'HVAC', 'Hydraulic', 'Pneumatic'];
+            skills.forEach(skill => {
+                const skillId = `skill${skill}`;
+                const checkbox = document.getElementById(skillId);
+                if(checkbox) {
+                    const skillPersian = checkbox.value;
+                    checkbox.checked = employee.skills.includes(skillPersian);
+                }
+            });
+            
+            // تحصیلات
+            document.getElementById('empEducation').value = employee.education;
+            document.getElementById('empFieldOfStudy').value = employee.fieldOfStudy;
+            
+            // اطلاعات استخدام
+            document.getElementById('empEmployeeId').value = employee.id;
+            document.getElementById('empPosition').value = employee.position;
+            document.getElementById('empDepartment').value = employee.departmentCode;
+            document.getElementById('empHireDate').value = convertToGregorian(employee.hireDate);
+            document.getElementById('empStatus').value = employee.status;
+            document.getElementById('empEmploymentType').value = employee.employmentType;
+            document.getElementById('empSalary').value = employee.salary;
+            document.getElementById('empWorkShift').value = employee.workShift;
+            document.getElementById('empWorkHours').value = employee.workHours;
+            document.getElementById('empSupervisor').value = employee.supervisor;
+            
+            // اطلاعات اضطراری
+            document.getElementById('empEmergencyContact').value = employee.emergencyContact;
+            document.getElementById('empEmergencyPhone').value = employee.emergencyPhone;
+            document.getElementById('empEmergencyRelation').value = employee.emergencyRelation;
+            document.getElementById('empBloodType').value = employee.bloodType;
+            document.getElementById('empMedicalConditions').value = employee.medicalConditions;
+            document.getElementById('empNotes').value = employee.notes;
+            
+            // تغییر عنوان Modal
+            document.querySelector('#addEmployeeModal .modal-title').innerHTML = 
+                '<i class="fas fa-user-edit"></i> ویرایش اطلاعات پرسنل';
+            
+            // تغییر متن دکمه
+            document.getElementById('saveEmployeeBtn').textContent = 'به‌روزرسانی پرسنل';
+            
+            const modal = new bootstrap.Modal(document.getElementById('addEmployeeModal'));
+            modal.show();
+        }
+
+        // ذخیره پرسنل
+        function saveEmployee() {
+            // جمع‌آوری اطلاعات از فرم
+            const formData = {
+                id: isEditMode ? currentEmployeeId : generateEmployeeId(),
+                firstName: document.getElementById('empFirstName').value,
+                lastName: document.getElementById('empLastName').value,
+                fullName: `${document.getElementById('empFirstName').value} ${document.getElementById('empLastName').value}`,
+                nationalCode: document.getElementById('empNationalCode').value,
+                birthDate: convertToJalali(document.getElementById('empBirthDate').value),
+                gender: document.getElementById('empGender').value,
+                maritalStatus: document.getElementById('empMaritalStatus').value,
+                phone: document.getElementById('empPhone').value,
+                email: document.getElementById('empEmail').value,
+                address: document.getElementById('empAddress').value,
+                employeeId: document.getElementById('empEmployeeId').value,
+                position: document.getElementById('empPosition').value,
+                departmentCode: document.getElementById('empDepartment').value,
+                department: getDepartmentName(document.getElementById('empDepartment').value),
+                hireDate: convertToJalali(document.getElementById('empHireDate').value),
+                status: document.getElementById('empStatus').value,
+                statusText: getStatusText(document.getElementById('empStatus').value),
+                employmentType: document.getElementById('empEmploymentType').value,
+                salary: parseInt(document.getElementById('empSalary').value) || 0,
+                workShift: document.getElementById('empWorkShift').value,
+                workHours: parseInt(document.getElementById('empWorkHours').value) || 44,
+                supervisor: document.getElementById('empSupervisor').value,
+                emergencyContact: document.getElementById('empEmergencyContact').value,
+                emergencyPhone: document.getElementById('empEmergencyPhone').value,
+                emergencyRelation: document.getElementById('empEmergencyRelation').value,
+                bloodType: document.getElementById('empBloodType').value,
+                medicalConditions: document.getElementById('empMedicalConditions').value,
+                notes: document.getElementById('empNotes').value,
+                education: document.getElementById('empEducation').value,
+                fieldOfStudy: document.getElementById('empFieldOfStudy').value,
+                skills: getSelectedSkills(),
+                certifications: getCertifications(),
+                experience: calculateExperience(convertToJalali(document.getElementById('empHireDate').value)),
+                rating: isEditMode ? personnelData.find(emp => emp.id === currentEmployeeId)?.rating || 8.0 : 8.0,
+                avatarColor: isEditMode ? personnelData.find(emp => emp.id === currentEmployeeId)?.avatarColor || getRandomColor() : getRandomColor()
+            };
+            
+            if(isEditMode) {
+                // به‌روزرسانی پرسنل موجود
+                const index = personnelData.findIndex(emp => emp.id === currentEmployeeId);
+                if(index !== -1) {
+                    personnelData[index] = formData;
+                }
+            } else {
+                // افزودن پرسنل جدید
+                personnelData.push(formData);
+            }
+            
+            // به‌روزرسانی جدول
+            personnelTable.clear();
+            personnelTable.rows.add(personnelData);
+            personnelTable.draw();
+            
+            // به‌روزرسانی آمار
+            updateStatistics();
+            
+            // بستن Modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal'));
+            modal.hide();
+            
+            // نمایش پیام موفقیت
+            showToast(`اطلاعات پرسنل ${isEditMode ? 'ویرایش' : 'ذخیره'} شد`, 'success');
+        }
+
+        // حذف پرسنل
+        function deleteEmployee(employeeId) {
+            if(confirm('آیا از حذف این پرسنل اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+                const index = personnelData.findIndex(emp => emp.id === employeeId);
+                if(index !== -1) {
+                    personnelData.splice(index, 1);
+                    
+                    // به‌روزرسانی جدول
+                    personnelTable.clear();
+                    personnelTable.rows.add(personnelData);
+                    personnelTable.draw();
+                    
+                    // به‌روزرسانی آمار
+                    updateStatistics();
+                    
+                    showToast('پرسنل با موفقیت حذف شد', 'success');
+                }
+            }
+        }
+
+        // به‌روزرسانی آمار
+        function updateStatistics() {
+            const total = personnelData.length;
+            const active = personnelData.filter(emp => emp.status === 'active').length;
+            const onLeave = personnelData.filter(emp => emp.status === 'on_leave').length;
+            
+            document.getElementById('totalPersonnel').textContent = total;
+            document.getElementById('activePersonnel').textContent = active;
+            document.getElementById('onLeavePersonnel').textContent = onLeave;
+            
+            // محاسبه میانگین تجربه
+            const totalExperience = personnelData.reduce((sum, emp) => {
+                const exp = parseFloat(emp.experience) || 0;
+                return sum + exp;
+            }, 0);
+            
+            const avgExperience = (totalExperience / total).toFixed(1);
+            document.querySelector('.metric-card:nth-child(4) .metric-value').textContent = avgExperience;
+            
+            // محاسبه میانگین رضایت
+            const totalRating = personnelData.reduce((sum, emp) => sum + (emp.rating || 8), 0);
+            const avgRating = (totalRating / total).toFixed(1);
+            document.querySelector('.metric-card:nth-child(5) .metric-value').textContent = `${avgRating}/۱۰`;
+        }
+
+        // تولید ID جدید برای پرسنل
+        function generateEmployeeId() {
+            const maxId = personnelData.reduce((max, emp) => {
+                const num = parseInt(emp.id.split('-')[1]) || 0;
+                return Math.max(max, num);
+            }, 0);
+            
+            return `EMP-${(maxId + 1).toString().padStart(3, '0')}`;
+        }
+
+        // ریست فرم
+        function resetEmployeeForm() {
+            document.getElementById('employeeForm').reset();
+            document.querySelector('#addEmployeeModal .modal-title').innerHTML = 
+                '<i class="fas fa-user-plus"></i> افزودن پرسنل جدید';
+            document.getElementById('saveEmployeeBtn').textContent = 'ذخیره پرسنل';
+            
+            // پاک کردن گواهینامه‌های اضافه
+            const certContainer = document.getElementById('certificationsContainer');
+            while(certContainer.children.length > 1) {
+                certContainer.removeChild(certContainer.lastChild);
+            }
+        }
+
+        // افزودن فیلد گواهینامه
+        function addCertificationField() {
+            const container = document.getElementById('certificationsContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'certification-item form-row mt-2';
+            newItem.innerHTML = `
+                <div class="form-group col-md-5">
+                    <input type="text" class="form-control" placeholder="نام گواهینامه">
+                </div>
+                <div class="form-group col-md-3">
+                    <input type="text" class="form-control" placeholder="شماره مدرک">
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="date" class="form-control" placeholder="تاریخ صدور">
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="date" class="form-control" placeholder="تاریخ انقضا">
+                    <button type="button" class="btn btn-sm btn-outline-danger mt-1 remove-cert" style="width: 100%">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(newItem);
+            
+            // رویداد حذف گواهینامه
+            newItem.querySelector('.remove-cert').addEventListener('click', function() {
+                container.removeChild(newItem);
+            });
+        }
+
+        // گرفتن مهارت‌های انتخاب شده
+        function getSelectedSkills() {
+            const skills = [];
+            const skillCheckboxes = document.querySelectorAll('.skills-container input[type="checkbox"]:checked');
+            
+            skillCheckboxes.forEach(checkbox => {
+                skills.push(checkbox.value);
+            });
+            
+            // افزودن مهارت‌های دستی
+            const otherSkills = document.getElementById('otherSkills').value;
+            if(otherSkills) {
+                otherSkills.split(',').forEach(skill => {
+                    const trimmedSkill = skill.trim();
+                    if(trimmedSkill) skills.push(trimmedSkill);
+                });
+            }
+            
+            return skills;
+        }
+
+        // گرفتن گواهینامه‌ها
+        function getCertifications() {
+            const certifications = [];
+            const certItems = document.querySelectorAll('.certification-item');
+            
+            certItems.forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                const name = inputs[0]?.value;
+                const number = inputs[1]?.value;
+                
+                if(name && number) {
+                    certifications.push(`${name} (${number})`);
+                }
+            });
+            
+            return certifications;
+        }
+
+        // پر کردن لیست سرپرستان
+        function populateSupervisorsList() {
+            const supervisorSelect = document.getElementById('empSupervisor');
+            supervisorSelect.innerHTML = '<option value="">انتخاب کنید</option>';
+            
+            personnelData
+                .filter(emp => emp.position.includes('سرپرست') || emp.departmentCode === 'supervision')
+                .forEach(emp => {
+                    const option = document.createElement('option');
+                    option.value = emp.id;
+                    option.textContent = `${emp.fullName} (${emp.position})`;
+                    supervisorSelect.appendChild(option);
+                });
+        }
+
+        // تبدیل تاریخ به میلادی
+        function convertToGregorian(jalaliDate) {
+            if(!jalaliDate) return '';
+            // این یک تبدیل ساده است. در پروژه واقعی از کتابخانه مناسب استفاده کنید
+            return jalaliDate.replace(/\//g, '-');
+        }
+
+        // تبدیل تاریخ به شمسی
+        function convertToJalali(gregorianDate) {
+            if(!gregorianDate) return '';
+            // این یک تبدیل ساده است. در پروژه واقعی از کتابخانه مناسب استفاده کنید
+            return gregorianDate.replace(/-/g, '/');
+        }
+
+        // گرفتن نام دپارتمان
+        function getDepartmentName(code) {
+            const departments = {
+                'mechanical': 'مکانیک',
+                'electrical': 'الکتریک',
+                'instrumentation': 'ابزار دقیق',
+                'facilities': 'تاسیسات',
+                'planning': 'برنامه‌ریزی',
+                'supervision': 'سرپرستی'
+            };
+            return departments[code] || code;
+        }
+
+        // گرفتن متن وضعیت
+        function getStatusText(status) {
+            const statuses = {
+                'active': 'فعال',
+                'on_leave': 'در مرخصی',
+                'inactive': 'غیرفعال'
+            };
+            return statuses[status] || status;
+        }
+
+        // محاسبه تجربه کاری
+        function calculateExperience(hireDate) {
+            if(!hireDate) return 'نامشخص';
+            
+            const hireYear = parseInt(hireDate.split('/')[0]);
+            const currentYear = new Date().getFullYear() - 621; // سال شمسی جاری
+            const experience = currentYear - hireYear;
+            
+            return experience > 0 ? `${experience} سال` : 'کمتر از ۱ سال';
+        }
+
+        // تولید رنگ تصادفی
+        function getRandomColor() {
+            const colors = [
+                '#3498db', '#2ecc71', '#9b59b6', '#e74c3c', 
+                '#f39c12', '#1abc9c', '#34495e', '#16a085'
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // خروجی به Excel
+        async function exportToExcel() {
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('پرسنل تعمیرات');
+                
+                // اضافه کردن عنوان
+                worksheet.mergeCells('A1:I1');
+                const titleCell = worksheet.getCell('A1');
+                titleCell.value = 'گزارش پرسنل تعمیرات';
+                titleCell.font = { size: 16, bold: true };
+                titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+                
+                // اضافه کردن تاریخ
+                worksheet.mergeCells('A2:I2');
+                const dateCell = worksheet.getCell('A2');
+                dateCell.value = `تاریخ استخراج: ${new Date().toLocaleDateString('fa-IR')}`;
+                dateCell.alignment = { horizontal: 'center' };
+                
+                // هدرهای جدول
+                const headers = [
+                    'ردیف', 'کد پرسنلی', 'نام و نام خانوادگی', 'موقعیت شغلی',
+                    'دپارتمان', 'وضعیت', 'تاریخ استخدام', 'تجربه', 'مهارت‌های کلیدی'
+                ];
+                
+                worksheet.addRow(headers);
+                
+                // داده‌ها
+                personnelData.forEach((emp, index) => {
+                    worksheet.addRow([
+                        index + 1,
+                        emp.id,
+                        emp.fullName,
+                        emp.position,
+                        emp.department,
+                        emp.statusText,
+                        emp.hireDate,
+                        emp.experience,
+                        emp.skills.join(', ')
+                    ]);
+                });
+                
+                // استایل‌دهی
+                worksheet.columns = [
+                    { width: 10 }, { width: 15 }, { width: 25 }, { width: 20 },
+                    { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 },
+                    { width: 40 }
+                ];
+                
+                // رنگ‌آمیزی هدرها
+                const headerRow = worksheet.getRow(3);
+                headerRow.eachCell((cell) => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FF2C3E50' }
+                    };
+                    cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+                    cell.alignment = { horizontal: 'center' };
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+                
+                // تولید فایل
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `personnel-report-${new Date().toISOString().slice(0,10)}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showToast('گزارش Excel با موفقیت ایجاد شد', 'success');
+            } catch (error) {
+                console.error('خطا در ایجاد فایل Excel:', error);
+                showToast('خطا در ایجاد فایل Excel', 'error');
+            }
+        }
+
+        // خروجی به PDF
+        function exportToPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // عنوان
+                doc.setFontSize(18);
+                doc.setTextColor(40);
+                doc.text('گزارش پرسنل تعمیرات', 105, 20, null, null, 'center');
+                
+                // تاریخ
+                doc.setFontSize(11);
+                doc.setTextColor(100);
+                doc.text(`تاریخ استخراج: ${new Date().toLocaleDateString('fa-IR')}`, 105, 30, null, null, 'center');
+                
+                // ایجاد جدول
+                const tableData = personnelData.map((emp, index) => [
+                    index + 1,
+                    emp.id,
+                    emp.fullName,
+                    emp.position,
+                    emp.department,
+                    emp.statusText,
+                    emp.hireDate,
+                    emp.experience
+                ]);
+                
+                doc.autoTable({
+                    head: [['ردیف', 'کد پرسنلی', 'نام', 'موقعیت', 'دپارتمان', 'وضعیت', 'تاریخ استخدام', 'تجربه']],
+                    body: tableData,
+                    startY: 40,
+                    theme: 'grid',
+                    styles: { fontSize: 9, font: 'Vazirmatn', halign: 'center' },
+                    headStyles: { fillColor: [44, 62, 80], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 15 },
+                        1: { cellWidth: 25 },
+                        2: { cellWidth: 35 },
+                        3: { cellWidth: 30 },
+                        4: { cellWidth: 25 },
+                        5: { cellWidth: 20 },
+                        6: { cellWidth: 25 },
+                        7: { cellWidth: 20 }
+                    },
+                    margin: { right: 10, left: 10 }
+                });
+                
+                // ذخیره فایل
+                doc.save(`personnel-report-${new Date().toISOString().slice(0,10)}.pdf`);
+                
+                showToast('گزارش PDF با موفقیت ایجاد شد', 'success');
+            } catch (error) {
+                console.error('خطا در ایجاد فایل PDF:', error);
+                showToast('خطا در ایجاد فایل PDF', 'error');
+            }
+        }
+
+        // چاپ جزئیات پرسنل
+        function printEmployeeDetails() {
+            const printContent = document.getElementById('employeeDetailContent').innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            document.body.innerHTML = `
+                <!DOCTYPE html>
+                <html dir="rtl" lang="fa">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>پرونده پرسنل</title>
+                    <style>
+                        body { font-family: 'Vazirmatn', sans-serif; padding: 20px; }
+                        .employee-avatar { 
+                            width: 100px; height: 100px; border-radius: 50%; 
+                            background: #3498db; color: white; display: flex;
+                            align-items: center; justify-content: center;
+                            font-size: 2rem; font-weight: bold; margin: 0 auto 20px;
+                        }
+                        .detail-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #ddd; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+                        table, th, td { border: 1px solid #ddd; }
+                        th, td { padding: 8px; text-align: right; }
+                        th { background-color: #f2f2f2; }
+                        .skill-badge, .cert-badge {
+                            display: inline-block; padding: 4px 8px; margin: 2px;
+                            border-radius: 10px; font-size: 0.8rem;
+                        }
+                        .skill-badge { background-color: #e3f2fd; color: #1565c0; }
+                        .cert-badge { background-color: #e8f5e9; color: #2e7d32; }
+                        @page { size: A4; margin: 20mm; }
+                        @media print {
+                            body { padding: 0; }
+                            .no-print { display: none !important; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1 style="text-align: center; margin-bottom: 30px;">پرونده پرسنل</h1>
+                    ${printContent}
+                    <div style="text-align: center; margin-top: 40px; font-size: 0.9rem; color: #666;">
+                        <p>این گزارش در تاریخ ${new Date().toLocaleDateString('fa-IR')} استخراج شده است.</p>
+                        <p>سیستم جامع نگهداری و تعمیرات (CMMS)</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            window.print();
+            document.body.innerHTML = originalContent;
+            
+            // بازگرداندن رویدادها
+            initializePersonnelTable();
+            setupEventListeners();
+        }
+
+        // تابع کمکی برای نمایش پیام
+        function showToast(message, type = 'info') {
+            // پیاده‌سازی نمایش پیام (مشابه main.js)
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+    </script>
+</body>
+</html>
