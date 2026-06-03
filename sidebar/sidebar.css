@@ -1,0 +1,401 @@
+/* sidebar.css */
+/* دایره آبی برای نمایش/مخفی کردن منو */
+.menu-hover-trigger {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+}
+
+.menu-hover-trigger:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+}
+
+.menu-hover-trigger .line {
+    width: 24px;
+    height: 2px;
+    background-color: white;
+    margin: 3px 0;
+    transition: all 0.3s ease;
+}
+
+/* حالت‌های مختلف منو */
+.sidebar {
+    position: fixed;
+    right: -250px; /* منو خارج از صفحه */
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+    transition: right 0.3s ease, opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 999;
+    overflow-y: auto;
+}
+
+/* وقتی ماوس روی دایره است، منو نمایش داده شود */
+.menu-hover-trigger:hover ~ .sidebar,
+.sidebar:hover {
+    right: 0;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* حالت پین شده */
+.sidebar.pinned {
+    right: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important; /* حذف transition در حالت پین */
+}
+
+/* کانتینر لوگو و دکمه پین */
+.logo-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 70px;
+}
+
+/* دکمه پین */
+.pin-toggle {
+    position: absolute;
+    left: 20px; /* فاصله از سمت چپ */
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    z-index: 2;
+}
+
+.pin-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.pin-toggle.pinned {
+    background: #4CAF50;
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.pin-toggle.pinned i {
+    color: white;
+}
+
+/* لوگو */
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.logo i {
+    font-size: 2rem;
+    margin-left: 10px;
+    color: #1abc9c;
+}
+
+.logo h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+/* منوی ناوبری */
+.nav-menu {
+    flex: 1;
+    padding: 20px 0;
+    overflow-y: auto;
+}
+
+.nav-section {
+    margin-bottom: 25px;
+}
+
+.nav-section h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0 20px 10px;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.nav-section h3:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-section h3 i {
+    margin-left: 8px;
+    font-size: 0.9rem;
+}
+
+.nav-section h3 i.chevron {
+    margin-right: auto;
+    margin-left: 10px;
+    font-size: 0.8rem;
+    transition: transform 0.3s;
+}
+
+.nav-section.active h3 i.chevron {
+    transform: rotate(180deg);
+}
+
+.nav-section ul {
+    list-style: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-section.active ul {
+    max-height: 500px;
+}
+
+.nav-section li {
+    padding: 8px 20px;
+}
+
+.nav-section li a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    position: relative;
+}
+
+/* رنگ برای لینک فعال */
+.nav-section li a.active-link {
+    background-color: #1abc9c;
+    color: white;
+    font-weight: 600;
+}
+
+.nav-section li a.active-link::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background-color: white;
+    border-radius: 3px 0 0 3px;
+}
+
+/* رنگ برای هاور */
+.nav-section li a:hover:not(.active-link) {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-section li a i {
+    margin-left: 10px;
+    font-size: 1.1rem;
+}
+
+.badge {
+    background-color: #e74c3c;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: auto;
+}
+
+/* پایین سایدبار */
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+}
+
+.sidebar-footer a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.sidebar-footer a:hover {
+    color: white;
+}
+
+.sidebar-footer a i {
+    margin-left: 5px;
+}
+
+/* Overlay برای موبایل */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 998;
+}
+
+/* برای نمایش سایدبار هنگام هور در حالت غیرپین */
+.sidebar:not(.pinned) {
+    opacity: 0;
+    visibility: hidden;
+    right: -250px;
+}
+
+/* رسپانسیو */
+@media (max-width: 992px) {
+    .menu-hover-trigger {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .menu-hover-trigger .line {
+        width: 20px;
+    }
+    
+    .sidebar {
+        width: 280px;
+    }
+    
+    .sidebar.pinned {
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    .menu-hover-trigger {
+        display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-hover-trigger {
+        top: 15px;
+        right: 15px;
+    }
+    
+    .logo-container {
+        padding: 15px;
+    }
+    
+    .logo i {
+        font-size: 1.8rem;
+    }
+    
+    .logo h2 {
+        font-size: 1.3rem;
+    }
+}
+
+
+/* --- اضافه شده برای رفع مشکل چشمک زدن --- */
+
+/* وقتی بادی کلاس sidebar-pinned دارد، سایدبار باید فوراً دیده شود */
+body.sidebar-pinned .sidebar {
+    right: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important; /* حذف انیمیشن در لحظه لود */
+}
+
+/* تنظیم محتوای اصلی */
+body.sidebar-pinned .main-content {
+    margin-right: 250px !important;
+    width: calc(100% - 250px) !important;
+    transition: none !important;
+}
+
+/* مخفی کردن دکمه دایره‌ای */
+body.sidebar-pinned .menu-hover-trigger {
+    display: none !important;
+}
+
+/* رنگ دکمه پین وقتی فعال است */
+body.sidebar-pinned .pin-toggle {
+    background: #4CAF50;
+    transform: translateY(-50%) rotate(45deg);
+}
+
+
+
+/* --- شروع کد مربوط به انتقال نوار اسکرول به سمت چپ صفحه نمایش --- */
+/* --- دستورات زیر باعث می شود در صفحاتی که محتویات طولانی دارند ، نوار اسکرول در سمت چپ صفحه نمایش داده شود ---*/
+/* --- اگر می خواهید نوار اسکرول سمت راست نشان داده شود کدهای زیر را حذف کنید --- */
+/* --- اصلاح سیستم اسکرول برای جلوگیری از جابجایی صفحه --- */
+
+/* 1. حذف اسکرول از کل مرورگر */
+html, body {
+    height: 100%;
+    overflow: hidden !important; /* نوار اسکرول اصلی مرورگر را حذف می‌کند */
+}
+
+/* 2. اختصاص اسکرول فقط به محتوای اصلی */
+.main-content {
+    height: 100vh; /* ارتفاع تمام صفحه */
+    overflow-y: auto; /* اگر محتوا زیاد بود اسکرول بخورد */
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
+    /* استایل دادن به نوار اسکرول (اختیاری - برای زیبایی بیشتر در کروم) */
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f1f5f9;
+}
+
+/* 3. تنظیم دقیق عرض و موقعیت در حالت پین شده */
+body.sidebar-pinned .main-content {
+    margin-right: 250px !important;
+    /* عرض محتوا را محاسبه می‌کنیم تا اسکرول‌بار دقیقاً کنار سایدبار نیفتد */
+    width: calc(100% - 250px) !important; 
+    transition: none !important;
+}
+
+/* استایل سفارشی نوار اسکرول (برای مرورگرهای وبکیت مثل کروم و اج) */
+.main-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 4px;
+    border: 2px solid #f1f5f9;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}
+/* --- پایان کد مربوط به انتقال نوار اسکرول به سمت چپ صفحه نمایش --- */

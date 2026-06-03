@@ -1,0 +1,127 @@
+<!-- sidebar.html -->
+<!-- دایره آبی برای نمایش منو با hover -->
+<div class="menu-hover-trigger">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+</div>
+
+<!-- نوار کناری -->
+<aside class="sidebar">
+    <!-- بخش لوگو همراه با دکمه پین -->
+    <div class="logo-container">
+        <!-- دکمه پین در سمت چپ -->
+        <button class="pin-toggle" id="pinToggle" title="ثابت کردن منو">
+            <i class="fas fa-thumbtack"></i>
+        </button>
+        
+        <!-- لوگو -->
+        <div class="logo">
+            <i class="fas fa-cogs"></i>
+            <h2>CMMS</h2>
+        </div>
+    </div>
+
+    <nav class="nav-menu">
+        <div class="nav-section">
+            <h3>
+                <i class="fas fa-home"></i>
+                <span>داشبورد</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </h3>
+            <ul>
+                <li><a href="../dashboard/dashboard.html" class="menu-link"><i class="fas fa-tachometer-alt"></i> نمای کلی</a></li>
+                <li><a href="../dashboard/notifications.html" class="menu-link"><i class="fas fa-bell"></i> اعلان‌ها <span class="badge notification-sidebar-badge" id="sidebarNotificationBadge">0</span></a></li>
+                <li><a href="../dashboard/calendar.html" class="menu-link"><i class="fas fa-calendar-check"></i> تقویم</a></li>
+            </ul>
+        </div>
+        
+        <div class="nav-section">
+            <h3>
+                <i class="fas fa-clipboard-list"></i>
+                <span>فرم‌ها</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </h3>
+            <ul>
+                
+                <li><a href="../forms/Non-compliance.html" class="menu-link"><i class="fas fa-Non-compliance"></i> گزارش عدم انطباق</a></li>
+                <li><a href="../forms/shortage-report.html" class="menu-link"><i class="fas fa-exclamation-triangle"></i> گزارش کسری قطعات</a></li>
+                <li><a href="../forms/work-request.html" class="menu-link"><i class="fas fa-tools"></i> درخواست خرید</a></li>
+                <li><a href="../forms/preventive-maintenance.html" class="menu-link"><i class="fas fa-calendar-alt"></i> اقدام اصلاحی و پیشگیرانه</a></li>
+                <li><a href="../forms/periodic-inspection.html" class="menu-link"><i class="fas fa-search"></i> تعیین تکلیف اقلام نامنطبق</a></li>
+                <li><a href="../forms/work-completion.html" class="menu-link"><i class="fas fa-check-circle"></i> کلیم قطعات</a></li>
+                <li><a href="../forms/safety-checklist.html" class="menu-link"><i class="fas fa-shield-alt"></i> چک‌لیست ایمنی</a></li>
+                <li><a href="../forms/forms-list.html" class="menu-link"><i class="fas fa-list"></i> همه فرم‌ها</a></li>
+            </ul>
+        </div>
+
+
+            <div class="nav-section">
+                <h3>
+                    <i class="fas fa-tasks"></i>
+                    <span>مدیریت</span>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </h3>
+                <ul>
+                    <li><a href="../management/work-orders.html" class="menu-link"><i class="fas fa-clipboard-check"></i> دستورکارها</a></li>
+                    <li><a href="../management/equipment.html" class="menu-link"><i class="fas fa-industry"></i> تجهیزات</a></li>
+                    <li><a href="../management/personnel.html" class="menu-link"><i class="fas fa-users"></i> پرسنل</a></li>
+                    <li><a href="../management/inventory.html" class="menu-link"><i class="fas fa-boxes"></i> انبار</a></li>
+                    <li><a href="../management/vendors.html" class="menu-link"><i class="fas fa-handshake"></i> تأمین‌کنندگان</a></li>
+                    <li><a href="../management/users.html" class="menu-link"><i class="fas fa-users-cog"></i> مدیریت کاربران</a></li>
+                </ul>
+            </div>
+
+        <!-- ********کدهای اضافی که در صورت نیاز با تغییر آنها می توان استفاده نمود*********
+            <div class="nav-section">
+                <h3>
+                    <i class="fas fa-tasks"></i>
+                    <span>گزارش‌گیری</span>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </h3>
+                <ul>
+                    <li><a href="../reports/performance.html" class="menu-link"><i class="fas fa-chart-bar"></i> عملکرد</a></li>
+                    <li><a href="../reports/downtime.html" class="menu-link"><i class="fas fa-clock"></i> زمان توقف</a></li>
+                    <li><a href="../reports/costs.html" class="menu-link"><i class="fas fa-money-bill-wave"></i> هزینه‌ها</a></li>
+                    <li><a href="../reports/preventive.html" class="menu-link"><i class="fas fa-calendar-check"></i> PM برنامه</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3>
+                    <i class="fas fa-tasks"></i>
+                    <span> برنامه‌ریزی</span>
+                    <i class="fas fa-chevron-down chevron"></i>                    
+                </h3>
+                <ul>
+                    <li><a href="../planning/schedule.html" class="menu-link"><i class="fas fa-calendar-day"></i> برنامه زمانی</a></li>
+                    <li><a href="../planning/preventive.html" class="menu-link"><i class="fas fa-tasks"></i> برنامه PM</a></li>
+                    <li><a href="../planning/shutdown.html" class="menu-link"><i class="fas fa-power-off"></i> توقف خط</a></li>
+                    <li><a href="../planning/resources.html" class="menu-link"><i class="fas fa-user-cog"></i> منابع</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3>
+                    <i class="fas fa-tasks"></i>
+                    <span> مستندات</span>
+                    <i class="fas fa-chevron-down chevron"></i>                    
+                </h3>
+                <ul>
+                    <li><a href="../procedures/instructions.html" class="menu-link"><i class="fas fa-book"></i> دستورالعمل‌ها</a></li>
+                    <li><a href="../procedures/procedures.html" class="menu-link"><i class="fas fa-list-ol"></i> رویه‌ها</a></li>
+                    <li><a href="../procedures/checklists.html" class="menu-link"><i class="fas fa-check-square"></i> چک‌لیست‌ها</a></li>
+                    <li><a href="../procedures/safety.html" class="menu-link"><i class="fas fa-shield-alt"></i> ایمنی</a></li>
+                    <li><a href="../procedures/manuals.html" class="menu-link"><i class="fas fa-book-open"></i> کاتالوگ‌ها</a></li>
+                </ul>
+            </div>
+
+        -->        
+    </nav>
+   
+    <div class="sidebar-footer">
+        <a href="../management/settings.html" class="menu-link"><i class="fas fa-cog"></i> تنظیمات</a>
+        <a href="../help.html" class="menu-link"><i class="fas fa-question-circle"></i> راهنما</a>
+    </div>
+
+</aside>
