@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم جامع نگهداری و تعمیرات (CMMS)</title>
+
+    <!-- استایل‌های اصلی -->
+    <link rel="stylesheet" href="../css/style.css">
+    <!-- استایل‌های سایدبار -->
+    <link rel="stylesheet" href="../sidebar/sidebar.css">
+    <!-- آیکون ها 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">-->
+    <!-- فونت‌ها 
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">-->
+    
+    <!-- استفاده از کتابخانه محلی-->
+    <link rel="stylesheet" href="../libs/font-awesome-Pro.6.7.2/web/css/all.min.css">
+    <link rel="stylesheet" href="../css/vazirmatn.css">
+
+    <style>
+        /* استایل‌های فوتر */
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .footer p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+
+
+        /* استایل‌های جدید برای داده‌های داینامیک */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-assigned {
+            background-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+
+        .status-scheduled {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .status-in-progress {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .status-pending {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .status-completed {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-upcoming {
+            background-color: var(--purple-color);
+            color: white;
+        }
+
+        /* کلاس‌های اولویت */
+        .priority-critical {
+            border-right: 4px solid var(--danger-color);
+        }
+
+        .priority-high {
+            border-right: 4px solid var(--warning-color);
+        }
+
+        .priority-medium {
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .priority-low {
+            border-right: 4px solid var(--info-color);
+        }
+
+        /* وضعیت تجهیزات */
+        .status-normal {
+            border-right: 3px solid var(--success-color);
+        }
+
+        .status-warning {
+            border-right: 3px solid var(--warning-color);
+        }
+
+        .status-critical {
+            border-right: 3px solid var(--danger-color);
+        }
+
+        /* نشانگر خواندن/نخواندن اعلان */
+        .notification-item.unread {
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .notification-item.unread::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        /* هایلایت کارت‌ها هنگام هاور */
+        .work-order-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .preventive-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* وضعیت‌های برنامه پیشگیرانه */
+        .status-scheduled {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .status-in-progress {
+            background-color: #fff3e0;
+            color: #f57c00;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #388e3c;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .status-upcoming {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* انیمیشن بارگذاری */
+        @keyframes pulse {
+            /* کد زیر برای کدر و روشن کردن می باشد */
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+
+            /* برای ایجاد حالت بزرگ نمایی (کوچک و بزرگ شدن) کد زیر را فعال کنید
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }  */
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;  
+        }
+
+        
+        
+        /*-----------------------------------------------*/
+        /* استایل‌های loading */
+        .loading-placeholder {
+            padding: 1rem;
+        }
+
+        .placeholder-line {
+            height: 20px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            border-radius: 4px;
+            margin: 10px 0;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: -20px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+        /*---------------------------------------*/
+        
+
+
+
+
+
+/* استایل‌های آمارهای کلیدی */
+.key-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.metric-info {
+    flex: 1;
+}
+
+.metric-info h3 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.metric-value-text {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    line-height: 1;
+}
+
+.metric-change {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.metric-change.up {
+    color: #10b981;
+}
+
+.metric-change.down {
+    color: #ef4444;
+}
+
+/* رنگ‌های پس‌زمینه */
+.bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.bg-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.bg-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+/*------------------------------*/
+
+
+/* به بخش استایل‌های موجود اضافه کنید */
+
+.performance-charts .chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.chart-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.chart-stat {
+    text-align: center;
+    padding: 0 15px;
+}
+
+.chart-stat .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.chart-stat .stat-label {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+}
+
+.time-filter select {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.time-filter select:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+/* استایل برای نمایش وضعیت لودینگ */
+.loading-chart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #666;
+    font-size: 16px;
+}
+
+.loading-chart i {
+    margin-left: 10px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </style>
+</head>
+
+    <!-- اسکریپت دریافت داده‌های داشبورد از API -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // بررسی احراز هویت
+        if (!Auth.requireAuth()) {
+            return;
+        }
+
+        // تعریف توابع کمکی
+        function getPriorityClass(priority) {
+            const map = {
+                'urgent': 'priority-critical',
+                'critical': 'priority-critical',
+                'high': 'priority-high',
+                'medium': 'priority-medium',
+                'low': 'priority-low'
+            };
+            return map[priority] || 'priority-medium';
+        }
+        
+        function getStatusClass(status) {
+            const map = {
+                'assigned': 'status-assigned',
+                'scheduled': 'status-scheduled',
+                'in progress': 'status-in-progress',
+                'pending': 'status-pending',
+                'completed': 'status-completed'
+            };
+            return map[status] || 'status-pending';
+        }
+        
+        function getStatusText(status) {
+            const map = {
+                'assigned': 'تخصیص یافته',
+                'scheduled': 'برنامه‌ریزی شده',
+                'in progress': 'در حال انجام',
+                'pending': 'در انتظار',
+                'completed': 'تکمیل شده'
+            };
+            return map[status] || 'نامشخص';
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'بدون تاریخ';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fa-IR');
+        }
+        
+        function getDayName(dateString) {
+            if (!dateString) return '';
+            const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+            const date = new Date(dateString);
+            return days[date.getDay()];
+        }
+        
+        function formatPersianDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fa-IR');
+        }
+        
+        function getMaintenanceStatusClass(status) {
+            const map = {
+                'scheduled': 'status-scheduled',
+                'in progress': 'status-in-progress',
+                'completed': 'status-completed',
+                'upcoming': 'status-upcoming'
+            };
+            return map[status] || 'status-scheduled';
+        }
+        
+        function getMaintenanceStatusText(status) {
+            const map = {
+                'scheduled': 'برنامه‌ریزی شده',
+                'in progress': 'در حال انجام',
+                'completed': 'تکمیل شده',
+                'upcoming': 'آینده'
+            };
+            return map[status] || 'برنامه‌ریزی شده';
+        }
+        
+        function getEquipmentStatusClass(status) {
+            const map = {
+                'operational': 'status-normal',
+                'under maintenance': 'status-warning',
+                'out of service': 'status-critical',
+                'decommissioned': 'status-critical'
+            };
+            return map[status] || 'status-normal';
+        }
+        
+        function getEquipmentIconClass(status) {
+            const map = {
+                'operational': 'fa-check-circle',
+                'under maintenance': 'fa-exclamation-triangle',
+                'out of service': 'fa-times-circle',
+                'decommissioned': 'fa-times-circle'
+            };
+            return map[status] || 'fa-check-circle';
+        }
+        
+        function getNotificationIconClass(type) {
+            const map = {
+                'delay': 'fa-tools',
+                'inventory': 'fa-box',
+                'preventive': 'fa-calendar-alt',
+                'safety': 'fa-user-check'
+            };
+            return map[type] || 'fa-bell';
+        }
+        
+        function formatTimeAgo(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 60) {
+                return `${diffMins} دقیقه پیش`;
+            } else if (diffHours < 24) {
+                return `${diffHours} ساعت پیش`;
+            } else {
+                return `${diffDays} روز پیش`;
+            }
+        }
+
+        // تابع آپدیت آمارهای کلیدی
+        function updateKeyMetrics(data) {
+            console.log('داده‌های آمارها دریافت شد:', data);
+            
+            const metricCards = document.querySelectorAll('.metric-card');
+            
+            const metricConfigs = [
+                { key: 'active_work_orders', label: 'دستورکارهای فعال' },
+                { key: 'completed_this_week', label: 'تکمیل‌شده این هفته' },
+                { key: 'high_priority', label: 'اولویت بالا' },
+                { key: 'delayed', label: 'تأخیر در انجام' },
+                { key: 'active_equipment', label: 'تجهیزات فعال' },
+                { key: 'availability_rate', label: 'درصد در دسترس بودن' }
+            ];
+            
+            metricCards.forEach((card, index) => {
+                const config = metricConfigs[index];
+                const metricKey = config.key;
+                
+                const valueContainer = card.querySelector('.metric-value');
+                
+                if (valueContainer && data[metricKey] !== undefined) {
+                    valueContainer.innerHTML = '';
+                    valueContainer.className = 'metric-value';
+                    
+                    const valueSpan = document.createElement('div');
+                    valueSpan.className = 'metric-value-text';
+                    
+                    if (metricKey === 'availability_rate') {
+                        valueSpan.textContent = `${data[metricKey]}%`;
+                    } else {
+                        valueSpan.textContent = data[metricKey];
+                    }
+                    
+                    valueContainer.appendChild(valueSpan);
+                }
+                
+                const changeElement = card.querySelector('.metric-change');
+                if (changeElement) {
+                    const changes = [
+                        '+۲ از دیروز',
+                        '+۸ از هفته قبل', 
+                        '-۳ از دیروز',
+                        'بدون تغییر',
+                        'همه در حال کار',
+                        '+۰.۴٪'
+                    ];
+                    
+                    changeElement.textContent = changes[index] || '';
+                    changeElement.className = 'metric-change';
+                    
+                    if (changes[index] && changes[index].startsWith('+')) {
+                        changeElement.classList.add('up');
+                    } else if (changes[index] && changes[index].startsWith('-')) {
+                        changeElement.classList.add('down');
+                    }
+                }
+                
+                card.classList.remove('loading');
+            });
+        }
+
+        // تابع آپدیت دستورکارهای فوری
+        function updateUrgentWorkOrders(data) {
+            const container = document.querySelector('.work-order-list');
+            if (!container || !Array.isArray(data)) return;
+            
+            container.innerHTML = '';
+            
+            data.slice(0, 3).forEach(order => {
+                const priorityClass = getPriorityClass(order.priority);
+                const statusClass = getStatusClass(order.status);
+                const statusText = getStatusText(order.status);
+                
+                const orderHTML = `
+                    <div class="work-order-item ${priorityClass}">
+                        <div class="work-order-id">${order.work_order_number || 'بدون شماره'}</div>
+                        <div class="work-order-title">${order.work_description || 'بدون عنوان'}</div>
+                        <div class="work-order-meta">
+                            <span><i class="fas fa-industry"></i> ${order.location || 'تعیین نشده'}</span>
+                            <span><i class="fas fa-user"></i> ${order.assigned_to || 'تخصیص داده نشده'}</span>
+                            <span><i class="fas fa-clock"></i> ${formatDate(order.planned_start_date)}</span>
+                        </div>
+                        <div class="work-order-status">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML += orderHTML;
+            });
+        }
+        
+        // تابع آپدیت برنامه پیشگیرانه
+        function updatePreventiveSchedule(data) {
+            const container = document.querySelector('.preventive-list');
+            if (!container || !Array.isArray(data)) return;
+            
+            container.innerHTML = '';
+            
+            data.slice(0, 3).forEach(item => {
+                const statusClass = getMaintenanceStatusClass(item.status);
+                const statusText = getMaintenanceStatusText(item.status);
+                const date = formatPersianDate(item.maintenance_date);
+                
+                const itemHTML = `
+                    <div class="preventive-item">
+                        <div class="preventive-date">
+                            <span class="day">${getDayName(item.maintenance_date)}</span>
+                            <span class="date">${date}</span>
+                        </div>
+                        <div class="preventive-details">
+                            <h3>${item.procedure_name || 'بدون عنوان'}</h3>
+                            <p>${item.equipment_name || ''} - ${item.location || ''}</p>
+                            <div class="preventive-meta">
+                                <span><i class="fas fa-clock"></i> ${item.planned_start_time || '08:00'}</span>
+                                <span><i class="fas fa-user"></i> ${item.assigned_team || 'تیم تعمیرات'}</span>
+                                <span class="${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML += itemHTML;
+            });
+        }
+        
+        // تابع آپدیت تجهیزات بحرانی
+        function updateCriticalEquipment(data) {
+            const container = document.querySelector('.equipment-status');
+            if (!container || !Array.isArray(data)) return;
+            
+            container.innerHTML = '';
+            
+            data.slice(0, 5).forEach(equipment => {
+                const statusClass = getEquipmentStatusClass(equipment.status);
+                const iconClass = getEquipmentIconClass(equipment.status);
+                const days = equipment.days_since_last_maintenance || 0;
+                
+                const equipmentHTML = `
+                    <div class="equipment-item ${statusClass}">
+                        <div class="equipment-name">
+                            <i class="fas ${iconClass}"></i>
+                            <span>${equipment.equipment_name || 'بدون نام'}</span>
+                        </div>
+                        <div class="equipment-info">
+                            <span>${equipment.location || ''}</span>
+                            <span>${days} روز از آخرین سرویس</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML += equipmentHTML;
+            });
+        }
+        
+        // تابع آپدیت اعلان‌ها
+        function updateNotifications(data) {
+            const container = document.querySelector('.notification-list');
+            if (!container || !Array.isArray(data)) return;
+            
+            container.innerHTML = '';
+            
+            data.slice(0, 4).forEach(notification => {
+                const iconClass = getNotificationIconClass(notification.type);
+                
+                const notificationHTML = `
+                    <div class="notification-item">
+                        <div class="notification-icon">
+                            <i class="fas ${iconClass}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <p>${notification.message || 'بدون پیام'}</p>
+                            <span class="notification-time">${formatTimeAgo(notification.notification_time)}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML += notificationHTML;
+            });
+        }
+
+        // تابع اصلی برای آپدیت نمودار - باید period را به عنوان پارامتر بگیرد
+        function updatePerformanceChart(period) {
+            console.log(`درخواست داده‌های نمودار برای دوره: ${period}`);
+            
+            const chartContainer = document.querySelector('.chart-container');
+            if (chartContainer) {
+                chartContainer.innerHTML = '<div class="loading-chart"><i class="fas fa-spinner fa-spin"></i> در حال بارگذاری نمودار...</div>';
+            }
+            
+            fetch(`../api/dashboard_api.php?action=get_chart_data&period=${period}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('خطا در دریافت داده‌های نمودار');
+                    }
+                    return response.json();
+                })
+                .then(chartData => {
+                    console.log('داده‌های نمودار دریافت شد:', chartData);
+                    
+                    if (!chartData.labels || !chartData.datasets) {
+                        throw new Error('ساختار داده‌های نمودار نامعتبر است');
+                    }
+
+                    if (chartContainer) {
+                        chartContainer.innerHTML = '';
+                        const canvas = document.createElement('canvas');
+                        canvas.id = 'performanceChart';
+                        chartContainer.appendChild(canvas);
+                    }
+
+                    if (window.performanceChart instanceof Chart) {
+                        window.performanceChart.destroy();
+                    }
+                    
+                    const ctx = document.getElementById('performanceChart');
+                    
+                    if (!ctx) {
+                        console.error('عنصر canvas نمودار پیدا نشد');
+                        return;
+                    }
+                    
+                    const options = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                rtl: true,
+                                labels: {
+                                    font: {
+                                        family: 'Vazirmatn',
+                                        size: 12
+                                    },
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                rtl: true,
+                                titleFont: {
+                                    family: 'Vazirmatn'
+                                },
+                                bodyFont: {
+                                    family: 'Vazirmatn'
+                                },
+                                usePointStyle: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.dataset.label.includes('درصد')) {
+                                            label += context.parsed.y + '%';
+                                        } else if (context.dataset.label.includes('ساعت')) {
+                                            label += context.parsed.y + ' ساعت';
+                                        } else {
+                                            label += context.parsed.y;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    font: {
+                                        family: 'Vazirmatn',
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'تعداد کارها',
+                                    font: {
+                                        family: 'Vazirmatn'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Vazirmatn'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'میانگین زمان (ساعت)',
+                                    font: {
+                                        family: 'Vazirmatn'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Vazirmatn'
+                                    }
+                                },
+                                grid: {
+                                    drawOnChartArea: false,
+                                },
+                            },
+                            y2: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'نرخ به موقع (%)',
+                                    font: {
+                                        family: 'Vazirmatn'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Vazirmatn'
+                                    },
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: {
+                                    drawOnChartArea: false,
+                                },
+                            }
+                        }
+                    };
+                    
+                    try {
+                        window.performanceChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: chartData.labels,
+                                datasets: chartData.datasets.map((dataset, index) => ({
+                                    label: dataset.label,
+                                    data: dataset.data,
+                                    backgroundColor: dataset.backgroundColor,
+                                    borderColor: dataset.borderColor,
+                                    borderWidth: dataset.borderWidth || 2,
+                                    pointBackgroundColor: dataset.borderColor,
+                                    pointBorderColor: '#fff',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 6,
+                                    pointHoverRadius: 8,
+                                    fill: true,
+                                    tension: 0.2,
+                                    yAxisID: dataset.yAxisID || 'y'
+                                }))
+                            },
+                            options: options
+                        });
+                        
+                        updateChartStats(chartData);
+                        updateChartTitle(period);
+                        
+                    } catch (error) {
+                        console.error('خطا در ایجاد نمودار:', error);
+                        if (chartContainer) {
+                            chartContainer.innerHTML = `
+                                <div style="height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666;">
+                                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px; color: #ff9800;"></i>
+                                    <p>خطا در ایجاد نمودار</p>
+                                    <small>${error.message}</small>
+                                </div>
+                            `;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('خطا در دریافت داده‌های نمودار:', error);
+                    
+                    if (chartContainer) {
+                        chartContainer.innerHTML = `
+                            <div style="height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px; color: #ff9800;"></i>
+                                <p>خطا در بارگذاری نمودار</p>
+                                <small>${error.message}</small>
+                                <button onclick="loadSampleChartData('${period}')" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    نمایش داده‌های نمونه
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+        }
+
+        // تابع آپدیت آمارهای کنار نمودار
+        function updateChartStats(chartData) {
+            const statsContainer = document.querySelector('.chart-stats');
+            if (!statsContainer || !chartData.datasets) return;
+            
+            const completionData = chartData.datasets[0].data;
+            const durationData = chartData.datasets[1].data;
+            const onTimeData = chartData.datasets[2].data;
+            
+            const totalCompletion = completionData.length > 0 ? 
+                completionData.reduce((a, b) => a + b, 0) : 0;
+            
+            const validOnTimeData = onTimeData.filter(val => val > 0);
+            const avgOnTime = validOnTimeData.length > 0 ? 
+                Math.round(validOnTimeData.reduce((a, b) => a + b, 0) / validOnTimeData.length) : 0;
+            
+            const validDurationData = durationData.filter(val => val > 0);
+            const avgDuration = validDurationData.length > 0 ? 
+                (validDurationData.reduce((a, b) => a + b, 0) / validDurationData.length).toFixed(1) : 0;
+            
+            statsContainer.innerHTML = `
+                <div class="chart-stat">
+                    <div class="stat-value">${totalCompletion}</div>
+                    <div class="stat-label">کل کارهای تکمیل شده</div>
+                </div>
+                <div class="chart-stat">
+                    <div class="stat-value">${avgOnTime}%</div>
+                    <div class="stat-label">میانگین نرخ انجام به موقع</div>
+                </div>
+                <div class="chart-stat">
+                    <div class="stat-value">${avgDuration}</div>
+                    <div class="stat-label">میانگین زمان (ساعت)</div>
+                </div>
+            `;
+        }
+
+        // تابع آپدیت عنوان نمودار
+        function updateChartTitle(period) {
+            const titleMap = {
+                'current_month': 'ماه جاری',
+                'last_month': 'ماه قبل',
+                'three_months': 'سه ماهه اخیر',
+                'current_year': 'سال جاری'
+            };
+            
+            const chartTitle = document.querySelector('.performance-charts .section-header h2');
+            if (chartTitle) {
+                chartTitle.innerHTML = `<i class="fas fa-chart-bar"></i> عملکرد ${titleMap[period] || 'ماه جاری'}`;
+            }
+        }
+
+        // تابع اصلی بارگذاری داده‌های داشبورد
+        function loadDashboardData() {
+            console.log('شروع بارگذاری داده‌های داشبورد');
+            
+            const apiUrl = '../api/dashboard_api.php';
+            
+            // دریافت دوره زمانی فعلی
+            const timeFilter = document.querySelector('.time-filter select');
+            const period = timeFilter ? timeFilter.value : 'current_month';
+            
+            // لیست اکشن‌های مورد نیاز
+            const actions = [
+                'get_key_metrics',
+                'get_urgent_work_orders', 
+                'get_preventive_schedule',
+                'get_critical_equipment',
+                'get_notifications'
+            ];
+            
+            // دریافت همه داده‌ها به صورت موازی
+            const promises = actions.map(action => {
+                console.log(`درخواست ${action} ارسال شد`);
+                return fetch(`${apiUrl}?action=${action}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(`داده‌های ${action}:`, data);
+                        return data;
+                    })
+                    .catch(error => {
+                        console.error(`خطا در دریافت ${action}:`, error);
+                        return [];
+                    });
+            });
+            
+            Promise.all(promises).then(results => {
+                console.log('همه نتایج دریافت شد:', results);
+                
+                const [
+                    metricsData,
+                    urgentOrdersData,
+                    preventiveData,
+                    equipmentData,
+                    notificationsData
+                ] = results;
+                
+                if (metricsData && !metricsData.error) {
+                    updateKeyMetrics(metricsData);
+                }
+                    
+                if (urgentOrdersData && !urgentOrdersData.error) {
+                    updateUrgentWorkOrders(urgentOrdersData);
+                }
+                
+                if (preventiveData && !preventiveData.error) {
+                    updatePreventiveSchedule(preventiveData);
+                }
+                
+                if (equipmentData && !equipmentData.error) {
+                    updateCriticalEquipment(equipmentData);
+                }
+                
+                if (notificationsData && !notificationsData.error) {
+                    updateNotifications(notificationsData);
+                }
+            });
+            
+            // بارگذاری نمودار با دوره زمانی انتخاب شده
+            updatePerformanceChart(period);
+        }
+
+        // ---------- تنظیم رویدادها ----------
+        
+        // رویداد تغییر select فیلتر زمان
+        const timeFilter = document.querySelector('.time-filter select');
+        if (timeFilter) {
+            timeFilter.addEventListener('change', function() {
+                console.log('فیلتر زمان تغییر کرد به:', this.value);
+                updatePerformanceChart(this.value);
+            });
+        }
+        
+        // بارگذاری اولیه داده‌ها
+        loadDashboardData();
+        
+        // بارگذاری مجدد هر 5 دقیقه
+        setInterval(loadDashboardData, 300000);
+    });
+    </script>
+
+    <body>
+    <!-- این خط برای تعریف آدرس مسیر صفحه در هدر است که در تمام صفحات متناسب با خود صفحه نوشته می شود -->
+    <body data-page-title="داشبورد" data-breadcrumb="خانه|../dashboard/dashboard.html,نمای کلی">   
+    
+        <!-- بارگذاری سایدبار -->
+        <div id="sidebar-container"></div>
+
+        <!-- محتوای اصلی -->
+        <main class="main-content">
+
+    <!-- آمارهای کلیدی -->
+    <section class="key-metrics">
+        <div class="metric-card">
+            <div class="metric-icon bg-primary">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="metric-info">
+                <h3>دستورکارهای فعال</h3>
+                <div class="metric-value loading-placeholder">
+                    <div class="placeholder-line" style="width: 50px; height: 30px"></div>
+                </div>
+                <div class="metric-change">در حال بارگذاری...</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon bg-success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="metric-info">
+                <h3>تکمیل‌شده این هفته</h3>
+                <div class="metric-value loading-placeholder">
+                    <div class="placeholder-line" style="width: 50px; height: 30px"></div>
+                </div>
+                <div class="metric-change">در حال بارگذاری...</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon bg-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="metric-info">
+                <h3>اولویت بالا</h3>
+                <div class="metric-value loading-placeholder">
+                    <div class="placeholder-line" style="width: 50px; height: 30px"></div>
+                </div>
+                <div class="metric-change">در حال بارگذاری...</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon bg-danger">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="metric-info">
+                <h3>تأخیر در انجام</h3>
+                <div class="metric-value loading-placeholder">
+                    <div class="placeholder-line" style="width: 50px; height: 30px"></div>
+                </div>
+                <div class="metric-change">در حال بارگذاری...</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon bg-info">
+                <i class="fas fa-industry"></i>
+            </div>
+            <div class="metric-info">
+                <h3>تجهیزات فعال</h3>
+                <div class="metric-value loading-placeholder">
+                    <div class="placeholder-line" style="width: 50px; height: 30px"></div>
+                </div>
+                <div class="metric-change">در حال بارگذاری...</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon bg-secondary">
+                <i class="fas fa-percentage"></i>
+            </div>
+            <div class="metric-info">
+                <h3>درصد در دسترس بودن</h3>
+                <div class="metric-value loading-placeholder">
+                    <div class="placeholder-line" style="width: 50px; height: 30px"></div>
+                </div>
+                <div class="metric-change">در حال بارگذاری...</div>
+            </div>
+        </div>
+    </section>
+
+            <!-- بخش‌های اصلی داشبورد -->
+            <div class="dashboard-grid">
+                <!-- دستورکارهای فوری -->
+                <section class="dashboard-section urgent-work-orders">
+                    <div class="section-header">
+                        <h2><i class="fas fa-exclamation-circle"></i> دستورکارهای فوری</h2>
+                        <a href="../management/work-orders.html" class="view-all">مشاهده همه</a>
+                    </div>
+                    <div class="section-content">
+                        <div class="work-order-list loading">
+                            <!-- بارگذاری... -->
+                            <div class="loading-placeholder">
+                                <div class="placeholder-line" style="width: 80%"></div>
+                                <div class="placeholder-line" style="width: 60%"></div>
+                                <div class="placeholder-line" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- برنامه پیشگیرانه -->
+                <section class="dashboard-section preventive-schedule">
+                    <div class="section-header">
+                        <h2><i class="fas fa-calendar-check"></i> برنامه پیشگیرانه این هفته</h2>
+                        <a href="../planning/preventive.html" class="view-all">مشاهده همه</a>
+                    </div>
+                    <div class="section-content">
+                        <div class="preventive-list loading">
+                            <!-- بارگذاری... -->
+                            <div class="loading-placeholder">
+                                <div class="placeholder-line" style="width: 85%"></div>
+                                <div class="placeholder-line" style="width: 65%"></div>
+                                <div class="placeholder-line" style="width: 75%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- نمودارهای عملکرد -->
+                <section class="dashboard-section performance-charts">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-bar"></i> عملکرد ماهانه</h2>
+                        <div class="time-filter">
+                            <select>
+                                <option value="current_month">ماه جاری</option>
+                                <option value="last_month">ماه قبل</option>
+                                <option value="three_months">سه ماهه</option>
+                                <option value="current_year">سال جاری</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                        <div class="chart-stats">
+                            <div class="chart-stat">
+                                <div class="stat-value">۹۵%</div>
+                                <div class="stat-label">نرخ تکمیل</div>
+                            </div>
+                            <div class="chart-stat">
+                                <div class="stat-value">۸۷%</div>
+                                <div class="stat-label">انجام به موقع</div>
+                            </div>
+                            <div class="chart-stat">
+                                <div class="stat-value">۱۲.۴</div>
+                                <div class="stat-label">میانگین زمان (ساعت)</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- تجهیزات بحرانی -->
+                <section class="dashboard-section critical-equipment">
+                    <div class="section-header">
+                        <h2><i class="fas fa-industry"></i> وضعیت تجهیزات بحرانی</h2>
+                        <a href="../management/equipment.html" class="view-all">مشاهده همه</a>
+                    </div>
+                    <div class="section-content">
+                        <div class="equipment-status loading">
+                            <!-- بارگذاری... -->
+                            <div class="loading-placeholder">
+                                <div class="placeholder-line" style="width: 90%"></div>
+                                <div class="placeholder-line" style="width: 70%"></div>
+                                <div class="placeholder-line" style="width: 80%"></div>
+                                <div class="placeholder-line" style="width: 85%"></div>
+                                <div class="placeholder-line" style="width: 75%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- اقدامات سریع -->
+                <section class="dashboard-section quick-actions">
+                    <div class="section-header">
+                        <h2><i class="fas fa-bolt"></i> اقدامات سریع</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="action-buttons">
+                            <a href="../forms/work-request.html" class="action-btn">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>درخواست کار جدید</span>
+                            </a>
+                            <a href="../forms/failure-report.html" class="action-btn">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>گزارش خرابی</span>
+                            </a>
+                            <a href="../forms/periodic-inspection.html" class="action-btn">
+                                <i class="fas fa-clipboard-check"></i>
+                                <span>ثبت بازرسی</span>
+                            </a>
+                            <a href="../forms/work-completion.html" class="action-btn">
+                                <i class="fas fa-check-double"></i>
+                                <span>تکمیل دستورکار</span>
+                            </a>
+                            <a href="../management/inventory.html" class="action-btn">
+                                <i class="fas fa-box-open"></i>
+                                <span>درخواست قطعه</span>
+                            </a>
+                            <a href="../reports/performance.html" class="action-btn">
+                                <i class="fas fa-chart-pie"></i>
+                                <span>گزارش فوری</span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- اعلان‌ها و پیام‌ها -->
+                <section class="dashboard-section notifications">
+                    <div class="section-header">
+                        <h2><i class="fas fa-bell"></i> اعلان‌ها</h2>
+                        <button class="mark-all-read">علامت‌خوانده شده</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="notification-list loading">
+                            <!-- بارگذاری... -->
+                            <div class="loading-placeholder">
+                                <div class="placeholder-line" style="width: 95%"></div>
+                                <div class="placeholder-line" style="width: 85%"></div>
+                                <div class="placeholder-line" style="width: 90%"></div>
+                                <div class="placeholder-line" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+                
+        </main>
+
+        <!-- عنوان در هدر صفحه -->
+        <meta name="page-title" content="داشبورد سیستم نگهداری و تعمیرات">
+        
+        <!-- اسکرسپت ها -->
+
+        <!-- اسکریپت بارگذاری منوی کناری یا سایدبار-->
+        <script>
+            // 1. اجرای فوری: قبل از هر چیزی چک کن آیا پین است؟
+            // اگر بله، کلاس را به بادی اضافه کن تا CSS فوراً اعمال شود
+            (function() {
+                const isPinned = localStorage.getItem('sidebarPinned') === 'true';
+                if (isPinned) {
+                    document.body.classList.add('sidebar-pinned');
+                }
+            })();
+
+            // تابع تزریق HTML
+            function injectSidebarHTML(html) {
+                const container = document.getElementById('sidebar-container');
+                if (container.querySelector('.sidebar')) return;
+
+                container.innerHTML = html;
+                executeSidebarScript();
+            }
+
+            function loadSidebar() {
+                // 2. تلاش برای خواندن از کش (سرعت بالا)
+                const cachedHTML = localStorage.getItem('sidebarHTML_Cache');
+                if (cachedHTML) {
+                    injectSidebarHTML(cachedHTML);
+                }
+
+                // 3. دانلود در پس‌زمینه برای آپدیت
+                fetch('../sidebar/sidebar.html?v=' + Date.now())
+                    .then(response => response.text())
+                    .then(html => {
+                        // اگر کش نبود، الان نمایش بده
+                        if (!cachedHTML) {
+                            injectSidebarHTML(html);
+                        }
+                        // آپدیت کش
+                        if (html !== cachedHTML) {
+                            localStorage.setItem('sidebarHTML_Cache', html);
+                        }
+                    })
+                    .catch(console.error);
+            }
+            
+            function executeSidebarScript() {
+                const existingScript = document.querySelector('script[src*="../sidebar/sidebar.js"]');
+                if (existingScript) existingScript.remove();
+                
+                const script = document.createElement('script');
+                script.src = '../sidebar/sidebar.js?v=' + Date.now();
+                script.async = false;
+                document.body.appendChild(script);
+            }
+            
+            // اجرا
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', loadSidebar);
+            } else {
+                loadSidebar();
+            }
+        </script>
+        
+        <!-- کتابخانه Chart.js - برای نمایش نمودار
+        در صورت نیاز به بارگذاری آنلاین این کتابخانه ، اجرای آفلاین را با قرار دادن علامت نت 
+        (علامت کوچکتر و تعجب و 2 تا خط تیره) 
+        غیر فعال کنید و علامت نت را از انتهای اجرای آنلاین بردارید و انتهای همین متن قرار دهید. 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>   -->
+ 
+        <!-- اجرای آفلاین -->
+        <script src="../libs/node_modules/chart.js/dist/chart.umd.min.js"></script>    
+
+        <!-- داده‌های نمونه -->
+        <script src="../data/sample-data.js"></script>
+
+        <!-- اسکریپت Logout -->> 
+        <script src="../js/auth.js"></script>
+        <!-- اسکریپت هدر -->
+        <script src="../components/pages-header/header.js"></script>
+        <!-- اسکریپت فوتر -->
+        <script src="../components/pages-footer/footer.js"></script>
+
+        <!-- اسکریپت اصلی -->
+        <script src="../js/main.js"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // بررسی احراز هویت
+                if (!Auth.requireAuth()) {
+                    return;
+                }
+                
+                // تنظیم Logout Button
+                const logoutBtn = document.querySelector('.logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function() {
+                        if (confirm('آیا از خروج از سیستم اطمینان دارید؟')) {
+                            Auth.logout();
+                            window.location.href = '../login.html';
+                        }
+                    });
+                }
+                
+                // نمایش اطلاعات کاربر
+                const user = Auth.getUser();
+                if (user) {
+                    const userNameElement = document.querySelector('.user-name');
+                    const userRoleElement = document.querySelector('.user-role');
+                    
+                    if (userNameElement) {
+                        userNameElement.textContent = user.fullname || user.username;
+                    }
+                    if (userRoleElement) {
+                        userRoleElement.textContent = user.role;
+                    }
+                }
+            });
+        </script>
+
+
+
+    </body>
+</html>

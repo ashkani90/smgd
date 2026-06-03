@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اعلان‌ها - سیستم جامع نگهداری و تعمیرات</title>
+    
+    <!-- استایل‌های اصلی -->
+    <link rel="stylesheet" href="../css/style.css">
+    <!-- استایل‌های سایدبار -->
+    <link rel="stylesheet" href="../sidebar/sidebar.css">
+    
+    <!-- استفاده از کتابخانه محلی-->
+    <link rel="stylesheet" href="../libs/font-awesome-Pro.6.7.2/web/css/all.min.css">
+    <link rel="stylesheet" href="../css/vazirmatn.css">
+
+    <style>
+        /* استایل‌های اختصاصی صفحه اعلان‌ها */
+        .notifications-page {
+            padding: 20px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .page-header h1 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+        }
+        
+        .page-header h1 i {
+            margin-left: 10px;
+            color: #3498db;
+        }
+        
+        .notification-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .notification-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-box input {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 250px;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .search-box button {
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .notifications-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .notification-item {
+            display: flex;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .notification-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .notification-item.unread {
+            background: #f0f8ff;
+            border-right: 3px solid #3498db;
+        }
+        
+        .notification-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-size: 1.2rem;
+            color: #555;
+            flex-shrink: 0;
+        }
+        
+        .notification-icon.critical {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .notification-icon.high {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .notification-icon.medium {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .notification-icon.low {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+        
+        .notification-content {
+            flex: 1;
+            min-width: 0; /* برای truncate متن */
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .notification-message {
+            color: #555;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        
+        .notification-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 0.85rem;
+            color: #777;
+            flex-wrap: wrap;
+        }
+        
+        .notification-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .notification-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .mark-read-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        
+        .mark-read-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .mark-read-btn.read {
+            background: #e8f5e8;
+            color: #388e3c;
+            border-color: #388e3c;
+        }
+        
+        .notification-priority {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .priority-critical {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .priority-high {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .priority-medium {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .priority-low {
+            background-color: #e8f5e8;
+            color: #388e3c;
+        }
+        
+        .notification-type {
+            background: #eee;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+        
+        .no-notifications {
+            text-align: center;
+            padding: 50px 20px;
+            color: #777;
+        }
+        
+        .no-notifications i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .notification-count {
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: #3498db;
+        }
+
+        .loading-spinner i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            gap: 10px;
+        }
+
+        .pagination-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: #f0f0f0;
+        }
+
+        .pagination-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* استایل‌های مربوط به فیلترها */
+        .filter-btn {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .filter-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .filter-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        /* استایل‌های مربوط به دکمه‌ها */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #7f8c8d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219653;
+        }
+
+        /* استایل‌های برای انتخاب دسته‌جمعی */
+        .bulk-actions {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .bulk-actions.show {
+            display: flex;
+        }
+
+        .select-all-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* استایل‌های برای مرتب‌سازی */
+        .sort-options {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sort-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sort-btn.active {
+            background: #f0f0f0;
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            .notification-item {
+                flex-direction: column;
+            }
+            
+            .notification-icon {
+                margin: 0 0 15px 0;
+            }
+            
+            .notification-actions {
+                margin-top: 15px;
+                justify-content: flex-start;
+            }
+            
+            .notification-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .notification-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .notification-filters {
+                justify-content: center;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+        }
+
+        /* استایل‌های مربوط به فونت وزین */
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('../libs/vazirmatn/Vazirmatn-VariableFont_wght.ttf') format('truetype');
+            font-weight: 100 900;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+
+
+/* شروع استایل tooltip */
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-wrapper .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%; /* بالای دکمه */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.85rem;
+    font-weight: normal;
+    pointer-events: none;
+}
+
+.tooltip-wrapper .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* برای موقعیت‌های مختلف */
+.tooltip-wrapper.top .tooltip-text {
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tooltip-wrapper.bottom .tooltip-text {
+    top: 125%;
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tooltip-wrapper.right .tooltip-text {
+    left: 125%;
+    top: 50%;
+    transform: translateY(-50%);
+    bottom: auto;
+}
+
+.tooltip-wrapper.left .tooltip-text {
+    right: 125%;
+    top: 50%;
+    transform: translateY(-50%);
+    bottom: auto;
+    left: auto;
+}
+/* پایان استایل tooltip */
+
+
+
+
+
+    </style>
+</head>
+
+<body>
+    <!-- تعریف آدرس مسیر صفحه -->
+    <body data-page-title="اعلان‌ها و هشدارهای سیستم" data-breadcrumb="خانه|../dashboard/dashboard.html,اعلان‌ها">  
+
+    <!-- بارگذاری سایدبار -->
+    <div id="sidebar-container"></div>
+
+    <!-- محتوای اصلی -->
+    <main class="main-content">
+
+        <!-- محتوای صفحه اعلان‌ها -->
+        <div class="notifications-page">
+            <div class="page-header">
+                <h1><i class="fas fa-bell"></i> اعلان‌های سیستم</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" id="markAllRead">
+                        <i class="fas fa-check-double"></i> علامت‌گذاری همه
+                    </button>
+                    <button class="btn btn-secondary" id="refreshNotifications">
+                        <i class="fas fa-sync-alt"></i> بروزرسانی
+                    </button>
+                    <button class="btn btn-danger" id="deleteAllRead">
+                        <i class="fas fa-trash"></i> حذف خوانده‌شده‌ها
+                    </button>
+                </div>
+            </div>
+            
+            <!-- اقدامات دسته‌جمعی -->
+            <div class="bulk-actions" id="bulkActions">
+                <div class="select-all-checkbox">
+                    <input type="checkbox" id="selectAllNotifications">
+                    <label for="selectAllNotifications">انتخاب همه</label>
+                </div>
+                <span id="selectedCount">0 مورد انتخاب شده</span>
+                <button class="btn btn-success" id="markSelectedRead">
+                    <i class="fas fa-check"></i> علامت خوانده شده
+                </button>
+                <button class="btn btn-danger" id="deleteSelected">
+                    <i class="fas fa-trash"></i> حذف انتخاب‌ها
+                </button>
+                <button class="btn btn-secondary" id="cancelBulk">
+                    لغو
+                </button>
+            </div>
+            
+            <div class="notification-controls">
+                <div class="notification-filters">
+                    <button class="filter-btn active" data-filter="all">همه اعلان‌ها</button>
+                    <button class="filter-btn" data-filter="unread">خوانده نشده</button>
+                    <button class="filter-btn" data-filter="read">خوانده شده</button>
+                    <button class="filter-btn" data-filter="critical">بحرانی</button>
+                    <button class="filter-btn" data-filter="high">اولویت بالا</button>
+                    <button class="filter-btn" data-filter="maintenance_request">درخواست تعمیر</button>
+                    <button class="filter-btn" data-filter="work_order">دستورکار</button>
+                    <button class="filter-btn" data-filter="equipment">تجهیزات</button>
+                    <button class="filter-btn" data-filter="parts">قطعات</button>
+                    <button class="filter-btn" data-filter="system">سیستم</button>
+                </div>
+                
+                <div class="sort-options">
+                    <button class="sort-btn" data-sort="newest" id="sortNewest">
+                        <i class="fas fa-sort-amount-down"></i> جدیدترین
+                    </button>
+                    <button class="sort-btn" data-sort="oldest" id="sortOldest">
+                        <i class="fas fa-sort-amount-up"></i> قدیمی‌ترین
+                    </button>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="searchNotifications" placeholder="جستجو در اعلان‌ها...">
+                    <button id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="notifications-container">
+                <div class="notification-header">
+                    <h3>اعلان‌های شما</h3>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span class="notification-count" id="unreadCount">در حال بارگذاری...</span>
+                        <button class="btn btn-secondary" id="bulkSelectBtn">
+                            <i class="fas fa-tasks"></i> انتخاب دسته‌ای
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="notification-list" id="notificationList">
+                    <!-- اعلان‌ها به صورت داینامیک لود می‌شوند -->
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner"></i>
+                        <p>در حال بارگذاری اعلان‌ها...</p>
+                    </div>
+                </div>
+
+                <!-- صفحه‌بندی -->
+                <div class="pagination" id="pagination" style="display: none;">
+                    <button class="pagination-btn" id="prevPage" disabled>قبلی</button>
+                    <span id="pageInfo">صفحه 1</span>
+                    <button class="pagination-btn" id="nextPage" disabled>بعدی</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- اسکریپت‌ها -->
+    <!-- اسکریپت بارگذاری سایدبار -->
+    <script>
+        (function() {
+            const isPinned = localStorage.getItem('sidebarPinned') === 'true';
+            if (isPinned) {
+                document.body.classList.add('sidebar-pinned');
+            }
+        })();
+
+        function injectSidebarHTML(html) {
+            const container = document.getElementById('sidebar-container');
+            if (container.querySelector('.sidebar')) return;
+            container.innerHTML = html;
+            executeSidebarScript();
+        }
+
+        function loadSidebar() {
+            const cachedHTML = localStorage.getItem('sidebarHTML_Cache');
+            if (cachedHTML) {
+                injectSidebarHTML(cachedHTML);
+            }
+
+            fetch('../sidebar/sidebar.html?v=' + Date.now())
+                .then(response => response.text())
+                .then(html => {
+                    if (!cachedHTML) injectSidebarHTML(html);
+                    if (html !== cachedHTML) localStorage.setItem('sidebarHTML_Cache', html);
+                })
+                .catch(console.error);
+        }
+        
+        function executeSidebarScript() {
+            const existingScript = document.querySelector('script[src*="../sidebar/sidebar.js"]');
+            if (existingScript) existingScript.remove();
+            const script = document.createElement('script');
+            script.src = '../sidebar/sidebar.js?v=' + Date.now();
+            script.async = false;
+            document.body.appendChild(script);
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSidebar);
+        } else {
+            loadSidebar();
+        }
+    </script>
+
+    <!-- اسکریپت اصلی -->
+    <script src="../js/main.js"></script>
+
+    <!-- اسکریپت هدر -->
+    <script src="../components/pages-header/header.js"></script>
+    <!-- اسکریپت فوتر -->
+    <script src="../components/pages-footer/footer.js"></script>
+
+
+    <!-- اسکریپت‌های اختصاصی صفحه اعلان‌ها -->
+    <script>
+        class NotificationManager {
+            constructor() {
+                this.currentPage = 1;
+                this.limit = 20;
+                this.totalNotifications = 0;
+                this.currentFilter = 'all';
+                this.searchTerm = '';
+                this.sortBy = 'newest';
+                this.isLoading = false;
+                this.selectedNotifications = new Set();
+                this.bulkMode = false;
+                this.currentUserId = null;
+                this.currentUserRole = null;
+                
+                this.init();
+            }
+            
+
+
+            
+            init() {
+                this.getCurrentUser();
+                this.bindEvents();
+                this.loadNotifications();
+                this.setupAutoRefresh();
+                this.highlightActiveMenu();
+            }
+            
+            getCurrentUser() {
+                try {
+                    const userData = localStorage.getItem('user');
+                    if (userData) {
+                        const user = JSON.parse(userData);
+                        this.currentUserId = user.id || user.user_id || user.userId;
+                        this.currentUserRole = user.role || 'operator';
+                    }
+                    
+                    if (!this.currentUserId) {
+                        console.error('کاربر وارد سیستم نشده است');
+                        window.location.href = '../login.html';
+                    }
+                } catch (error) {
+                    console.error('خطا در دریافت اطلاعات کاربر:', error);
+                }
+            }
+            
+            bindEvents() {
+                // فیلترها
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentFilter = e.target.dataset.filter;
+                        this.currentPage = 1;
+                        this.loadNotifications();
+                    });
+                });
+                
+                // مرتب‌سازی
+                document.getElementById('sortNewest').addEventListener('click', () => {
+                    this.sortBy = 'newest';
+                    document.getElementById('sortNewest').classList.add('active');
+                    document.getElementById('sortOldest').classList.remove('active');
+                    this.loadNotifications();
+                });
+                
+                document.getElementById('sortOldest').addEventListener('click', () => {
+                    this.sortBy = 'oldest';
+                    document.getElementById('sortOldest').classList.add('active');
+                    document.getElementById('sortNewest').classList.remove('active');
+                    this.loadNotifications();
+                });
+                
+                // جستجو
+                document.getElementById('searchBtn').addEventListener('click', () => this.handleSearch());
+                document.getElementById('searchNotifications').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleSearch();
+                });
+                
+                // دکمه‌های صفحه
+                document.getElementById('markAllRead').addEventListener('click', () => this.markAllAsRead());
+                document.getElementById('refreshNotifications').addEventListener('click', () => this.loadNotifications());
+                document.getElementById('deleteAllRead').addEventListener('click', () => this.deleteAllRead());
+                document.getElementById('prevPage').addEventListener('click', () => this.changePage(-1));
+                document.getElementById('nextPage').addEventListener('click', () => this.changePage(1));
+                document.getElementById('bulkSelectBtn').addEventListener('click', () => this.toggleBulkMode());
+                
+                // اقدامات دسته‌جمعی
+                document.getElementById('selectAllNotifications').addEventListener('change', (e) => this.toggleSelectAll(e.target.checked));
+                document.getElementById('markSelectedRead').addEventListener('click', () => this.markSelectedAsRead());
+                document.getElementById('deleteSelected').addEventListener('click', () => this.deleteSelected());
+                document.getElementById('cancelBulk').addEventListener('click', () => this.cancelBulkMode());
+                
+                // بروزرسانی دوره‌ای
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        this.loadNotifications();
+                    }
+                });
+                
+                // همگام‌سازی با سیستم اعلان‌های هوشمند
+                if (window.SmartNotificationManager) {
+                    console.log('SmartNotificationManager detected, syncing...');
+                }
+            }
+            
+            
+            
+            handleSearch() {
+                this.searchTerm = document.getElementById('searchNotifications').value.trim();
+                this.currentPage = 1;
+                this.loadNotifications();
+            }
+            
+            setupAutoRefresh() {
+                // هر 2 دقیقه یکبار اعلان‌ها را بروزرسانی کن
+                setInterval(() => {
+                    if (!document.hidden && !this.isLoading) {
+                        this.loadNotifications();
+                    }
+                }, 120000); // 2 دقیقه
+            }
+            
+            async loadNotifications() {
+                if (!this.currentUserId) {
+                    this.showError('لطفاً ابتدا وارد سیستم شوید');
+                    return;
+                }
+                
+                if (this.isLoading) return;
+                
+                this.isLoading = true;
+                this.showLoading();
+                
+                try {
+                    const offset = (this.currentPage - 1) * this.limit;
+                    const params = new URLSearchParams({
+                        user_id: this.currentUserId,
+                        limit: this.limit,
+                        offset: offset
+                    });
+                    
+                    // اعمال فیلترها
+                    if (this.currentFilter === 'unread') {
+                        params.append('unread_only', 'true');
+                    } else if (this.currentFilter === 'read') {
+                        params.append('read_only', 'true');
+                    } else if (['critical', 'high', 'medium', 'low'].includes(this.currentFilter)) {
+                        params.append('priority', this.currentFilter);
+                    } else if (this.currentFilter !== 'all') {
+                        params.append('type', this.currentFilter);
+                    }
+                    
+                    // اعمال مرتب‌سازی
+                    params.append('sort', this.sortBy);
+                    
+                    // اعمال جستجو
+                    if (this.searchTerm) {
+                        params.append('search', this.searchTerm);
+                    }
+                    
+                    const response = await fetch(`../api/notifications.php?${params}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderNotifications(data.data);
+                        this.updatePagination(data.total || data.data.length);
+                        this.updateUnreadCount(data.unread_count || this.countUnread(data.data));
+                        this.updateStats(data);
+                    } else {
+                        this.showError(data.error || 'خطا در دریافت اعلان‌ها');
+                    }
+                } catch (error) {
+                    console.error('خطا:', error);
+                    this.showError('خطا در ارتباط با سرور');
+                    // بارگذاری داده‌های نمونه در صورت خطا
+                    this.loadSampleNotifications();
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+            
+            renderNotifications(notifications) {
+                const container = document.getElementById('notificationList');
+                
+                if (!notifications || notifications.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-notifications">
+                            <i class="far fa-bell-slash"></i>
+                            <h3>هیچ اعلانی یافت نشد</h3>
+                            <p>${this.searchTerm ? 'نتیجه‌ای برای جستجوی شما یافت نشد.' : 'در حال حاضر هیچ اعلانی برای نمایش وجود ندارد.'}</p>
+                            ${this.searchTerm ? '<button class="btn btn-primary" onclick="notificationManager.clearSearch()" style="margin-top: 15px;">پاک کردن جستجو</button>' : ''}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = notifications.map(notification => `
+                    <div class="notification-item ${notification.is_read == '0' ? 'unread' : ''}" 
+                         data-id="${notification.id}" 
+                         data-selected="false"
+                         onclick="notificationManager.handleNotificationClick(event, ${notification.id}, ${notification.related_id || 0}, '${notification.related_module || ''}')">
+                        ${this.bulkMode ? `
+                            <div class="notification-checkbox" onclick="event.stopPropagation()">
+                                <input type="checkbox" class="notification-select" data-id="${notification.id}" 
+                                    ${this.selectedNotifications.has(notification.id) ? 'checked' : ''}
+                                    onchange="notificationManager.toggleNotificationSelection(${notification.id}, this.checked)">
+                            </div>
+                        ` : ''}
+                        <div class="notification-icon ${notification.priority || 'medium'}">
+                            ${this.getNotificationIcon(notification.type, notification.priority)}
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">
+                                <span>${this.escapeHtml(notification.title || 'بدون عنوان')}</span>
+                                <span class="notification-priority priority-${notification.priority || 'medium'}">
+                                    ${this.getPriorityText(notification.priority)}
+                                </span>
+                            </div>
+                            <div class="notification-message">${this.escapeHtml(notification.message || 'بدون متن')}</div>
+                            <div class="notification-meta">
+                                <span class="notification-time">
+                                    <i class="far fa-clock"></i> ${this.formatDate(notification.created_at)}
+                                </span>
+                                <span class="notification-type">${this.getTypeText(notification.type)}</span>
+                                ${notification.sender_name ? `<span>ارسال توسط: ${this.escapeHtml(notification.sender_name)}</span>` : ''}
+                                ${notification.sender_role ? `<span>نقش: ${this.escapeHtml(notification.sender_role)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="notification-actions" onclick="event.stopPropagation()">
+                            ${notification.is_read == '0' ? `
+                                <div class="tooltip-wrapper" title="علامت‌گذاری به عنوان خوانده شده">
+                                    <button class="mark-read-btn" onclick="notificationManager.markAsRead(${notification.id})">
+                                        <i class="fas fa-check"></i> علامت خوانده شده
+                                    </button>
+                                    <span class="tooltip-text">
+                                        این اعلان را به عنوان خوانده شده علامت‌گذاری کنید.<br>
+                                        اعلان‌های خوانده شده از لیست خوانده نشده‌ها حذف می‌شوند.
+                                    </span>
+                                </div>
+                            ` : `
+                                <div class="tooltip-wrapper" title="برگشت به حالت خوانده نشده">
+                                    <button class="mark-read-btn read" onclick="notificationManager.markAsUnread(${notification.id})">
+                                        <i class="fas fa-undo"></i> علامت خوانده نشده
+                                    </button>
+                                    <span class="tooltip-text">
+                                        این اعلان را به حالت خوانده نشده برگردانید.<br>
+                                        اعلان دوباره در لیست خوانده نشده‌ها ظاهر می‌شود.
+                                    </span>
+                                </div>
+                            `}
+                            <button class="mark-read-btn" onclick="notificationManager.deleteNotification(${notification.id})" style="color: #e74c3c; border-color: #e74c3c;">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            getNotificationIcon(type, priority) {
+                const priorityIcons = {
+                    'critical': '<i class="fas fa-exclamation-circle"></i>',
+                    'high': '<i class="fas fa-exclamation-triangle"></i>',
+                    'medium': '<i class="fas fa-info-circle"></i>',
+                    'low': '<i class="fas fa-info"></i>'
+                };
+                
+                const typeIcons = {
+                    'maintenance_request': '<i class="fas fa-tools"></i>',
+                    'work_order': '<i class="fas fa-clipboard-list"></i>',
+                    'inspection': '<i class="fas fa-search"></i>',
+                    'equipment': '<i class="fas fa-cogs"></i>',
+                    'parts': '<i class="fas fa-box"></i>',
+                    'alert': '<i class="fas fa-exclamation"></i>',
+                    'system': '<i class="fas fa-server"></i>'
+                };
+                
+                if (priority && priorityIcons[priority]) {
+                    return priorityIcons[priority];
+                }
+                
+                return typeIcons[type] || '<i class="fas fa-bell"></i>';
+            }
+            
+            getPriorityText(priority) {
+                const translations = {
+                    'low': 'پایین',
+                    'medium': 'متوسط',
+                    'high': 'بالا',
+                    'critical': 'بحرانی'
+                };
+                return translations[priority] || priority;
+            }
+            
+            getTypeText(type) {
+                const translations = {
+                    'maintenance_request': 'درخواست تعمیر',
+                    'work_order': 'دستورکار',
+                    'inspection': 'بازرسی',
+                    'equipment': 'تجهیزات',
+                    'parts': 'قطعات',
+                    'alert': 'هشدار',
+                    'system': 'سیستم'
+                };
+                return translations[type] || type;
+            }
+            
+            formatDate(dateString) {
+                if (!dateString) return 'نامشخص';
+                
+                try {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+                    
+                    if (diffMins < 1) return 'همین الان';
+                    if (diffMins < 60) return `${diffMins} دقیقه پیش`;
+                    if (diffHours < 24) return `${diffHours} ساعت پیش`;
+                    if (diffDays < 30) return `${diffDays} روز پیش`;
+                    
+                    return date.toLocaleDateString('fa-IR');
+                } catch (error) {
+                    return dateString;
+                }
+            }
+            
+            async markAsRead(notificationId) {
+                if (!this.currentUserId) return;
+                
+                try {
+                    const response = await fetch('../api/notifications.php?action=mark-read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: notificationId,
+                            user_id: this.currentUserId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // به‌روزرسانی UI
+                        const notificationElement = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
+                        if (notificationElement) {
+                            notificationElement.classList.remove('unread');
+                            const markBtn = notificationElement.querySelector('.mark-read-btn');
+                            if (markBtn) {
+                                markBtn.innerHTML = '<i class="fas fa-undo"></i> علامت خوانده نشده';
+                                markBtn.classList.add('read');
+                                markBtn.onclick = () => this.markAsUnread(notificationId);
+                            }
+                        }
+
+                        // به‌روزرسانی شمارنده
+                        await this.loadNotifications();
+                        
+                        // به‌روزرسانی timestamp در دیتابیس
+                        if (data.notification && data.notification.read_at) {
+                            console.log('تاریخ خوانده شدن در دیتابیس ذخیره شد:', data.notification.read_at);
+                        }
+                        
+                        this.showSuccess('اعلان با موفقیت خوانده شد');
+                        
+                        // همگام‌سازی با سیستم هوشمند
+                        this.syncWithSmartSystem();
+                    } else {
+                        this.showError(data.error || 'خطا در علامت‌گذاری اعلان');
+                    }
+                } catch (error) {
+                    console.error('خطا در علامت‌گذاری اعلان:', error);
+                    this.showError('خطا در ارتباط با سرور');
+                }
+            }
+
+            async markAsUnread(notificationId) {
+                if (!this.currentUserId) return;
+                
+                try {
+                    const response = await fetch('../api/notifications.php?action=mark-unread', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: notificationId,
+                            user_id: this.currentUserId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // به‌روزرسانی UI
+                        const notificationElement = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
+                        if (notificationElement) {
+                            notificationElement.classList.add('unread');
+                            const markBtn = notificationElement.querySelector('.mark-read-btn');
+                            if (markBtn) {
+                                markBtn.innerHTML = '<i class="fas fa-check"></i> علامت خوانده شده';
+                                markBtn.classList.remove('read');
+                                markBtn.onclick = () => this.markAsRead(notificationId);
+                            }
+                        }
+
+                        // به‌روزرسانی شمارنده
+                        await this.loadNotifications();
+                        
+                        // به‌روزرسانی timestamp در دیتابیس
+                        if (data.notification && !data.notification.read_at) {
+                            console.log('تاریخ خوانده شدن در دیتابیس پاک شد');
+                        }
+                        
+                        this.showSuccess('اعلان با موفقیت به حالت خوانده نشده تغییر یافت');
+                        
+                        // همگام‌سازی با سیستم هوشمند
+                        this.syncWithSmartSystem();
+                    } else {
+                        this.showError(data.error || 'خطا در تغییر وضعیت اعلان');
+                    }
+                } catch (error) {
+                    console.error('خطا در تغییر وضعیت اعلان:', error);
+                    this.showError('خطا در ارتباط با سرور');
+                }
+            }
+                        
+            async markAllAsRead() {
+                if (!this.currentUserId) return;
+                
+                if (!confirm('آیا از علامت‌گذاری همه اعلان‌ها به عنوان خوانده شده اطمینان دارید؟')) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('../api/notifications.php?action=mark-all-read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: this.currentUserId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showSuccess(`${data.affected_rows || 0} اعلان علامت‌گذاری شد`);
+                        this.loadNotifications();
+                        this.syncWithSmartSystem();
+                    }
+                } catch (error) {
+                    console.error('خطا در علامت‌گذاری همه اعلان‌ها:', error);
+                    this.showError('خطا در انجام عملیات');
+                }
+            }
+            
+            async deleteNotification(notificationId) {
+                if (!this.currentUserId) return;
+                
+                if (!confirm('آیا از حذف این اعلان اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('../api/notifications.php?action=delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: notificationId,
+                            user_id: this.currentUserId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showSuccess('اعلان با موفقیت حذف شد');
+                        this.loadNotifications();
+                    }
+                } catch (error) {
+                    console.error('خطا در حذف اعلان:', error);
+                    this.showError('خطا در انجام عملیات');
+                }
+            }
+            
+            async deleteAllRead() {
+                if (!this.currentUserId) return;
+                
+                if (!confirm('آیا از حذف همه اعلان‌های خوانده شده اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('../api/notifications.php?action=delete-read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: this.currentUserId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showSuccess(`${data.deleted_count || 0} اعلان حذف شد`);
+                        this.loadNotifications();
+                    }
+                } catch (error) {
+                    console.error('خطا در حذف اعلان‌های خوانده شده:', error);
+                    this.showError('خطا در انجام عملیات');
+                }
+            }
+            
+            handleNotificationClick(event, notificationId, relatedId, relatedModule) {
+                // اگر در حالت bulk هستیم، فقط انتخاب را تغییر بده
+                if (this.bulkMode) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const checkbox = event.currentTarget.querySelector('.notification-select');
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        this.toggleNotificationSelection(notificationId, checkbox.checked);
+                    }
+                    return;
+                }
+                
+                // اول اعلان را علامت خوانده شده بزن
+                this.markAsRead(notificationId);
+                
+                // سپس بر اساس ماژول مرتبط کاربر را هدایت کن
+                this.navigateToRelatedModule(relatedId, relatedModule);
+            }
+            
+            navigateToRelatedModule(relatedId, relatedModule) {
+                if (!relatedId || !relatedModule) return;
+                
+                const routes = {
+                    'maintenance_requests': `../maintenance/request-details.html?id=${relatedId}`,
+                    'work_orders': `../maintenance/work-order-details.html?id=${relatedId}`,
+                    'equipments': `../equipment/equipment-details.html?id=${relatedId}`,
+                    'spare_parts': `../inventory/part-details.html?id=${relatedId}`,
+                    'inspection_reports': `../inspection/report-details.html?id=${relatedId}`,
+                    'activity_logs': `../reports/activity-logs.html`
+                };
+                
+                const route = routes[relatedModule];
+                if (route) {
+                    window.location.href = route;
+                }
+            }
+            
+            toggleBulkMode() {
+                this.bulkMode = !this.bulkMode;
+                const bulkActions = document.getElementById('bulkActions');
+                const bulkSelectBtn = document.getElementById('bulkSelectBtn');
+                
+                if (this.bulkMode) {
+                    bulkActions.classList.add('show');
+                    bulkSelectBtn.innerHTML = '<i class="fas fa-times"></i> لغو انتخاب دسته‌ای';
+                    bulkSelectBtn.classList.add('btn-danger');
+                    
+                    // اضافه کردن چک‌باکس‌ها
+                    this.renderNotificationsWithCheckboxes();
+                } else {
+                    bulkActions.classList.remove('show');
+                    bulkSelectBtn.innerHTML = '<i class="fas fa-tasks"></i> انتخاب دسته‌ای';
+                    bulkSelectBtn.classList.remove('btn-danger');
+                    this.selectedNotifications.clear();
+                    this.updateSelectedCount();
+                    
+                    // حذف چک‌باکس‌ها
+                    this.loadNotifications();
+                }
+            }
+            
+            renderNotificationsWithCheckboxes() {
+                const container = document.getElementById('notificationList');
+                const currentHTML = container.innerHTML;
+                
+                // اضافه کردن چک‌باکس‌ها به HTML موجود
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = currentHTML;
+                
+                tempDiv.querySelectorAll('.notification-item').forEach(item => {
+                    const id = item.dataset.id;
+                    const checkboxHTML = `
+                        <div class="notification-checkbox" onclick="event.stopPropagation()">
+                            <input type="checkbox" class="notification-select" data-id="${id}" 
+                                ${this.selectedNotifications.has(parseInt(id)) ? 'checked' : ''}
+                                onchange="notificationManager.toggleNotificationSelection(${id}, this.checked)">
+                        </div>
+                    `;
+                    item.insertAdjacentHTML('afterbegin', checkboxHTML);
+                });
+                
+                container.innerHTML = tempDiv.innerHTML;
+            }
+            
+            toggleNotificationSelection(id, isSelected) {
+                if (isSelected) {
+                    this.selectedNotifications.add(id);
+                } else {
+                    this.selectedNotifications.delete(id);
+                }
+                this.updateSelectedCount();
+            }
+            
+            toggleSelectAll(isChecked) {
+                const checkboxes = document.querySelectorAll('.notification-select');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                    const id = parseInt(checkbox.dataset.id);
+                    if (isChecked) {
+                        this.selectedNotifications.add(id);
+                    } else {
+                        this.selectedNotifications.delete(id);
+                    }
+                });
+                this.updateSelectedCount();
+            }
+            
+            updateSelectedCount() {
+                const selectedCount = document.getElementById('selectedCount');
+                if (selectedCount) {
+                    selectedCount.textContent = `${this.selectedNotifications.size} مورد انتخاب شده`;
+                }
+            }
+            
+            async markSelectedAsRead() {
+                if (this.selectedNotifications.size === 0) {
+                    this.showError('لطفاً حداقل یک اعلان را انتخاب کنید');
+                    return;
+                }
+                
+                if (!confirm(`آیا از علامت‌گذاری ${this.selectedNotifications.size} اعلان انتخاب شده به عنوان خوانده شده اطمینان دارید؟`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('../api/notifications.php?action=mark-multiple-read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ids: Array.from(this.selectedNotifications),
+                            user_id: this.currentUserId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showSuccess(`${data.affected_rows || 0} اعلان علامت‌گذاری شد`);
+                        this.selectedNotifications.clear();
+                        this.updateSelectedCount();
+                        this.loadNotifications();
+                        this.syncWithSmartSystem();
+                    }
+                } catch (error) {
+                    console.error('خطا در علامت‌گذاری اعلان‌های انتخاب شده:', error);
+                    this.showError('خطا در انجام عملیات');
+                }
+            }
+            
+            async deleteSelected() {
+                if (this.selectedNotifications.size === 0) {
+                    this.showError('لطفاً حداقل یک اعلان را انتخاب کنید');
+                    return;
+                }
+                
+                if (!confirm(`آیا از حذف ${this.selectedNotifications.size} اعلان انتخاب شده اطمینان دارید؟ این عمل قابل بازگشت نیست.`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('../api/notifications.php?action=delete-multiple', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ids: Array.from(this.selectedNotifications),
+                            user_id: this.currentUserId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showSuccess(`${data.deleted_count || 0} اعلان حذف شد`);
+                        this.selectedNotifications.clear();
+                        this.updateSelectedCount();
+                        this.loadNotifications();
+                    }
+                } catch (error) {
+                    console.error('خطا در حذف اعلان‌های انتخاب شده:', error);
+                    this.showError('خطا در انجام عملیات');
+                }
+            }
+            
+            cancelBulkMode() {
+                this.toggleBulkMode();
+            }
+            
+            clearSearch() {
+                document.getElementById('searchNotifications').value = '';
+                this.searchTerm = '';
+                this.loadNotifications();
+            }
+            
+            changePage(direction) {
+                const newPage = this.currentPage + direction;
+                if (newPage < 1) return;
+                
+                const maxPage = Math.ceil(this.totalNotifications / this.limit);
+                if (newPage > maxPage) return;
+                
+                this.currentPage = newPage;
+                this.loadNotifications();
+            }
+            
+            updatePagination(total) {
+                this.totalNotifications = total;
+                const pagination = document.getElementById('pagination');
+                const maxPage = Math.ceil(total / this.limit);
+                
+                if (maxPage <= 1) {
+                    pagination.style.display = 'none';
+                    return;
+                }
+                
+                pagination.style.display = 'flex';
+                document.getElementById('prevPage').disabled = this.currentPage <= 1;
+                document.getElementById('nextPage').disabled = this.currentPage >= maxPage;
+                document.getElementById('pageInfo').textContent = `صفحه ${this.currentPage} از ${maxPage}`;
+            }
+            
+            updateUnreadCount(count) {
+                const unreadCountElement = document.getElementById('unreadCount');
+                if (unreadCountElement) {
+                    unreadCountElement.textContent = `${count} اعلان خوانده نشده`;
+                }
+                
+                // به‌روزرسانی badge در هدر
+                this.updateHeaderBadge(count);
+            }
+            
+            updateHeaderBadge(count) {
+                const unreadCountElement = document.getElementById('unreadCount');
+                if (unreadCountElement) {
+                    unreadCountElement.textContent = `${count} اعلان خوانده نشده`;
+                }
+                
+                // به‌روزرسانی badge در هدر
+                const headerBadge = document.querySelector('.notification-badge');
+                if (headerBadge) {
+                    headerBadge.textContent = count > 99 ? '99+' : count;
+                    headerBadge.style.display = 'flex';
+                    
+                    if (count === 0) {
+                        headerBadge.style.backgroundColor = '#95a5a6';
+                    } else if (count <= 5) {
+                        headerBadge.style.backgroundColor = '#2ecc71';
+                    } else if (count <= 10) {
+                        headerBadge.style.backgroundColor = '#f39c12';
+                    } else {
+                        headerBadge.style.backgroundColor = '#e74c3c';
+                    }
+                }
+                
+                // همگام‌سازی
+                if (window.SmartNotificationManager && window.SmartNotificationManager.updateSidebarBadge) {
+                    window.SmartNotificationManager.updateSidebarBadge();
+                }
+                
+                // ذخیره وضعیت
+                localStorage.setItem('last_notification_count', count);
+                localStorage.setItem('last_notification_update', new Date().toISOString());
+            }
+            
+            updateStats(data) {
+                // نمایش آمار در کنسول
+                console.log('آمار اعلان‌ها:', {
+                    total: data.total || 0,
+                    unread: data.unread_count || 0,
+                    read: (data.total || 0) - (data.unread_count || 0),
+                    byType: data.by_type || {},
+                    byPriority: data.by_priority || {}
+                });
+            }
+            
+            countUnread(notifications) {
+                return notifications.filter(n => n.is_read == '0').length;
+            }
+            
+            loadSampleNotifications() {
+                console.log('Loading sample notifications for demo...');
+                
+                const sampleData = {
+                    success: true,
+                    data: [
+                        {
+                            id: 1,
+                            title: "درخواست تعمیر جدید",
+                            message: "درخواست تعمیر برای دستگاه CNC توسط علی رضایی ثبت شد. اولویت: بالا",
+                            type: "maintenance_request",
+                            priority: "high",
+                            is_read: "0",
+                            created_at: new Date().toISOString(),
+                            sender_name: "سیستم",
+                            sender_role: "system"
+                        },
+                        {
+                            id: 2,
+                            title: "موجودی قطعه کم شد",
+                            message: "موجودی بلبرینگ ۶۲۰۵ به ۳ عدد رسیده است. لطفاً اقدام به سفارش نمایید.",
+                            type: "parts",
+                            priority: "high",
+                            is_read: "0",
+                            created_at: new Date(Date.now() - 3600000).toISOString(),
+                            sender_name: "سیستم",
+                            sender_role: "system"
+                        },
+                        {
+                            id: 3,
+                            title: "تخصیص دستورکار جدید",
+                            message: "دستورکار WO-2024-015 برای خط تولید ۲ تخصیص یافت.",
+                            type: "work_order",
+                            priority: "medium",
+                            is_read: "1",
+                            created_at: new Date(Date.now() - 7200000).toISOString(),
+                            sender_name: "مدیر سیستم",
+                            sender_role: "admin"
+                        }
+                    ],
+                    total: 3,
+                    unread_count: 2
+                };
+                
+                this.renderNotifications(sampleData.data);
+                this.updatePagination(sampleData.total);
+                this.updateUnreadCount(sampleData.unread_count);
+            }
+            
+            syncWithSmartSystem() {
+                // همگام‌سازی با سیستم اعلان‌های هوشمند
+                if (window.SmartNotificationManager && typeof window.SmartNotificationManager.loadNotifications === 'function') {
+                    window.SmartNotificationManager.loadNotifications(false);
+                }
+
+                    // همگام‌سازی badgeهای سایدبار
+                    if (window.updateAllNotificationBadges) {
+                        window.updateAllNotificationBadges(this.getUnreadCount());
+                    }
+            }
+            
+            highlightActiveMenu() {
+                // highlight کردن منوی فعال
+                const allMenuLinks = document.querySelectorAll('.nav-section a');
+                allMenuLinks.forEach(link => {
+                    link.classList.remove('active-link');
+                });
+                
+                const notificationsLink = document.querySelector('a[href="notifications.html"]');
+                if (notificationsLink) {
+                    notificationsLink.classList.add('active-link');
+                }
+                
+                const dashboardSection = document.querySelector('.nav-section:first-child');
+                if (dashboardSection) {
+                    dashboardSection.classList.add('active');
+                }
+            }
+            
+            showLoading() {
+                const container = document.getElementById('notificationList');
+                container.innerHTML = `
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner"></i>
+                        <p>در حال بارگذاری اعلان‌ها...</p>
+                    </div>
+                `;
+            }
+            
+            showError(message) {
+                const container = document.getElementById('notificationList');
+                container.innerHTML = `
+                    <div class="no-notifications">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>خطا در بارگذاری</h3>
+                        <p>${message}</p>
+                        <button class="btn btn-primary" onclick="notificationManager.loadNotifications()" style="margin-top: 15px;">
+                            تلاش مجدد
+                        </button>
+                    </div>
+                `;
+            }
+            
+            showSuccess(message) {
+                // نمایش پیام موفقیت موقت
+                const alert = document.createElement('div');
+                alert.className = 'success-alert';
+                alert.innerHTML = `
+                    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+                                background: #2ecc71; color: white; padding: 10px 20px; 
+                                border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 10000;">
+                        <i class="fas fa-check-circle"></i> ${message}
+                    </div>
+                `;
+                document.body.appendChild(alert);
+                setTimeout(() => alert.remove(), 3000);
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        
+        
+            async syncNotificationStatus(notificationId, isRead) {
+        // همگام‌سازی وضعیت با سرور و دیتابیس
+        const action = isRead ? 'mark-read' : 'mark-unread';
+        
+        try {
+            const response = await fetch(`../api/notifications.php?action=${action}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: notificationId,
+                    user_id: this.currentUserId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log(`اعلان ${notificationId} در دیتابیس ${isRead ? 'خوانده شده' : 'خوانده نشده'} ثبت شد`);
+                
+                // ذخیره در localStorage برای پیگیری
+                const syncKey = `sync_notification_${notificationId}`;
+                localStorage.setItem(syncKey, JSON.stringify({
+                    status: isRead ? 'read' : 'unread',
+                    timestamp: new Date().toISOString(),
+                    server_response: data
+                }));
+                
+                return data;
+            } else {
+                throw new Error(data.error || 'خطا در همگام‌سازی');
+            }
+        } catch (error) {
+            console.error('خطا در همگام‌سازی با دیتابیس:', error);
+            throw error;
+        }
+    }
+    
+    // تابع همگام‌سازی دسته‌ای
+    async syncMultipleNotifications(notificationIds, isRead) {
+        if (!notificationIds || notificationIds.length === 0) {
+            return { success: true };
+        }
+        
+        const action = isRead ? 'mark-multiple-read' : 'mark-multiple-unread';
+        
+        try {
+            const response = await fetch(`../api/notifications.php?action=${action}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ids: notificationIds,
+                    user_id: this.currentUserId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log(`${notificationIds.length} اعلان در دیتابیس همگام‌سازی شد`);
+                return data;
+            } else {
+                throw new Error(data.error || 'خطا در همگام‌سازی دسته‌ای');
+            }
+        } catch (error) {
+            console.error('خطا در همگام‌سازی دسته‌ای:', error);
+            throw error;
+        }
+    }
+    
+    // تابع بازیابی وضعیت از localStorage
+    restoreUnsyncedChanges() {
+        // بازیابی تغییرات همگام‌سازی نشده از localStorage
+        const unsyncedChanges = [];
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('sync_notification_')) {
+                try {
+                    const change = JSON.parse(localStorage.getItem(key));
+                    unsyncedChanges.push({
+                        key: key,
+                        data: change
+                    });
+                } catch (e) {
+                    console.error('خطا در پردازش تغییر همگام‌سازی نشده:', e);
+                }
+            }
+        }
+        
+        if (unsyncedChanges.length > 0) {
+            console.log(`یافت ${unsyncedChanges.length} تغییر همگام‌سازی نشده`);
+            
+            // برای هر تغییر، دوباره سعی کن همگام‌سازی کنی
+            unsyncedChanges.forEach(change => {
+                const notificationId = change.key.replace('sync_notification_', '');
+                const status = change.data.status;
+                
+                console.log(`بازیابی تغییر برای اعلان ${notificationId}: ${status}`);
+                
+                // حذف از localStorage بعد از پردازش موفق
+                localStorage.removeItem(change.key);
+            });
+        }
+    }
+        
+        
+        }
+        
+        // ایجاد نمونه از NotificationManager
+        let notificationManager;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            notificationManager = new NotificationManager();
+            
+            // تنظیم مرتب‌سازی پیش‌فرض
+            document.getElementById('sortNewest').classList.add('active');
+            
+            // تابع global برای دسترسی از جاهای دیگر
+            window.notificationManager = notificationManager;
+            
+            // تابع برای بروزرسانی اعلان‌ها از منوی هدر
+            if (window.refreshNotifications) {
+                const originalRefresh = window.refreshNotifications;
+                window.refreshNotifications = function() {
+                    originalRefresh && originalRefresh();
+                    notificationManager && notificationManager.loadNotifications();
+                };
+            }
+            
+            // تست سیستم اعلان‌ها
+            console.log('Notification system initialized successfully');
+        });
+        
+        // تست سریع سیستم
+        setTimeout(() => {
+            if (window.notificationManager) {
+                console.log('Notification system test: OK');
+            }
+        }, 1000);
+
+
+
+        
+    </script>
+    
+</body>
+</html>

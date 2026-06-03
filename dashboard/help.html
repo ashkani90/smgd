@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راهنمای جامع سیستم نگهداری و تعمیرات | CMMS Pro</title>
+    <!-- استایل‌های اصلی -->
+    <link rel="stylesheet" href="../css/style.css">
+    <!-- استایل‌های سایدبار -->
+    <link rel="stylesheet" href="../sidebar/sidebar.css">
+    <!-- آیکون ها -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- فونت‌ها -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a5f7a;
+            --secondary-color: #57cc99;
+            --accent-color: #ff9a3c;
+            --danger-color: #ff6b6b;
+            --warning-color: #ffd166;
+            --dark-color: #2d3047;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* استایل‌های منوی کناری */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, var(--dark-color) 0%, #1a1c2f 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            right: 0;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .sidebar-header p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .sidebar-menu {
+            padding: 1.5rem 0;
+        }
+        
+        .menu-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .menu-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0 1.5rem 0.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-items {
+            list-style: none;
+        }
+        
+        .menu-items li {
+            margin-bottom: 0.2rem;
+        }
+        
+        .menu-items li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            border-right: 3px solid transparent;
+        }
+        
+        .menu-items li a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+            border-right-color: var(--secondary-color);
+        }
+        
+        .menu-items li.active a {
+            background-color: rgba(87, 204, 153, 0.15);
+            color: var(--secondary-color);
+            border-right-color: var(--secondary-color);
+            font-weight: 500;
+        }
+        
+        .menu-items li a i {
+            margin-left: 0.8rem;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* استایل‌های محتوای اصلی */
+
+        
+        .header {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: var(--dark-color);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #144b61;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #46b082;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: rgba(26, 95, 122, 0.05);
+        }
+        
+        /* استایل‌های بخش راهنما */
+        .help-container {
+            display: contents;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .help-search {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1rem;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+        }
+        
+        .search-box i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-color);
+        }
+        
+        .help-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .category-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            transition: var(--transition);
+            border-top: 4px solid var(--primary-color);
+        }
+        
+        .category-card:nth-child(2) {
+            border-top-color: var(--secondary-color);
+        }
+        
+        .category-card:nth-child(3) {
+            border-top-color: var(--accent-color);
+        }
+        
+        .category-card:nth-child(4) {
+            border-top-color: var(--danger-color);
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(26, 95, 122, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            font-size: 1.3rem;
+        }
+        
+        .category-card:nth-child(2) .category-icon {
+            background-color: rgba(87, 204, 153, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .category-card:nth-child(3) .category-icon {
+            background-color: rgba(255, 154, 60, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .category-card:nth-child(4) .category-icon {
+            background-color: rgba(255, 107, 107, 0.1);
+            color: var(--danger-color);
+        }
+        
+        .category-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            color: var(--dark-color);
+        }
+        
+        .category-card p {
+            color: var(--gray-color);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .category-links {
+            list-style: none;
+        }
+        
+        .category-links li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .category-links li a {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        
+        .category-links li a:hover {
+            color: var(--secondary-color);
+            padding-right: 5px;
+        }
+        
+        .category-links li a i {
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .faq-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-left: 0.8rem;
+            color: var(--primary-color);
+        }
+        
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .faq-item {
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .faq-item:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .faq-question {
+            padding: 1.2rem;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--dark-color);
+            transition: var(--transition);
+        }
+        
+        .faq-question:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .faq-question i {
+            transition: var(--transition);
+            color: var(--primary-color);
+        }
+        
+        .faq-answer {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background-color: white;
+        }
+        
+        .faq-answer.active {
+            padding: 1.2rem;
+            max-height: 500px;
+        }
+        
+        .contact-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+        }
+        
+        .contact-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .contact-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
+            transition: var(--transition);
+        }
+        
+        .contact-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            background-color: rgba(26, 95, 122, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+        
+        .contact-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+        
+        .contact-card p {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-card a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .contact-card a:hover {
+            color: var(--secondary-color);
+        }
+        
+        /* استایل‌های فوتر */
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .footer p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* استایل‌های ریسپانسیو */
+        @media (max-width: 992px) {
+            .sidebar {
+                right: -260px;
+            }
+            
+            .sidebar.active {
+                right: 0;
+            }
+            
+            .main-content {
+                margin-right: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .help-categories {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+        
+        /* دکمه منوی موبایل */
+        .menu-toggle {
+            display: none;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: var(--border-radius);
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 999;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        /* استایل‌های اضافی برای صفحه راهنما */
+        .breadcrumb {
+            background-color: rgba(0, 0, 0, 0.03);
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+        
+        .quick-action-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        
+        .quick-action-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .quick-action-btn i {
+            margin-left: 0.5rem;
+        }
+        
+        .highlight-box {
+            background-color: rgba(255, 214, 102, 0.15);
+            border-right: 4px solid var(--warning-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .highlight-box i {
+            color: var(--warning-color);
+            font-size: 1.5rem;
+            margin-left: 1rem;
+            margin-top: 0.2rem;
+        }
+        
+        .highlight-content h4 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .highlight-content p {
+            color: var(--gray-color);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- بارگذاری سایدبار -->
+    <div id="sidebar-container"></div>
+   
+    <!-- دکمه منو برای موبایل -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+      
+    <!-- محتوای اصلی -->
+    <main class="main-content">
+        <!-- هدر -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>راهنمای جامع سیستم CMMS</h1>
+            </div>
+
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">علیرضا محمدی</span>
+                        <span class="user-role">سرپرست تعمیرات</span>
+                    </div>
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+                <div class="date-display">
+                    <i class="fas fa-calendar"></i>
+                    <span id="currentDate">...</span>
+                </div>
+            </div>
+            
+
+        </header>
+
+        <!-- تعریف دکمه-->
+        <div class="quick-actions">
+            <button class="quick-action-btn">
+                <i class="fas fa-play-circle"></i> آموزش ویدیویی
+            </button>
+            <button class="quick-action-btn">
+                <i class="fas fa-file-pdf"></i> مستندات PDF
+            </button>
+            <button class="quick-action-btn">
+                <i class="fas fa-tools"></i> عیب‌یابی
+            </button>
+            <button class="quick-action-btn">
+                <i class="fas fa-sync-alt"></i> آپدیت‌ها
+            </button>
+
+            <div class="header-actions">
+                <button class="btn btn-primary">
+                    <i class="fas fa-download"></i> دانلود راهنما
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-print"></i> چاپ
+                </button>
+            </div>    
+
+        </div>
+
+        <!-- محتوای صفحه راهنما -->
+        <div class="notifications-page">
+            <div class="highlight-box">
+                <i class="fas fa-lightbulb"></i>
+                <div class="highlight-content">
+                    <h4>نکته کلیدی: چگونه از راهنما به بهترین شکل استفاده کنیم؟</h4>
+                    <p>برای دسترسی سریع به اطلاعات مورد نظر، می‌توانید از جستجوی بالای صفحه استفاده کنید. همچنین با کلیک بر روی سوالات متداول (FAQ) می‌توانید پاسخ سوالات رایج را مشاهده کنید. در صورت نیاز به اطلاعات بیشتر، با واحد پشتیبانی تماس بگیرید.</p>
+                </div>
+            </div>
+    
+            <div class="help-container">
+                <div class="help-search">
+                    <div class="search-box">
+                        <input type="text" placeholder="جستجوی موضوع مورد نظر در راهنما...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                
+                <div class="help-categories">
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3>ماژول مستندات و رویه‌ها</h3>
+                        <p>راهنمای کامل ماژول مستندات، دستورالعمل‌ها، چک‌لیست‌ها و رویه‌های فنی</p>
+                        <ul class="category-links">
+                            <li><a href="../procedures/instructions.html"><i class="fas fa-chevron-left"></i> نحوه ایجاد و مدیریت دستورالعمل‌ها</a></li>
+                            <li><a href="../procedures/checklists.html"><i class="fas fa-chevron-left"></i> استفاده از چک‌لیست‌های تعمیراتی</a></li>
+                            <li><a href="../procedures/safety.html"><i class="fas fa-chevron-left"></i> رعایت نکات ایمنی در فرآیندها</a></li>
+                            <li><a href="../procedures/manuals.html"><i class="fas fa-chevron-left"></i> مدیریت کاتالوگ و مستندات فنی</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3>ماژول برنامه‌ریزی</h3>
+                        <p>آموزش برنامه‌ریزی عملیات نگهداری، زمان‌بندی و مدیریت منابع</p>
+                        <ul class="category-links">
+                            <li><a href="../planning/schedule.html"><i class="fas fa-chevron-left"></i> ایجاد برنامه زمان‌بندی نگهداری</a></li>
+                            <li><a href="../planning/preventive.html"><i class="fas fa-chevron-left"></i> برنامه‌ریزی نگهداری پیشگیرانه (PM)</a></li>
+                            <li><a href="../planning/shutdown.html"><i class="fas fa-chevron-left"></i> مدیریت نگهداری توقفی (Shutdown)</a></li>
+                            <li><a href="../planning/resources.html"><i class="fas fa-chevron-left"></i> تخصیص منابع و نیروی انسانی</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>گزارش‌گیری و تحلیل</h3>
+                        <p>تهیه گزارش‌های تحلیلی، Dashboard و شاخص‌های عملکردی (KPI)</p>
+                        <ul class="category-links">
+                            <li><a href="#"><i class="fas fa-chevron-left"></i> گزارش‌گیری از عملکرد تجهیزات</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-left"></i> تحلیل شاخص‌های MTBF و MTTR</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-left"></i> گزارش هزینه‌های نگهداری و تعمیرات</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-left"></i> داشبورد مدیریتی و نمودارها</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-user-cog"></i>
+                        </div>
+                        <h3>مدیریت کاربران و امنیت</h3>
+                        <p>تنظیمات کاربران، سطوح دسترسی، نقش‌ها و امنیت سیستم</p>
+                        <ul class="category-links">
+                            <li><a href="#"><i class="fas fa-chevron-left"></i> ایجاد کاربر و تعریف نقش‌های دسترسی</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-left"></i> تنظیمات امنیتی و رمزنگاری</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-left"></i> لاگ‌گیری و ثبت فعالیت‌ها</a></li>
+                            <li><a href="#"><i class="fas fa-chevron-left"></i> پشتیبان‌گیری و بازیابی اطلاعات</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="faq-section">
+                    <h2 class="section-title"><i class="fas fa-question-circle"></i> سوالات متداول (FAQ)</h2>
+                    <div class="faq-list">
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                چگونه یک دستورالعمل جدید ایجاد کنم؟
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>برای ایجاد دستورالعمل جدید به بخش <strong>مستندات/دستورالعمل‌ها</strong> مراجعه کنید. روی دکمه "ایجاد دستورالعمل جدید" کلیک کرده و فرم مربوطه را پر کنید. حتماً فیلدهای اجباری شامل عنوان، کد دستورالعمل، تجهیز مرتبط و سطح خطر را تکمیل نمایید. پس از تکمیل، می‌توانید دستورالعمل را به صورت PDF ذخیره یا چاپ کنید.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                نحوه برنامه‌ریزی نگهداری پیشگیرانه به چه صورت است؟
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>به بخش <strong>برنامه‌ریزی/نگهداری پیشگیرانه</strong> مراجعه کنید. در این بخش می‌توانید بر اساس نوع تجهیز، بازه زمانی و اولویت، برنامه‌های PM ایجاد کنید. سیستم به صورت خودکار اعلان‌های مربوط به موعد انجام PM را ارسال می‌کند. همچنین می‌توانید گزارش‌های تحلیلی از اثربخشی PMها را مشاهده کنید.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                چگونه چک‌لیست تعمیراتی ایجاد و مدیریت کنم؟
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>در بخش <strong>مستندات/چک‌لیست‌ها</strong> می‌توانید چک‌لیست‌های تعمیراتی ایجاد کنید. برای هر چک‌لیست می‌توانید آیتم‌های بازرسی، استانداردهای قابل قبول، روش اندازه‌گیری و نتایج را تعریف کنید. چک‌لیست‌ها می‌توانند به تجهیزات خاص یا خانواده تجهیزات لینک شوند و در برنامه‌های PM مورد استفاده قرار گیرند.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                سیستم چگونه به مدیریت shutdown کمک می‌کند؟
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>ماژول مدیریت shutdown در بخش <strong>برنامه‌ریزی/نگهداری توقف</strong> امکان برنامه‌ریزی دقیق، تخصیص منابع، زمان‌بندی فعالیت‌ها و کنترل هزینه‌های توقف را فراهم می‌کند. شما می‌توانید گانت چارت فعالیت‌ها، لیست مواد مصرفی و گزارش پیشرفت کار را در این ماژول مشاهده و مدیریت کنید.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                چگونه می‌توانم گزارش‌های عملکرد سیستم را دریافت کنم؟
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>در بخش <strong>گزارش‌گیری</strong> می‌توانید به انواع گزارش‌های تحلیلی دسترسی داشته باشید. این گزارش‌ها شامل شاخص‌های کلیدی عملکرد (KPI) مانند MTBF, MTTR, OEE، گزارش هزینه‌ها، گزارش خرابی تجهیزات و گزارش اثربخشی PM می‌باشد. امکان سفارشی‌سازی گزارش‌ها و خروجی گرفتن به فرمت‌های Excel و PDF نیز وجود دارد.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-section">
+                    <h2 class="section-title"><i class="fas fa-headset"></i> راه‌های ارتباط با پشتیبانی</h2>
+                    <p>در صورت نیاز به راهنمایی بیشتر یا گزارش مشکل در سیستم، می‌توانید از یکی از راه‌های زیر استفاده کنید.</p>
+                    
+                    <div class="contact-options">
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <h4>تماس تلفنی</h4>
+                            <p>پشتیبانی فنی در ساعات اداری</p>
+                            <a href="tel:+982188776655">۰۲۱ - ۸۸۷۷۶۶۵۵</a>
+                        </div>
+                        
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <h4>ایمیل پشتیبانی</h4>
+                            <p>پاسخگویی در کمتر از ۲۴ ساعت</p>
+                            <a href="mailto:support@cmmspro.ir">support@cmmspro.ir</a>
+                        </div>
+                        
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <h4>چت آنلاین</h4>
+                            <p>پشتیبانی آنلاین در ساعات ۸ تا ۱۶</p>
+                            <a href="#">شروع چت آنلاین</a>
+                        </div>
+                        
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-ticket-alt"></i>
+                            </div>
+                            <h4>تیکت پشتیبانی</h4>
+                            <p>ثبت درخواست و پیگیری آنلاین</p>
+                            <a href="#">ثبت تیکت جدید</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>© ۲۰۲۳ سیستم جامع نگهداری و تعمیرات CMMS Pro. تمامی حقوق محفوظ است.</p>
+                <p>نسخه ۳.۲.۱ | آخرین بروزرسانی: ۱۴۰۲/۰۷/۱۵</p>
+                <p>محمــد پورسـان دلیــر</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- overlay برای موبایل -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- اسکرسپت ها -->
+
+    <!-- اسکریپت بارگذاری منوی کناری یا سایدبار-->
+    <script>
+        // 1. اجرای فوری: قبل از هر چیزی چک کن آیا پین است؟
+        // اگر بله، کلاس را به بادی اضافه کن تا CSS فوراً اعمال شود
+        (function() {
+            const isPinned = localStorage.getItem('sidebarPinned') === 'true';
+            if (isPinned) {
+                document.body.classList.add('sidebar-pinned');
+            }
+        })();
+
+        // تابع تزریق HTML
+        function injectSidebarHTML(html) {
+            const container = document.getElementById('sidebar-container');
+            if (container.querySelector('.sidebar')) return;
+
+            container.innerHTML = html;
+            executeSidebarScript();
+        }
+
+        function loadSidebar() {
+            // 2. تلاش برای خواندن از کش (سرعت بالا)
+            const cachedHTML = localStorage.getItem('sidebarHTML_Cache');
+            if (cachedHTML) {
+                injectSidebarHTML(cachedHTML);
+            }
+
+            // 3. دانلود در پس‌زمینه برای آپدیت
+            fetch('../sidebar/sidebar.html?v=' + Date.now())
+                .then(response => response.text())
+                .then(html => {
+                    // اگر کش نبود، الان نمایش بده
+                    if (!cachedHTML) {
+                        injectSidebarHTML(html);
+                    }
+                    // آپدیت کش
+                    if (html !== cachedHTML) {
+                        localStorage.setItem('sidebarHTML_Cache', html);
+                    }
+                })
+                .catch(console.error);
+        }
+        
+        function executeSidebarScript() {
+            const existingScript = document.querySelector('script[src*="../sidebar/sidebar.js"]');
+            if (existingScript) existingScript.remove();
+            
+            const script = document.createElement('script');
+            script.src = '../sidebar/sidebar.js?v=' + Date.now();
+            script.async = false;
+            document.body.appendChild(script);
+        }
+        
+        // اجرا
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSidebar);
+        } else {
+            loadSidebar();
+        }
+    </script>
+    
+    <!-- اسکریپت اصلی -->
+    <script src="../js/main.js"></script>
+    <!-- اسکریپت‌های اختصاصی صفحه راهنما -->
+    <script>
+        // اسکریپت برای منوی موبایل
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const overlay = document.getElementById('overlay');
+            const sidebar = document.querySelector('.sidebar');
+            
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            
+            // اسکریپت برای FAQ
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', () => {
+                    const answer = question.nextElementSibling;
+                    const icon = question.querySelector('i');
+                    
+                    // بستن سایر آیتم‌ها
+                    document.querySelectorAll('.faq-answer.active').forEach(activeAnswer => {
+                        if (activeAnswer !== answer) {
+                            activeAnswer.classList.remove('active');
+                            activeAnswer.previousElementSibling.querySelector('i').classList.remove('fa-chevron-up');
+                            activeAnswer.previousElementSibling.querySelector('i').classList.add('fa-chevron-down');
+                        }
+                    });
+                    
+                    // باز یا بسته کردن آیتم جاری
+                    answer.classList.toggle('active');
+                    
+                    if (answer.classList.contains('active')) {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    } else {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    }
+                });
+            });
+            
+            // نمایش منوی موبایل در صورت نیاز
+            function checkWindowSize() {
+                if (window.innerWidth <= 992) {
+                    menuToggle.style.display = 'block';
+                } else {
+                    menuToggle.style.display = 'none';
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            }
+            
+            window.addEventListener('resize', checkWindowSize);
+            checkWindowSize(); // بررسی اولیه هنگام لود صفحه
+        });
+    </script>
+
+
+    
+</body>
+</html>
