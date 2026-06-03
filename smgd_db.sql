@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 28, 2026 at 06:29 AM
+-- Generation Time: Jun 03, 2026 at 03:23 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -699,7 +699,45 @@ INSERT INTO `login_attempts` (`id`, `username`, `ip_address`, `attempt_time`, `s
 (200, 'admin', '::1', '2026-03-14 12:56:53', 1),
 (201, 'admin', '::1', '2026-03-14 13:23:28', 1),
 (202, 'admin', '::1', '2026-03-28 05:17:55', 0),
-(203, 'admin', '::1', '2026-03-28 05:18:15', 1);
+(203, 'admin', '::1', '2026-03-28 05:18:15', 1),
+(204, 'admin', '::1', '2026-03-28 05:48:08', 1),
+(205, 'admin', '::1', '2026-03-28 06:05:19', 1),
+(206, 'admin', '::1', '2026-03-28 08:23:33', 1),
+(207, 'admin', '::1', '2026-03-28 10:22:39', 1),
+(208, 'admin', '::1', '2026-03-28 11:15:35', 1),
+(209, 'admin', '::1', '2026-03-28 11:35:14', 1),
+(210, 'admin', '::1', '2026-03-29 09:44:16', 1),
+(211, 'admin', '::1', '2026-03-29 10:00:41', 1),
+(212, 'admin', '::1', '2026-03-29 10:06:00', 1),
+(213, 'admin', '::1', '2026-03-29 10:35:06', 1),
+(214, 'admin', '::1', '2026-03-29 12:44:39', 1),
+(215, 'admin', '::1', '2026-03-30 10:45:22', 1),
+(216, 'admin', '::1', '2026-03-30 13:06:33', 0),
+(217, 'admin', '::1', '2026-03-30 13:06:48', 0),
+(218, 'admin', '::1', '2026-03-30 13:06:56', 1),
+(219, 'admin', '::1', '2026-04-07 06:36:25', 1),
+(220, 'admin', '::1', '2026-04-19 08:25:45', 1),
+(221, 'admin', '::1', '2026-05-13 04:13:41', 1),
+(222, 'admin', '::1', '2026-05-13 04:20:46', 1),
+(223, 'admin', '::1', '2026-05-30 08:51:13', 1),
+(224, 'admin', '::1', '2026-05-30 12:04:23', 1),
+(225, 'admin', '::1', '2026-05-30 12:08:16', 1),
+(226, 'admin', '::1', '2026-05-30 12:28:44', 1),
+(227, 'admin', '::1', '2026-05-31 13:17:47', 1),
+(228, 'admin', '::1', '2026-06-02 05:35:37', 1),
+(229, 'operator3', '::1', '2026-06-02 13:32:26', 1),
+(230, 'admin', '::1', '2026-06-02 13:40:02', 1),
+(231, 'admin', '::1', '2026-06-03 10:54:17', 1),
+(232, 'operator1', '::1', '2026-06-03 11:30:54', 1),
+(233, 'admin', '::1', '2026-06-03 11:32:50', 1),
+(234, 'operator1', '::1', '2026-06-03 11:33:41', 1),
+(235, 'admin', '::1', '2026-06-03 11:35:07', 1),
+(236, 'operator1', '::1', '2026-06-03 11:37:17', 1),
+(237, 'admin', '::1', '2026-06-03 11:46:55', 1),
+(238, 'operator1', '::1', '2026-06-03 11:47:42', 1),
+(239, 'admin', '::1', '2026-06-03 11:48:29', 1),
+(240, 'operator1', '::1', '2026-06-03 11:50:26', 1),
+(241, 'admin', '::1', '2026-06-03 12:14:28', 1);
 
 -- --------------------------------------------------------
 
@@ -1499,17 +1537,17 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password_hash`, `full_name`, `email`, `phone`, `role`, `department`, `profile_image`, `is_active`, `last_login`, `created_at`, `updated_at`) VALUES
-(0, 'admin1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'مدیر سیستم', 'admin@company.com', '09123456789', 'admin', 'IT', 'profile1.jpg', 1, '2024-01-15 14:30:00', '2023-01-10 06:30:00', '2026-01-29 12:17:53'),
-(1, 'admin', '$2y$10$TYMp3ksCe50H2x20cM9ZtOOGfrC0JM1J8wsVTsh.S3BGlLSd95svq', 'محمد پورسان دلیر', 'admin@cmms.local', '09127557315', 'admin', 'کنترل کیفیت', 'http://localhost/Maintenance-system/images/profiles/admin.jpg', 1, '2026-03-28 08:48:15', '0000-00-00 00:00:00', '2026-03-28 05:18:15'),
-(2, 'supervisor1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'ناظر فنی', 'supervisor@company.com', '09123456788', 'supervisor', 'فنی', 'profile2.jpg', 1, '2024-01-14 09:15:00', '2023-02-15 07:50:00', '2024-01-14 05:50:00'),
-(3, 'tech1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین برق', 'tech1@company.com', '09123456787', 'technician', 'تعمیرات', 'profile3.jpg', 1, '2024-01-13 16:45:00', '2023-03-20 05:00:00', '2024-01-13 13:20:00'),
-(4, 'operator1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'اپراتور خط ۱', 'operator1@company.com', '09123456786', 'operator', 'تولید', 'profile4.jpg', 1, '2024-01-12 07:20:00', '2023-04-05 10:45:00', '2024-01-12 03:55:00'),
+(0, 'admin1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'مدیر سیستم', 'admin@company.com', '09123456789', 'admin', 'IT', '', 1, '2024-01-15 14:30:00', '2023-01-10 06:30:00', '2026-06-02 07:41:18'),
+(1, 'admin', '$2y$10$TYMp3ksCe50H2x20cM9ZtOOGfrC0JM1J8wsVTsh.S3BGlLSd95svq', 'محمد پورسان دلیر', 'admin@cmms.local', '09127557315', 'admin', 'کنترل کیفیت', 'http:\\\\localhost\\smgd\\images\\profiles\\admin.jpg', 1, '2026-06-03 15:44:28', '0000-00-00 00:00:00', '2026-06-03 12:14:28'),
+(2, 'supervisor1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'ناظر فنی', 'supervisor@company.com', '09123456788', 'supervisor', 'فنی', '', 1, '2024-01-14 09:15:00', '2023-02-15 07:50:00', '2026-06-02 07:41:32'),
+(3, 'tech1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین برق', 'tech1@company.com', '09123456787', 'technician', 'تعمیرات', '', 1, '2024-01-13 16:45:00', '2023-03-20 05:00:00', '2026-06-02 07:41:37'),
+(4, 'operator1', '$2y$10$NQk1xpDRoE4ISpKr5vYdguUAnfyZKE5KQ2jVFuSNomXpRKJPnuLJe', 'اپراتور خط ۱', 'operator1@company.com', '09123456786', 'operator', 'quality', '', 1, '2026-06-03 15:20:26', '2023-04-05 10:45:00', '2026-06-03 11:50:26'),
 (5, 'tech2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین مکانیک', 'tech2@company.com', '09123456785', 'technician', 'تعمیرات', NULL, 1, '2024-01-10 13:10:00', '2023-05-12 06:10:00', '2024-01-10 09:45:00'),
-(6, 'supervisor2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'ناظر تولید', 'supervisor2@company.com', '09123456784', 'supervisor', 'تولید', 'profile6.jpg', 1, '2024-01-09 10:05:00', '2023-06-18 12:55:00', '2024-01-09 06:40:00'),
-(7, 'operator2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'اپراتور خط ۲', 'operator2@company.com', '09123456783', 'operator', 'تولید', NULL, 0, '2023-12-20 08:00:00', '2023-07-22 09:00:00', '2023-12-25 05:30:00'),
-(8, 'admin2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'مدیر فنی', 'admin2@company.com', '09123456782', 'admin', 'فنی', 'profile8.jpg', 1, '2024-01-08 15:40:00', '2023-08-30 06:40:00', '2024-01-08 12:15:00'),
-(9, 'tech3', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین ابزار دقیق', 'tech3@company.com', '09123456781', 'technician', 'کنترل کیفیت', 'profile9.jpg', 1, '2024-01-07 11:25:00', '2023-09-14 10:20:00', '2024-01-07 08:00:00'),
-(10, 'operator3', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'اپراتور انبار', 'operator3@company.com', '09123456780', 'operator', 'انبار', NULL, 1, '2024-01-05 09:45:00', '2023-10-28 03:50:00', '2024-01-05 06:20:00');
+(6, 'supervisor2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'ناظر تولید', 'supervisor2@company.com', '09123456784', 'supervisor', 'تولید', '', 1, '2024-01-09 10:05:00', '2023-06-18 12:55:00', '2026-06-02 07:41:47'),
+(7, 'operator2', '$2y$10$4IW0vsfvuQF5HxsiVr8gG.t1h6BYMXXlBVZ8vOJw0rjAG2tM6Rcvm', 'اپراتور خط ۲', 'operator2@company.com', '09123456783', 'operator', 'warehouse', '', 1, '2023-12-20 08:00:00', '2023-07-22 09:00:00', '2026-06-03 11:27:31'),
+(8, 'admin2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'مدیر فنی', 'admin2@company.com', '09123456782', 'admin', 'فنی', '', 1, '2024-01-08 15:40:00', '2023-08-30 06:40:00', '2026-06-02 07:41:54'),
+(9, 'tech3', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین ابزار دقیق', 'tech3@company.com', '09123456781', 'technician', 'کنترل کیفیت', '', 1, '2024-01-07 11:25:00', '2023-09-14 10:20:00', '2026-06-02 07:41:58'),
+(10, 'operator3', '$2y$10$DZ4kpuQza3KNZNlpj/Qdjui4GFmEIE.lc1pK7tY1knvSEexn7Dpg.', 'اپراتور انبار', 'operator3@company.com', '09123456780', 'operator', 'warehouse', 'http:\\\\localhost\\smgd\\images\\profiles\\انبار.png', 1, '2026-06-02 17:02:26', '2023-10-28 03:50:00', '2026-06-02 13:32:26');
 
 -- --------------------------------------------------------
 
@@ -1974,7 +2012,7 @@ ALTER TABLE `kpi_data`
 -- AUTO_INCREMENT for table `login_attempts`
 --
 ALTER TABLE `login_attempts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=204;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=242;
 
 --
 -- AUTO_INCREMENT for table `notifications`
