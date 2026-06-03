@@ -1,0 +1,148 @@
+{
+    "meta": {
+        "title": "Ordering System",
+        "dir": "ltr",
+        "lang": "en"
+    },
+    "header": {
+        "system_name": "Parts Management System",
+        "system_name_p": "Bus",
+        "login": "Login",
+        "welcome": "Welcome"
+    },
+    "hero": {
+        "title": "Parts Management System",
+        "description": "This system is a comprehensive solution for ordering, monitoring and controlling all activities of non-conforming product reporting, claims, replacement part requests or purchase requests in your organization. Using this system, you can register desired information and manage your orders optimally, and provide information in the shortest possible time.",
+        "features_btn": "System Features",
+        "start_btn": "Get Started",
+        "hero_image_title": "Smart Management System",
+        "hero_image_content": "Ordering • Claim • Reporting",
+        "hero_image_alt": "Parts Management System Image"
+    },
+    "features": {
+        "title": "Key Features",
+        "subtitle": "The ordering system helps you manage parts better with its features",
+        "items": [
+            {
+                "title": "Ordering",
+                "description": "Create and manage purchase orders from suppliers"
+            },
+            {
+                "title": "Non-conforming Product",
+                "description": "Quick registration and notification of non-conforming products to suppliers"
+            },
+            {
+                "title": "Corrective Action",
+                "description": "Register and track required corrective actions from suppliers"
+            },
+            {
+                "title": "Parts Claim",
+                "description": "Report defective parts and request parts claims"
+            },
+            {
+                "title": "Mobile Access",
+                "description": "Access the system via mobile phone and tablet anytime, anywhere"
+            },
+            {
+                "title": "Smart Alert System",
+                "description": "Automatic alerts for relevant people"
+            }
+        ]
+    },
+    "benefits": {
+        "title": "Benefits of Using Parts Management System",
+        "subtitle": "Register, track and receive reports",
+        "items": [
+            {
+                "title": "Cost Reduction",
+                "description": "By eliminating additional transportation costs"
+            },
+            {
+                "title": "Increased Productivity",
+                "description": "By reducing production line downtime and increasing equipment utilization"
+            },
+            {
+                "title": "Increased Safety",
+                "description": "By monitoring equipment status and preventing accidents"
+            },
+            {
+                "title": "Complete Documentation",
+                "description": "Full history of orders, claims and non-conforming products"
+            }
+        ]
+    },
+    "access": {
+        "title": "Ready to Start?",
+        "subtitle": "Choose one of the following methods to use the system according to your organization's needs",
+        "dashboard": {
+            "title": "Dashboard Login",
+            "features": [
+                "Access to all system features",
+                "Order management",
+                "Claims tracking",
+                "Advanced reporting"
+            ],
+            "button": "Login to System"
+        },
+        "guide": {
+            "title": "User Guide",
+            "features": [
+                "Step by step training",
+                "Educational videos",
+                "Complete documentation",
+                "Online support"
+            ],
+            "button": "Read Guide"
+        }
+    },
+    "footer": {
+        "about": "About Us",
+        "contact": "Contact Us",
+        "terms": "Terms of Use",
+        "privacy": "Privacy Policy",
+        "copyright": "© 2026 Parts Management System - Version 1.2",
+        "description": "Designed for information exchange between Soroush Motor Mebna Company and Golden Dragon Company"
+    },
+    "floating_help": {
+        "title": "Help",
+        "aria_label": "Help button"
+    },
+    "language": {
+        "selector": "Language",
+        "fa": "فارسی",
+        "en": "English",
+        "ar": "العربية",
+        "fr": "Français"
+    },
+
+        "login": {
+        "title": "Ordering System",
+        "page_title": "Ordering Login",
+        "system_name": "Parts Management System",
+        "system_description": "Ordering, Claim, Non-conforming Product",
+        "username_label": "Username",
+        "username_placeholder": "Enter your username",
+        "password_label": "Password",
+        "password_placeholder": "Enter your password",
+        "remember_me": "Remember Me",
+        "forgot_password": "Forgot Password?",
+        "login_button": "Login",
+        "login_button_loading": "Logging in...",
+        "error_required": "Please enter username and password",
+        "error_invalid": "Invalid username or password",
+        "error_server": "Server connection error",
+        "already_logged_in": "You are already logged in. Do you want to return to the dashboard?"
+    },
+    "forgot_password": {
+        "modal_title": "Password Recovery",
+        "modal_message": "To recover your password, please contact system support or contact the system administrator via email.",
+        "support_email": "Poursan.m@gmail.com",
+        "close_button": "Close"
+    },
+    "validation": {
+        "required": "This field is required",
+        "username_required": "Username is required",
+        "password_required": "Password is required"
+    }
+
+}
