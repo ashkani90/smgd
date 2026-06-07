@@ -483,7 +483,7 @@
 <body>
 
     <!-- تعریف آدرس مسیر صفحه -->
-    <body data-page-title="گزارش عدم انطباق" data-breadcrumb="فرم ها|../forms/failure-report.html,گزارش عدم انطباق"> 
+    <body data-page-title="گزارش عدم انطباق" data-breadcrumb="فرم ها|../forms/Non-compliance.html,گزارش عدم انطباق"> 
 
     <!-- بارگذاری سایدبار -->
     <div id="sidebar-container"></div>
@@ -514,7 +514,7 @@
                             <option value="reporter">اپراتور تولید (ثبت اولیه)</option>
                             <option value="operator1">اپراتور کنترل کیفیت (operator1)</option>
                             <option value="operator2">اپراتور انباردار (operator2)</option>
-                            <option value="operator3">عضو کمیته فنی (operator3)</option>
+                            <option value="operator3">عضو کمیته فنی/مدیر کارخانه (operator3)</option>
                         </select>
                     </div>
                 </div>
@@ -849,14 +849,14 @@
                         </div>
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-primary" id="nextToStep4">ثبت و ارجاع به کمیته فنی</button>
+                        <button type="button" class="btn btn-primary" id="nextToStep4">ثبت و ارجاع به مدیر کارخانه</button>
                     </div>
                 </div>             
 
                 <!-- Step4: کمیته فنی -->
                 <div class="form-step" id="step4">
                     <div class="form-section">
-                        <h2 class="form-section-title"><i class="fas fa-users"></i> نظر کمیته فنی (operator3)</h2>
+                        <h2 class="form-section-title"><i class="fas fa-users"></i> نظر کمیته فنی / مدیر کارخانه (operator3)</h2>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="techReviewResult">نتیجه بررسی <span class="required">*</span></label>
@@ -1111,7 +1111,7 @@
             });
         }
 
-        // ==================== مکانیزم گردش کار و کارتابل ورودی ====================
+        // ==================== مکانیزم گردش کار و کارتابل ورودی اتصال به دیتابیس ====================
         function getStatusForRole(role) {
             if (role === 'operator1') return 'waiting_qc';
             if (role === 'operator2') return 'waiting_warehouse';
@@ -1119,18 +1119,27 @@
             return '';
         }
 
-        function checkPendingTasks() {
+        async function checkPendingTasks() {
             const inbox = document.getElementById('workflow-inbox');
             const emptyState = document.getElementById('empty-inbox-state');
             const mainForm = document.getElementById('defectReportForm');
 
-            // ذخیره نقش کاربر در لوکال استوریج برای هماهنگی با زنگوله اعلان
-            localStorage.setItem('currentUserRole', currentRole);
+            // بررسی حضور کاربر واقعی لاگین شده
+            const loggedUser = getLoggedInUserData();
+            if (loggedUser) {
+                // نگاشت دپارتمان یا نقش به ساختار فرآیند
+                if (loggedUser.department === 'quality') currentRole = 'operator1';
+                else if (loggedUser.department === 'warehouse') currentRole = 'operator2';
+                else if (loggedUser.department === 'technical' || loggedUser.role === 'manager') currentRole = 'operator3';
+                else currentRole = 'reporter';
+                
+                // آپدیت دراپ‌داون شبیه‌ساز جهت هماهنگی ظاهری با کاربر واقعی وارد شده
+                document.getElementById('userRoleSelect').value = currentRole;
+            }
 
-            // به روز رسانی زنگوله اعلان در بالای صفحه
+            localStorage.setItem('currentUserRole', currentRole);
             updateHeaderNotificationBell();
 
-            // اگر کاربر عادی (گزارش‌دهنده) بود، کارتابل بی معنی است و فرم جدید باید بلافاصله باز باشد
             if (currentRole === 'reporter') {
                 inbox.style.display = 'none';
                 emptyState.style.display = 'none';
@@ -1139,27 +1148,31 @@
                 return;
             }
 
-            // بررسی وجود کار معوق در حافظه مرورگر برای نقش انتخاب شده
-            const targetStatus = getStatusForRole(currentRole);
-            const reports = JSON.parse(localStorage.getItem('defectReports_Workflow') || '[]');
-            const pendingTask = reports.find(r => r.status === targetStatus);
+            mainForm.style.display = 'none';
 
-            mainForm.style.display = 'none'; // فرم مخفی است تا کاربر دکمه کارتابل یا اعلان زنگوله را بزند
+            try {
+                const response = await fetch(`../api/defect_reports.php?pending_for_role=${currentRole}`);
+                const resData = await response.json();
 
-            if (pendingTask) {
-                activeTaskReport = pendingTask;
-                inbox.style.display = 'block';
-                emptyState.style.display = 'none';
-                
-                let stepLabel = '';
-                if (currentRole === 'operator1') stepLabel = 'کنترل کیفیت (operator1)';
-                if (currentRole === 'operator2') stepLabel = 'انبار (operator2)';
-                if (currentRole === 'operator3') stepLabel = 'کمیته فنی (operator3)';
+                if (resData.success && resData.data) {
+                    activeTaskReport = resData.data;
+                    inbox.style.display = 'block';
+                    emptyState.style.display = 'none';
+                    
+                    let stepLabel = '';
+                    if (currentRole === 'operator1') stepLabel = 'کنترل کیفیت';
+                    if (currentRole === 'operator2') stepLabel = 'انبار';
+                    if (currentRole === 'operator3') stepLabel = 'مدیر کارخانه/کمیته فنی';
 
-                document.getElementById('inbox-message-text').innerHTML = 
-                    `یک گزارش ارجاع شده با شماره <strong>${pendingTask.reportNumber}</strong> منتظر بررسی و تکمیل اطلاعات بخش <strong>${stepLabel}</strong> است.`;
-            } else {
-                activeTaskReport = null;
+                    document.getElementById('inbox-message-text').innerHTML = 
+                        `یک گزارش ارجاع شده با شماره <strong>${activeTaskReport.reportNumber || activeTaskReport.report_number}</strong> منتظر بررسی و تکمیل اطلاعات بخش <strong>${stepLabel}</strong> است.`;
+                } else {
+                    activeTaskReport = null;
+                    inbox.style.display = 'none';
+                    emptyState.style.display = 'block';
+                }
+            } catch(err) {
+                console.error("خطا در ارتباط با وب‌سرویس کارتابل:", err);
                 inbox.style.display = 'none';
                 emptyState.style.display = 'block';
             }
@@ -1172,76 +1185,56 @@
             const data = activeTaskReport;
 
             // پرکردن اطلاعات مرحله ۱
-            document.getElementById('reportNumber').value = data.reportNumber || '';
-            document.getElementById('reportDate').value = data.reportDate || '';
-            document.getElementById('reporterName').value = data.reporterName || '';
-            document.getElementById('employeeCode').value = data.employeeCode || '';
-            document.getElementById('reporterDepartment').value = data.reporterDepartment || '';
-            document.getElementById('vehicleType').value = data.vehicleType || '';
-            document.getElementById('vehicleModel').value = data.vehicleModel || '';
-            document.getElementById('partCode').value = data.partCode || '';
-            document.getElementById('partNameFa').value = data.partNameFa || '';
-            document.getElementById('partNameEn').value = data.partNameEn || '';
-            document.getElementById('defectQuantity').value = data.defectQuantity || '1';
-            document.getElementById('unitOfMeasure').value = data.unitOfMeasure || '';
-            document.getElementById('detectionLocation').value = data.detectionLocation || '';
+            document.getElementById('reportNumber').value = data.report_number || data.reportNumber || '';
+            document.getElementById('reportDate').value = data.report_date || data.reportDate || '';
+            document.getElementById('reporterName').value = data.reporter_name || data.reporterName || '';
+            document.getElementById('employeeCode').value = data.employee_code || data.employeeCode || '';
+            document.getElementById('reporterDepartment').value = data.reporter_department || data.reporterDepartment || '';
+            document.getElementById('vehicleType').value = data.vehicle_type || data.vehicleType || '';
+            document.getElementById('vehicleModel').value = data.vehicle_model || data.vehicleModel || '';
+            document.getElementById('partCode').value = data.part_code || data.partCode || '';
+            document.getElementById('partNameFa').value = data.part_name_fa || data.partNameFa || '';
+            document.getElementById('partNameEn').value = data.part_name_en || data.partNameEn || '';
+            document.getElementById('defectQuantity').value = data.defect_quantity || data.defectQuantity || '1';
+            document.getElementById('unitOfMeasure').value = data.unit_of_measure || data.unitOfMeasure || '';
+            document.getElementById('detectionLocation').value = data.detection_location || data.detectionLocation || '';
             
-            if (data.isReplaced === 'بله') {
+            if (data.is_replaced === 'بله' || data.isReplaced === 'بله') {
                 document.getElementById('replacedYes').checked = true;
-            } else if (data.isReplaced === 'خیر') {
+            } else {
                 document.getElementById('replacedNo').checked = true;
             }
             
-            document.getElementById('defectType').value = data.defectType || '';
-            document.getElementById('defectDescription').value = data.defectDescription || '';
-            document.getElementById('possibleCause').value = data.possibleCause || '';
+            document.getElementById('defectType').value = data.defect_type || data.defectType || '';
+            document.getElementById('defectDescription').value = data.defect_description || data.defectDescription || '';
+            document.getElementById('possibleCause').value = data.possible_cause || data.possibleCause || '';
 
             // پرکردن اطلاعات مرحله ۲ (اگر وجود داشت)
-            if (data.qcData) {
-                document.getElementById('qcDetectionLocation').value = data.qcData.qcDetectionLocation || '';
-                document.getElementById('partStatus').value = data.qcData.partStatus || '';
-                document.getElementById('defectReason').value = data.qcData.defectReason || '';
-                document.getElementById('qualityNotes').value = data.qcData.qualityNotes || '';
-            } else {
-                document.getElementById('qcDetectionLocation').value = '';
-                document.getElementById('partStatus').value = '';
-                document.getElementById('defectReason').value = '';
-                document.getElementById('qualityNotes').value = '';
-            }
+            document.getElementById('qcDetectionLocation').value = data.qc_detection_location || data.qcDetectionLocation || '';
+            document.getElementById('partStatus').value = data.part_status || data.partStatus || '';
+            document.getElementById('defectReason').value = data.defect_reason || data.defectReason || '';
+            document.getElementById('qualityNotes').value = data.quality_notes || data.qualityNotes || '';
 
             // پرکردن اطلاعات مرحله ۳ (اگر وجود داشت)
-            if (data.warehouseData) {
-                document.getElementById('trackingCode').value = data.warehouseData.trackingCode || '';
-                document.getElementById('inventoryStatus').value = data.warehouseData.inventoryStatus || '';
-                document.getElementById('warehouseNotes').value = data.warehouseData.warehouseNotes || '';
-            } else {
-                document.getElementById('trackingCode').value = '';
-                document.getElementById('inventoryStatus').value = '';
-                document.getElementById('warehouseNotes').value = '';
-            }
+            document.getElementById('trackingCode').value = data.tracking_code || data.trackingCode || '';
+            document.getElementById('inventoryStatus').value = data.inventory_status || data.inventoryStatus || '';
+            document.getElementById('warehouseNotes').value = data.warehouse_notes || data.warehouseNotes || '';
 
             // پرکردن اطلاعات مرحله ۴ (اگر وجود داشت)
-            if (data.techData) {
-                document.getElementById('techReviewResult').value = data.techData.techReviewResult || '';
-                document.getElementById('finalDecision').value = data.techData.finalDecision || '';
-                document.getElementById('responsibleParty').value = data.techData.responsibleParty || '';
-                document.getElementById('deadlineDate').value = data.techData.deadlineDate || '';
-                document.getElementById('correctiveActionNo').value = data.techData.correctiveActionNo || '';
-            } else {
-                document.getElementById('techReviewResult').value = '';
-                document.getElementById('finalDecision').value = '';
-                document.getElementById('responsibleParty').value = '';
-                document.getElementById('deadlineDate').value = '';
-                document.getElementById('correctiveActionNo').value = '';
-            }
+            document.getElementById('techReviewResult').value = data.tech_review_result || data.techReviewResult || '';
+            document.getElementById('finalDecision').value = data.final_decision || data.finalDecision || '';
+            document.getElementById('responsibleParty').value = data.responsible_party || data.responsibleParty || '';
+            document.getElementById('deadlineDate').value = data.deadline_date || data.deadlineDate || '';
+            document.getElementById('correctiveActionNo').value = data.corrective_action_no || data.correctiveActionNo || '';
 
             // تصویر قطعه
-            if (data.partImage) {
+            const partImageValue = data.part_image || data.partImage;
+            if (partImageValue) {
                 document.getElementById('partImagePreview').innerHTML = `
                     <div class="preview-item">
                         <i class="fas fa-image" style="font-size: 24px; color: #3498db;"></i>
                         <div class="file-info">
-                            <span>${data.partImage}</span>
+                            <span>${partImageValue}</span>
                         </div>
                     </div>
                 `;
@@ -1251,16 +1244,17 @@
 
             // تعیین مرحله فعال برای نمایش
             let activeStep = 1;
-            if (data.status === 'waiting_qc') activeStep = 2;
-            if (data.status === 'waiting_warehouse') activeStep = 3;
-            if (data.status === 'waiting_tech') activeStep = 4;
+            const currentStatus = data.status;
+            if (currentStatus === 'waiting_qc') activeStep = 2;
+            if (currentStatus === 'waiting_warehouse') activeStep = 3;
+            if (currentStatus === 'waiting_tech') activeStep = 4;
 
             document.getElementById('defectReportForm').style.display = 'block';
             setStepsVisibility(activeStep);
 
             // اسکرول نرم به بخش فعال فرم
             document.getElementById(`step${activeStep}`).scrollIntoView({ behavior: 'smooth' });
-            showToast(`اطلاعات گزارش ${data.reportNumber} بارگذاری شد. بخش مربوط به خود را تکمیل کنید.`, 'info');
+            showToast(`گزارش ${data.report_number || data.reportNumber} بارگذاری شد. بخش مربوط به خود را تکمیل کنید.`, 'info');
         }
 
         // ریست فرم به حالت اولیه کاربری گزارش‌دهنده
@@ -1277,116 +1271,131 @@
             setStepsVisibility(1);
         }
 
-        // ==================== کنترل هوشمند زنگوله اعلان هدر (fas fa-bell) ====================
-        function updateHeaderNotificationBell() {
-            const reports = JSON.parse(localStorage.getItem('defectReports_Workflow') || '[]');
-            const pendingTasks = reports.filter(r => r.status === getStatusForRole(currentRole));
+        // ==================== کنترل هوشمند زنگوله اعلان هدر متصل به دیتابیس واقعی ====================
+        async function updateHeaderNotificationBell() {
+            const loggedUser = getLoggedInUserData();
+            
+            // اگر کاربر واقعی لاگین بود از مشخصات او استفاده کن، در غیر این صورت از مقادیر شبیه‌ساز
+            const roleParam = loggedUser ? loggedUser.role : currentRole;
+            const deptParam = loggedUser ? loggedUser.department : '';
+            const userParam = loggedUser ? loggedUser.username : '';
 
-            // استفاده از تایمر یا Observer برای پیدا کردن آیکون زنگوله‌ای که کامپوننت هدر داینامیک آن را می‌سازد
-            const checkBellExist = setInterval(() => {
-                const bellIcon = document.querySelector('.fa-bell') || document.querySelector('[class*="fa-bell"]');
-                if (bellIcon) {
-                    clearInterval(checkBellExist);
-                    
-                    // به دست آوردن المان والد آیکون زنگوله جهت افزودن نشان عدد (Badge) و دراپ‌داون
-                    const parent = bellIcon.parentElement;
-                    if (!parent) return;
+            try {
+                // ارسال پارامترها به صورت کامل به سرویس اعلان‌ها
+                const response = await fetch(`../api/notifications.php?target_role=${roleParam}&user_department=${deptParam}&username=${userParam}`);
+                const notifData = await response.json();
 
-                    parent.style.position = 'relative';
+                if (!notifData.success) return;
 
-                    // حذف Badge و کارت اعلان‌های قبلی در صورت وجود برای جلوگیری از تکرار فیلدها
-                    const oldBadge = parent.querySelector('#bell-notif-badge');
-                    if (oldBadge) oldBadge.remove();
-                    const oldDropdown = parent.querySelector('#bell-notif-dropdown');
-                    if (oldDropdown) oldDropdown.remove();
+                const pendingTasks = notifData.data || [];
 
-                    if (pendingTasks.length > 0) {
-                        // ایجاد دایره قرمز اعلان
-                        const badge = document.createElement('span');
-                        badge.id = 'bell-notif-badge';
-                        badge.style.cssText = `
-                            position: absolute;
-                            top: -4px;
-                            right: -4px;
-                            background-color: #e74c3c;
-                            color: white;
-                            border-radius: 50%;
-                            width: 18px;
-                            height: 18px;
-                            font-size: 11px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-weight: bold;
-                            z-index: 1000;
-                            box-shadow: 0 0 4px rgba(0,0,0,0.3);
-                            pointer-events: none;
-                        `;
-                        badge.textContent = pendingTasks.length;
-                        parent.appendChild(badge);
+                const checkBellExist = setInterval(() => {
+                    const bellIcon = document.querySelector('.fa-bell') || document.querySelector('[class*="fa-bell"]');
+                    if (bellIcon) {
+                        clearInterval(checkBellExist);
+                        
+                        const parent = bellIcon.parentElement;
+                        if (!parent) return;
 
-                        // ایجاد باکس دراپ‌داون لیست کارهای معوق
-                        const dropdown = document.createElement('div');
-                        dropdown.id = 'bell-notif-dropdown';
-                        dropdown.style.cssText = `
-                            position: absolute;
-                            top: 35px;
-                            left: 0;
-                            background: white;
-                            border: 1px solid #cbd5e1;
-                            border-radius: 8px;
-                            width: 320px;
-                            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-                            display: none;
-                            z-index: 10000;
-                            direction: rtl;
-                            max-height: 350px;
-                            overflow-y: auto;
-                        `;
+                        parent.style.position = 'relative';
 
-                        // هدر دراپ‌داون
-                        const header = document.createElement('div');
-                        header.style.cssText = 'padding: 10px 15px; border-bottom: 1px solid #edf2f7; font-weight: bold; color: #1e293b; font-size: 13px; background: #f8fafc; border-top-left-radius: 8px; border-top-right-radius: 8px;';
-                        header.textContent = `اعلان‌های کارتابل شما (${pendingTasks.length})`;
-                        dropdown.appendChild(header);
+                        const oldBadge = parent.querySelector('#bell-notif-badge');
+                        if (oldBadge) oldBadge.remove();
+                        const oldDropdown = parent.querySelector('#bell-notif-dropdown');
+                        if (oldDropdown) oldDropdown.remove();
 
-                        // لیست کارهای معوق
-                        pendingTasks.forEach(task => {
-                            const item = document.createElement('div');
-                            item.className = 'bell-notif-item';
-                            item.innerHTML = `
-                                <i class="fas fa-file-invoice bell-notif-icon"></i>
-                                <div class="bell-notif-text">
-                                    <strong>کارهای معوق:</strong> فرم گزارش قطعه معیوب به شماره <strong>${task.reportNumber}</strong> به این واحد ارجاع گردید. جهت باز کردن کلیک کنید.
-                                </div>
+                        if (pendingTasks.length > 0) {
+                            const badge = document.createElement('span');
+                            badge.id = 'bell-notif-badge';
+                            badge.style.cssText = `
+                                position: absolute;
+                                top: -4px;
+                                right: -4px;
+                                background-color: #e74c3c;
+                                color: white;
+                                border-radius: 50%;
+                                width: 18px;
+                                height: 18px;
+                                font-size: 11px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-weight: bold;
+                                z-index: 1000;
+                                box-shadow: 0 0 4px rgba(0,0,0,0.3);
+                                pointer-events: none;
                             `;
-                            // کلیک روی اعلان برای لود شدن فرم و تسک
-                            item.addEventListener('click', (e) => {
+                            badge.textContent = pendingTasks.length;
+                            parent.appendChild(badge);
+
+                            const dropdown = document.createElement('div');
+                            dropdown.id = 'bell-notif-dropdown';
+                            dropdown.style.cssText = `
+                                position: absolute;
+                                top: 35px;
+                                left: 0;
+                                background: white;
+                                border: 1px solid #cbd5e1;
+                                border-radius: 8px;
+                                width: 320px;
+                                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                                display: none;
+                                z-index: 10000;
+                                direction: rtl;
+                                max-height: 350px;
+                                overflow-y: auto;
+                            `;
+
+                            const header = document.createElement('div');
+                            header.style.cssText = 'padding: 10px 15px; border-bottom: 1px solid #edf2f7; font-weight: bold; color: #1e293b; font-size: 13px; background: #f8fafc; border-top-left-radius: 8px; border-top-right-radius: 8px;';
+                            header.textContent = `درخواست‌های ارجاع شده جدید (${pendingTasks.length})`;
+                            dropdown.appendChild(header);
+
+                            pendingTasks.forEach(task => {
+                                const item = document.createElement('div');
+                                item.className = 'bell-notif-item';
+                                item.innerHTML = `
+                                    <i class="fas fa-file-invoice bell-notif-icon"></i>
+                                    <div class="bell-notif-text">
+                                        <strong>ارجاع کار جدید:</strong> ${task.message}
+                                    </div>
+                                `;
+                                item.addEventListener('click', async (e) => {
+                                    e.stopPropagation();
+                                    dropdown.style.display = 'none';
+                                    
+                                    try {
+                                        const loadRep = await fetch(`../api/defect_reports.php?report_number=${task.message.match(/NC-\d+-\d+/)[0]}`);
+                                        const repData = await loadRep.json();
+                                        if (repData.success) {
+                                            activeTaskReport = repData.data;
+                                            loadTaskIntoForm();
+                                        }
+                                    } catch(err) {
+                                        console.error("خطا در خواندن جزئیات گزارش:", err);
+                                    }
+                                });
+                                dropdown.appendChild(item);
+                            });
+
+                            parent.appendChild(dropdown);
+
+                            parent.style.cursor = 'pointer';
+                            parent.addEventListener('click', (e) => {
+                                e.preventDefault();
                                 e.stopPropagation();
-                                activeTaskReport = task;
-                                loadTaskIntoForm();
+                                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                            });
+
+                            document.addEventListener('click', () => {
                                 dropdown.style.display = 'none';
                             });
-                            dropdown.appendChild(item);
-                        });
-
-                        parent.appendChild(dropdown);
-
-                        // کلیک روی آیکون برای فعال شدن دراپ‌داون
-                        parent.style.cursor = 'pointer';
-                        parent.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-                        });
-
-                        // بستن دراپ‌داون با کلیک به خارج از آن
-                        document.addEventListener('click', () => {
-                            dropdown.style.display = 'none';
-                        });
+                        }
                     }
-                }
-            }, 300);
+                }, 300);
+            } catch(err) {
+                console.error("خطا در خواندن اعلان‌ها از سرور:", err);
+            }
         }
 
         // ==================== مدیریت فایل‌ها ====================
@@ -1540,10 +1549,10 @@
             }
         }
         
-        // ==================== ارسال مراحل فرم و تغییر وضعیت گردش کار ====================
+        // ==================== ارسال فرم به دیتابیس واقعی ====================
 
         // مرحله اول: ارسال گزارش‌دهنده به کنترل کیفیت
-        function submitStep1(e) {
+        async function submitStep1(e) {
             e.preventDefault();
             
             if (!validateStep('step1')) {
@@ -1552,6 +1561,7 @@
             }
             
             const reportData = {
+                step: 1,
                 reportNumber: document.getElementById('reportNumber').value,
                 reportDate: document.getElementById('reportDate').value,
                 reporterName: document.getElementById('reporterName').value,
@@ -1569,32 +1579,33 @@
                 defectType: document.getElementById('defectType').value,
                 defectDescription: document.getElementById('defectDescription').value,
                 possibleCause: document.getElementById('possibleCause').value,
-                partImage: partImageFile ? partImageFile.name : null,
-                defectDocumentsCount: defectDocumentsFiles.length,
-                submitTime: new Date().toLocaleString('fa-IR'),
-                
-                // اطلاعات وضعیت گردش کار
-                status: 'waiting_qc', // ارجاع به مرحله بعد (کنترل کیفیت - operator1)
-                qcData: null,
-                warehouseData: null,
-                techData: null
+                partImage: partImageFile ? partImageFile.name : null
             };
             
-            let reports = JSON.parse(localStorage.getItem('defectReports_Workflow') || '[]');
-            reports.push(reportData);
-            localStorage.setItem('defectReports_Workflow', JSON.stringify(reports));
-            localStorage.removeItem('defectReportDraft'); // پاکسازی پیش‌نویس
-            
-            showToast(`گزارش ${reportData.reportNumber} ثبت و با موفقیت به کارتابل کنترل کیفیت (operator1) ارجاع شد.`, 'success');
-            
-            setTimeout(() => {
-                resetFormToReporter();
-                checkPendingTasks();
-            }, 1500);
+            try {
+                const response = await fetch('../api/defect_reports.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    localStorage.removeItem('defectReportDraft');
+                    resetFormToReporter();
+                    checkPendingTasks();
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch(err) {
+                console.error("Error submitting step 1:", err);
+                showToast("خطا در ارتباط با سرور", "error");
+            }
         }
 
         // مرحله دوم: کنترل کیفیت به انباردار
-        function submitStep2(e) {
+        async function submitStep2(e) {
             e.preventDefault();
             if (!validateStep('step2')) {
                 showToast('لطفاً فیلدهای اجباری کنترل کیفیت را تکمیل کنید.', 'error');
@@ -1603,29 +1614,37 @@
 
             if (!activeTaskReport) return;
 
-            let reports = JSON.parse(localStorage.getItem('defectReports_Workflow') || '[]');
-            let index = reports.findIndex(r => r.reportNumber === activeTaskReport.reportNumber);
+            const qcData = {
+                step: 2,
+                reportNumber: activeTaskReport.report_number || activeTaskReport.reportNumber,
+                qcDetectionLocation: document.getElementById('qcDetectionLocation').value,
+                partStatus: document.getElementById('partStatus').value,
+                defectReason: document.getElementById('defectReason').value,
+                qualityNotes: document.getElementById('qualityNotes').value
+            };
 
-            if (index > -1) {
-                reports[index].qcData = {
-                    qcDetectionLocation: document.getElementById('qcDetectionLocation').value,
-                    partStatus: document.getElementById('partStatus').value,
-                    defectReason: document.getElementById('defectReason').value,
-                    qualityNotes: document.getElementById('qualityNotes').value
-                };
-                reports[index].status = 'waiting_warehouse'; // ارجاع به مرحله بعد (انباردار - operator2)
+            try {
+                const response = await fetch('../api/defect_reports.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(qcData)
+                });
+                const result = await response.json();
 
-                localStorage.setItem('defectReports_Workflow', JSON.stringify(reports));
-                showToast('اظهارنظر کنترل کیفیت ثبت و به کارتابل انباردار (operator2) ارجاع شد.', 'success');
-
-                setTimeout(() => {
+                if (result.success) {
+                    showToast(result.message, 'success');
                     checkPendingTasks();
-                }, 1500);
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch(err) {
+                console.error("Error submitting step 2:", err);
+                showToast("خطا در ارتباط با سرور", "error");
             }
         }
 
-        // مرحله سوم: انباردار به کمیته فنی
-        function submitStep3(e) {
+        // مرحله سوم: انباردار به کمیته فنی/مدیر کارخانه
+        async function submitStep3(e) {
             e.preventDefault();
             if (!validateStep('step3')) {
                 showToast('لطفاً فیلدهای اجباری بخش انبار را تکمیل کنید.', 'error');
@@ -1634,55 +1653,71 @@
 
             if (!activeTaskReport) return;
 
-            let reports = JSON.parse(localStorage.getItem('defectReports_Workflow') || '[]');
-            let index = reports.findIndex(r => r.reportNumber === activeTaskReport.reportNumber);
+            const warehouseData = {
+                step: 3,
+                reportNumber: activeTaskReport.report_number || activeTaskReport.reportNumber,
+                trackingCode: document.getElementById('trackingCode').value,
+                inventoryStatus: document.getElementById('inventoryStatus').value,
+                warehouseNotes: document.getElementById('warehouseNotes').value
+            };
 
-            if (index > -1) {
-                reports[index].warehouseData = {
-                    trackingCode: document.getElementById('trackingCode').value,
-                    inventoryStatus: document.getElementById('inventoryStatus').value,
-                    warehouseNotes: document.getElementById('warehouseNotes').value
-                };
-                reports[index].status = 'waiting_tech'; // ارجاع به کمیته فنی (operator3)
+            try {
+                const response = await fetch('../api/defect_reports.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(warehouseData)
+                });
+                const result = await response.json();
 
-                localStorage.setItem('defectReports_Workflow', JSON.stringify(reports));
-                showToast('گزارش انبار ثبت و به کارتابل کمیته فنی (operator3) ارجاع شد.', 'success');
-
-                setTimeout(() => {
+                if (result.success) {
+                    showToast(result.message, 'success');
                     checkPendingTasks();
-                }, 1500);
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch(err) {
+                console.error("Error submitting step 3:", err);
+                showToast("خطا در ارتباط با سرور", "error");
             }
         }
 
-        // مرحله چهارم: ثبت نهایی توسط کمیته فنی
-        function submitStep4(e) {
+        // مرحله چهارم: ثبت نهایی توسط مدیر کارخانه / کمیته فنی
+        async function submitStep4(e) {
             e.preventDefault();
             if (!validateStep('step4')) {
-                showToast('لطفاً فیلدهای اجباری بخش کمیته فنی را تکمیل کنید.', 'error');
+                showToast('لطفاً فیلدهای اجباری بخش مدیر کارخانه را تکمیل کنید.', 'error');
                 return;
             }
 
             if (!activeTaskReport) return;
 
-            let reports = JSON.parse(localStorage.getItem('defectReports_Workflow') || '[]');
-            let index = reports.findIndex(r => r.reportNumber === activeTaskReport.reportNumber);
+            const techData = {
+                step: 4,
+                reportNumber: activeTaskReport.report_number || activeTaskReport.reportNumber,
+                techReviewResult: document.getElementById('techReviewResult').value,
+                finalDecision: document.getElementById('finalDecision').value,
+                responsibleParty: document.getElementById('responsibleParty').value,
+                deadlineDate: document.getElementById('deadlineDate').value,
+                correctiveActionNo: document.getElementById('correctiveActionNo').value
+            };
 
-            if (index > -1) {
-                reports[index].techData = {
-                    techReviewResult: document.getElementById('techReviewResult').value,
-                    finalDecision: document.getElementById('finalDecision').value,
-                    responsibleParty: document.getElementById('responsibleParty').value,
-                    deadlineDate: document.getElementById('deadlineDate').value,
-                    correctiveActionNo: document.getElementById('correctiveActionNo').value
-                };
-                reports[index].status = 'completed'; // خاتمه پرونده
+            try {
+                const response = await fetch('../api/defect_reports.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(techData)
+                });
+                const result = await response.json();
 
-                localStorage.setItem('defectReports_Workflow', JSON.stringify(reports));
-                showToast(`پرونده گزارش عدم انطباق ${activeTaskReport.reportNumber} به صورت نهایی بسته و بایگانی شد.`, 'success');
-
-                setTimeout(() => {
+                if (result.success) {
+                    showToast(result.message, 'success');
                     checkPendingTasks();
-                }, 1500);
+                } else {
+                    showToast(result.error, 'error');
+                }
+            } catch(err) {
+                console.error("Error submitting step 4:", err);
+                showToast("خطا در ارتباط با سرور", "error");
             }
         }
 
@@ -1799,6 +1834,25 @@
             // چک کردن کارتابل اولیه و اعمال زنگوله در زمان باز شدن صفحه
             checkPendingTasks();
         });
+
+        // تابع خواندن مشخصات کاربر واقعی لاگین شده از لوکال استوریج سیستم شما
+        function getLoggedInUserData() {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    return {
+                        id: user.id || user.user_id || '',
+                        username: user.username || '',
+                        department: user.department || '',
+                        role: user.role || ''
+                    };
+                } catch(e) {
+                    console.error("خطا در پارس اطلاعات کاربر از لوکال استوریج", e);
+                }
+            }
+            return null;
+        }
     </script>
 </body>
 </html>
