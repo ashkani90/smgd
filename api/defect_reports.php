@@ -1,5 +1,6 @@
 
 <?php
+session_start();
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
@@ -81,33 +82,71 @@ if ($method === 'POST') {
     // --- مرحله ۱: ثبت اولیه توسط گزارش‌گر و ارجاع به کنترل کیفیت ---
     if ($step === 1) {
         try {
+            // دریافت user_id کاربر لاگین شده از session
+            $user_id = $_SESSION['user_id'] ?? 0;
+            
+            // اگر user_id در session نبود، از localStorage که در فرم ارسال می‌شود بگیر
+            if ($user_id == 0 && isset($input['user_id'])) {
+                $user_id = $input['user_id'];
+            }
+            
             $sql = "INSERT INTO defect_reports (
                 report_number, report_date, reporter_name, employee_code, reporter_department,
                 vehicle_type, vehicle_model, part_code, part_name_fa, part_name_en,
                 defect_quantity, unit_of_measure, detection_location, is_replaced,
-                part_image, defect_type, defect_description, possible_cause, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting_qc')";
+                part_image, defect_type, defect_description, possible_cause, status, user_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting_qc', ?)";
 
             $stmt = $db->prepare($sql);
             $stmt->execute([
                 $input['reportNumber'], $input['reportDate'], $input['reporterName'], $input['employeeCode'], $input['reporterDepartment'],
                 $input['vehicleType'], $input['vehicleModel'], $input['partCode'], $input['partNameFa'], $input['partNameEn'] ?? '',
                 $input['defectQuantity'], $input['unitOfMeasure'] ?? '', $input['detectionLocation'], $input['isReplaced'],
-                $input['partImage'] ?? '', $input['defectType'], $input['defectDescription'], $input['possibleCause'] ?? ''
+                $input['partImage'] ?? '', $input['defectType'], $input['defectDescription'], $input['possibleCause'] ?? '',
+                $user_id  // <-- اضافه شود
             ]);
 
             $reportId = $db->lastInsertId();
 
             // ایجاد اعلان واقعی در دیتابیس برای کنترل کیفیت (operator1)
-            $notifSql = "INSERT INTO notifications (title, message, type, priority, related_id, target_role, sender_name, sender_role) 
-             VALUES (?, ?, 'alert', 'high', ?, 'quality', ?, 'operator')";
-            $notifStmt = $db->prepare($notifSql);
-            $notifStmt->execute([
-                "گزارش عدم انطباق جدید",
-                "گزارش قطعه معیوب شماره " . $input['reportNumber'] . " ثبت گردید و منتظر ارزیابی کیفی شماست.",
-                $reportId,
-                $input['reporterName']
-            ]);
+// دریافت اطلاعات کامل کاربر لاگین شده از session
+$user_id = $_SESSION['user_id'] ?? 0;
+
+// اگر user_id در فرم ارسال شده، از آن استفاده کن
+if ($user_id == 0 && isset($input['user_id'])) {
+    $user_id = $input['user_id'];
+}
+
+// دریافت نام کامل و نقش کاربر از دیتابیس
+$sender_fullname = $input['reporterName']; // مقدار پیش‌فرض
+$sender_role = 'operator'; // مقدار پیش‌فرض
+
+if ($user_id > 0) {
+    $userStmt = $db->prepare("SELECT full_name, role FROM users WHERE id = ?");
+    $userStmt->execute([$user_id]);
+    $userInfo = $userStmt->fetch(PDO::FETCH_ASSOC);
+    if ($userInfo) {
+        $sender_fullname = $userInfo['full_name'];
+        $sender_role = $userInfo['role'];
+    }
+}
+
+// ساخت پیام کامل با نام گزارش‌دهنده
+                $fullMessage = "گزارش قطعه معیوب شماره " . $input['reportNumber'] . " ثبت گردید.\n" .
+                            "گزارش‌دهنده: " . $sender_fullname . " (" . $sender_role . ")\n" .
+                            "قطعه: " . $input['partNameFa'] . "\n" .
+                            "نوع عیب: " . $input['defectType'];
+
+                        $notifSql = "INSERT INTO notifications (title, message, type, priority, related_module, related_id,target_role, sender_name, sender_role, created_at, expires_at
+                        ) VALUES ('گزارش عدم انطباق جدید',?,'alert','high','defect_reports',?,'Quality-Manager',?,?,NOW(),DATE_ADD(NOW(), INTERVAL 7 DAY)
+                        )";
+                        $notifStmt = $db->prepare($notifSql);
+                        $notifStmt->execute([
+                            $fullMessage,
+                            $reportId,
+                            $sender_fullname,   // نام کامل: 
+                            $sender_role        // نقش: admin
+                ]);
 
             echo json_encode(["success" => true, "message" => "گزارش با موفقیت ثبت و به کنترل کیفیت ارجاع شد."]);
         } catch(Exception $e) {
