@@ -757,7 +757,8 @@
                             <div class="upload-preview" id="defectDocsPreview"></div>
                         </div>
                     </div>
-                    
+<!-- اضافه شود: input مخفی برای ارسال user_id -->
+<input type="hidden" id="form_user_id" name="user_id" value="">                    
                     <!-- دکمه‌های فرم مرحله اول -->
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" id="resetFormBtn">
@@ -1559,7 +1560,15 @@
                 showToast('لطفاً تمام فیلدهای اجباری مرحله اول را پر کنید', 'error');
                 return;
             }
-            
+    // دریافت user_id از localStorage
+    let userId = 0;
+    const userData = localStorage.getItem('user');
+    if (userData) {
+        try {
+            const user = JSON.parse(userData);
+            userId = user.id || 0;
+        } catch(e) {}
+    }            
             const reportData = {
                 step: 1,
                 reportNumber: document.getElementById('reportNumber').value,
