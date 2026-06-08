@@ -75,7 +75,6 @@ class NotificationAPI {
                         n.type,
                         n.priority,
                         n.related_module,
-                        n.related_id,
                         n.is_read,
                         n.created_at,
                         n.expires_at,
@@ -654,7 +653,31 @@ $api->handleRequest();
 
 
 
-
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // گرفتن متغیر نقش کاربر جاری فرستاده شده از فرانت‌اند
+    $target_role = isset($_GET['target_role']) ? $_GET['target_role'] : '';
+    
+    if (!empty($target_role)) {
+        try {
+            // دریافت اعلان‌های فعال خوانده نشده متعلق به نقش مورد نظر
+            $stmt = $db->prepare("SELECT * FROM notifications WHERE target_role = ? AND is_read = 0 ORDER BY id DESC");
+            $stmt->execute([$target_role]);
+            $notifs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // ساخت فرمت خروجی هماهنگ با فرانت‌اند
+            echo json_encode([
+                "success" => true,
+                "data" => $notifs,
+                "unread_count" => count($notifs),
+                "total" => count($notifs)
+            ]);
+            exit;
+        } catch(Exception $e) {
+            echo json_encode(["success" => false, "error" => $e->getMessage()]);
+            exit;
+        }
+    }
+}
 
 
 
