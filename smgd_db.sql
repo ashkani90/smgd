@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 08, 2026 at 09:42 AM
+-- Generation Time: Jun 08, 2026 at 12:37 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -275,8 +275,62 @@ CREATE TABLE `defect_reports` (
 --
 
 INSERT INTO `defect_reports` (`id`, `report_number`, `report_date`, `reporter_name`, `employee_code`, `reporter_department`, `vehicle_type`, `vehicle_model`, `part_code`, `part_name_fa`, `part_name_en`, `defect_quantity`, `unit_of_measure`, `detection_location`, `is_replaced`, `part_image`, `defect_type`, `defect_description`, `possible_cause`, `status`, `qc_detection_location`, `part_status`, `defect_reason`, `quality_notes`, `qc_submitted_at`, `tracking_code`, `inventory_status`, `warehouse_notes`, `warehouse_submitted_at`, `tech_review_result`, `final_decision`, `responsible_party`, `deadline_date`, `corrective_action_no`, `tech_submitted_at`, `created_at`) VALUES
-(46, 'NC-20260608-471', '2026/06/08 - 12:00', '1', '1', 'rnd', 'مینی بوس', '1', '1', '1', '1', 1, 'متر', 'برگشت از تولید', 'خیر', '', 'ظاهری', '111', '1111111111', 'waiting_qc', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-08 07:11:57'),
-(52, 'NC-20260608-819', '2026/07/03 - 12:00', '2', '2', 'warehouse', 'کامیونت', '2', '2', '2', '2', 1, 'عدد', 'بازرسی دوره ای انبار', 'بله', '', 'مونتاژی', '2', '2', 'waiting_qc', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-08 07:24:30');
+(64, 'NC-20260608-069', '2026/06/08 - 12:00', '876', '786', 'quality_control', 'کامیونت', '786', '786', '786', '786', 1, 'عدد', 'بازرسی پیش از تحویل', 'خیر', '', 'مونتاژی', '786', '7896', 'waiting_qc', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-08 09:51:11');
+
+--
+-- Triggers `defect_reports`
+--
+DELIMITER $$
+CREATE TRIGGER `after_defect_report_insert` AFTER INSERT ON `defect_reports` FOR EACH ROW BEGIN
+    DECLARE reporter_name_val VARCHAR(100);
+    DECLARE quality_manager_id INT;
+    
+    -- دریافت نام گزارش‌دهنده
+    SELECT full_name INTO reporter_name_val 
+    FROM users 
+    WHERE id = NEW.reporter_name
+    LIMIT 1;
+    
+    -- یافتن کاربر با نقش Quality-Manager
+    SELECT id INTO quality_manager_id
+    FROM users 
+    WHERE role = 'Quality-Manager' AND is_active = 1
+    LIMIT 1;
+    
+    -- اگر مدیر کیفیت وجود دارد، اعلان ارسال کن
+    IF quality_manager_id IS NOT NULL THEN
+        INSERT INTO `notifications` (
+            `user_id`, 
+            `title`, 
+            `message`, 
+            `type`, 
+            `priority`, 
+            `related_module`, 
+            `related_id`, 
+            `created_at`,
+            `expires_at`
+        ) VALUES (
+            quality_manager_id,
+            'گزارش عدم انطباق جدید',
+            CONCAT(
+                'گزارش قطعه معیوب شماره ', NEW.report_number, ' ثبت گردید.\n',
+                'گزارش‌دهنده: ', IFNULL(reporter_name_val, 'کاربر ناشناس'), '\n',
+                'قطعه: ', NEW.part_name_fa, '\n',
+                'نوع عیب: ', NEW.defect_type, '\n',
+                'وضعیت: منتظر ارزیابی کیفی'
+            ),
+            'defect_report',
+            'high',
+            'defect_reports',
+            NEW.id,
+            NOW(),
+            DATE_ADD(NOW(), INTERVAL 7 DAY)
+        );
+    END IF;
+    
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -386,55 +440,6 @@ INSERT INTO `equipments` (`id`, `equipment_code`, `equipment_name`, `equipment_t
 (14, 'EQP-014', 'دستگاه برش لیزری', 'ماشین‌آلات برش', 'Trumpf', 'TruLaser 5030', 'TRM-2021-077', '2021-07-19', 'سالن ماشین‌آلات پیشرفته', 'operational', '2024-02-20', '2024-08-20', 'critical', 'تنها دستگاه برش لیزری موجود', '2026-01-27 11:57:43'),
 (15, 'EQP-015', 'سیستم UPS', 'تجهیزات الکتریکی', 'Eaton', '9PX 6k', 'EAT-2022-033', '2022-11-08', 'اتاق سرور', 'operational', '2024-03-10', '2024-09-10', 'critical', 'محافظت از سرورهای مرکزی', '2026-01-27 11:57:43');
 
---
--- Triggers `equipments`
---
-DELIMITER $$
-CREATE TRIGGER `after_equipment_status_update` AFTER UPDATE ON `equipments` FOR EACH ROW BEGIN
-    -- اگر وضعیت به حالت بحرانی تغییر کرده باشد
-    IF OLD.status != NEW.status AND 
-       (NEW.status IN ('repair', 'out of service') OR 
-        NEW.criticality_level IN ('high', 'critical')) THEN
-        
-        -- ارسال اعلان به پرسنل فنی
-        INSERT INTO `notifications` (
-            `user_id`, 
-            `title`, 
-            `message`, 
-            `type`, 
-            `priority`, 
-            `related_module`, 
-            `related_id`, 
-            `expires_at`
-        )
-        SELECT 
-            id,
-            'تغییر وضعیت تجهیز',
-            CONCAT(
-                'وضعیت تجهیز ''', NEW.equipment_name, ''' (', NEW.equipment_code, 
-                ') تغییر یافت.\n',
-                'وضعیت جدید: ', translate_equipment_status(NEW.status), '\n',
-                'سطح بحرانی: ', translate_criticality(NEW.criticality_level), '\n',
-                'محل: ', NEW.location
-            ),
-            'equipment',
-            CASE 
-                WHEN NEW.status = 'out of service' OR NEW.criticality_level = 'critical' 
-                THEN 'critical'
-                ELSE 'high'
-            END,
-            'equipments',
-            NEW.id,
-            DATE_ADD(NOW(), INTERVAL 7 DAY)
-        FROM users 
-        WHERE role IN ('admin', 'supervisor', 'technician') 
-        AND is_active = 1;
-        
-    END IF;
-END
-$$
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --
@@ -470,97 +475,6 @@ INSERT INTO `inspection_reports` (`id`, `report_number`, `equipment_id`, `inspec
 (3, 'IR-2023-003', 42, 22, '2023-11-20', NULL, 'عیب‌یابی', 'شناسایی نشتی روغن در سیلندر اصلی. فشار سیستم ۲۰٪ پایین‌تر از حداقل استاندارد است. ادامه کار ایمن نیست.', 'دستگاه بلافاصله از خط خارج شده و تعمیر اساسی روی سیلندر و سیستم هیدرولیک انجام شود.', 'Needs Urgent Repair', 1, 'تعویض اورینگ‌ها و شیلنگ‌های فرسوده سیلندر اصلی. پرکردن مجدد روغن و تست فشار.', '2023-11-27', 13, '2023-11-20', '[\"عکس‌های محل نشتی\", \"گزارش فشارسنجی\", \"دستور توقف دستگاه\"]'),
 (4, 'IR-2023-004', 91, 24, '2023-12-05', '2024-06-05', 'دوره‌ای (شش‌ماهه)', 'بازرسی الکتریکی: کلیه اتصالات سالم، عایق‌بندی بدون مشکل، جریان کشی موتور در محدوده پلاک.', 'نیاز به اقدام خاصی نیست.', 'Passed', 0, NULL, NULL, 13, '2023-12-05', '[\"گزارش تست عایق\", \"پلاک دستگاه\"]'),
 (5, 'IR-2023-005', 56, 23, '2023-12-12', '2024-01-12', 'کنترل کیفیت', 'لرزش دستگاه در دور بالا کمی از حد مجاز بیشتر است. احتمال عدم بالانس چرخ طیار وجود دارد.', 'بالانس چرخ طیار و بررسی یاتاقان‌ها توسط تیم تعمیرات.', 'Needs Follow-up', 1, 'بالانس دینامیکی چرخ طیار و در صورت نیاز سفت‌کردن اتصالات پایه.', '2023-12-26', NULL, NULL, '[\"فیلم عملکرد دستگاه\", \"گزارش آنالیز ارتعاش\"]');
-
---
--- Triggers `inspection_reports`
---
-DELIMITER $$
-CREATE TRIGGER `after_inspection_report_insert` AFTER INSERT ON `inspection_reports` FOR EACH ROW BEGIN
-    DECLARE equipment_name_val VARCHAR(100);
-    DECLARE inspector_name_val VARCHAR(100);
-    
-    -- دریافت اطلاعات
-    SELECT 
-        e.equipment_name,
-        u.full_name
-    INTO 
-        equipment_name_val,
-        inspector_name_val
-    FROM equipments e
-    JOIN users u ON u.id = NEW.inspector_id
-    WHERE e.id = NEW.equipment_id;
-    
-    -- اگر نیاز به پیگیری یا تعمیر اضطراری باشد
-    IF NEW.status IN ('Needs Follow-up', 'Needs Urgent Repair') THEN
-        
-        -- ارسال اعلان به سوپروایزرها و مدیران
-        INSERT INTO `notifications` (
-            `user_id`, 
-            `title`, 
-            `message`, 
-            `type`, 
-            `priority`, 
-            `related_module`, 
-            `related_id`, 
-            `expires_at`
-        )
-        SELECT 
-            id,
-            'گزارش بازرسی نیازمند اقدام',
-            CONCAT(
-                'گزارش بازرسی ', NEW.report_number, ' برای تجهیز ''', 
-                equipment_name_val, ''' نیازمند اقدام است.\n',
-                'وضعیت: ', NEW.status, '\n',
-                'یافته‌ها: ', LEFT(NEW.findings, 120), '...\n',
-                'تاریخ بازرسی: ', DATE_FORMAT(NEW.inspection_date, '%Y/%m/%d')
-            ),
-            'inspection',
-            CASE 
-                WHEN NEW.status = 'Needs Urgent Repair' THEN 'high'
-                ELSE 'medium'
-            END,
-            'inspection_reports',
-            NEW.id,
-            DATE_ADD(NEW.follow_up_date, INTERVAL 1 DAY)
-        FROM users 
-        WHERE role IN ('admin', 'supervisor') 
-        AND is_active = 1;
-        
-        -- اگر نیاز به تعمیر اضطراری باشد، به تکنسین‌ها هم اطلاع بده
-        IF NEW.status = 'Needs Urgent Repair' THEN
-            INSERT INTO `notifications` (
-                `user_id`, 
-                `title`, 
-                `message`, 
-                `type`, 
-                `priority`, 
-                `related_module`, 
-                `related_id`, 
-                `expires_at`
-            )
-            SELECT 
-                id,
-                'تعمیر اضطراری مورد نیاز',
-                CONCAT(
-                    'تجهیز ''', equipment_name_val, ''' نیاز به تعمیر اضطراری دارد.\n',
-                    'گزارش بازرسی: ', NEW.report_number, '\n',
-                    'یافته‌ها: ', LEFT(NEW.findings, 100), '...'
-                ),
-                'inspection',
-                'critical',
-                'inspection_reports',
-                NEW.id,
-                DATE_ADD(NEW.follow_up_date, INTERVAL 1 DAY)
-            FROM users 
-            WHERE role = 'technician' 
-            AND is_active = 1;
-        END IF;
-        
-    END IF;
-    
-END
-$$
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -840,7 +754,24 @@ INSERT INTO `login_attempts` (`id`, `username`, `ip_address`, `attempt_time`, `s
 (288, 'operator1', '::1', '2026-06-08 07:12:10', 1),
 (289, 'admin', '::1', '2026-06-08 07:16:42', 1),
 (290, 'operator1', '::1', '2026-06-08 07:24:48', 1),
-(291, 'admin', '::1', '2026-06-08 07:28:34', 1);
+(291, 'admin', '::1', '2026-06-08 07:28:34', 1),
+(292, 'operator1', '::1', '2026-06-08 07:50:14', 0),
+(293, 'operator1', '::1', '2026-06-08 07:50:18', 1),
+(294, 'admin', '::1', '2026-06-08 07:55:04', 1),
+(295, 'operator1', '::1', '2026-06-08 07:56:09', 1),
+(296, 'admin', '::1', '2026-06-08 08:05:10', 1),
+(297, 'operator1', '::1', '2026-06-08 08:05:57', 1),
+(298, 'admin', '::1', '2026-06-08 08:14:06', 1),
+(299, 'operator1', '::1', '2026-06-08 08:15:02', 1),
+(300, 'operator1', '::1', '2026-06-08 08:18:52', 1),
+(301, 'admin', '::1', '2026-06-08 08:29:42', 1),
+(302, 'operator1', '::1', '2026-06-08 08:30:22', 1),
+(303, 'admin', '::1', '2026-06-08 09:37:21', 1),
+(304, 'operator1', '::1', '2026-06-08 09:38:30', 1),
+(305, 'admin', '::1', '2026-06-08 09:39:49', 1),
+(306, 'operator1', '::1', '2026-06-08 09:46:51', 1),
+(307, 'admin', '::1', '2026-06-08 09:49:32', 1),
+(308, 'operator1', '::1', '2026-06-08 09:52:07', 1);
 
 -- --------------------------------------------------------
 
@@ -951,242 +882,6 @@ INSERT INTO `maintenance_requests` (`id`, `request_number`, `equipment_id`, `rep
 (7, 'MNT-2024-007', 56, 13, 'فشار سنج دیگ بخار شماره 2، عقربه ثابت مانده است.', 'high', '2024-01-19 06:30:00', '2024-01-23', 'In Progress', '2024-01-19', 24),
 (8, 'MNT-2024-008', 93, 11, 'صندلی اداری واحد مالی خراب شده است.', 'low', '2024-01-15 12:00:00', '2024-02-10', 'Paused', '2024-01-16', 22);
 
---
--- Triggers `maintenance_requests`
---
-DELIMITER $$
-CREATE TRIGGER `after_maintenance_request_approved` AFTER UPDATE ON `maintenance_requests` FOR EACH ROW BEGIN
-    DECLARE equipment_name_val VARCHAR(100);
-    DECLARE approver_name_val VARCHAR(100);
-    
-    -- بررسی تغییر وضعیت به Approved
-    IF OLD.status != 'Approved' AND NEW.status = 'Approved' THEN
-        
-        -- دریافت نام تجهیز
-        SELECT equipment_name INTO equipment_name_val 
-        FROM equipments 
-        WHERE id = NEW.equipment_id;
-        
-        -- دریافت نام تاییدکننده
-        SELECT full_name INTO approver_name_val 
-        FROM users 
-        WHERE id = NEW.approved_by;
-        
-        -- ارسال اعلان به گزارش‌دهنده
-        INSERT INTO `notifications` (
-            `user_id`, 
-            `title`, 
-            `message`, 
-            `type`, 
-            `priority`, 
-            `related_module`, 
-            `related_id`, 
-            `expires_at`
-        ) VALUES (
-            NEW.reported_by,
-            'درخواست تعمیر تایید شد',
-            CONCAT(
-                'درخواست تعمیر شما برای تجهیز ''', equipment_name_val, 
-                ''' تایید شد.\n',
-                'تاییدکننده: ', approver_name_val, '\n',
-                'شماره درخواست: ', NEW.request_number
-            ),
-            'maintenance_request',
-            'medium',
-            'maintenance_requests',
-            NEW.id,
-            DATE_ADD(NOW(), INTERVAL 3 DAY)
-        );
-        
-    END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `after_maintenance_request_insert` AFTER INSERT ON `maintenance_requests` FOR EACH ROW BEGIN
-    -- تعریف تمام متغیرها در ابتدا
-    DECLARE equipment_name_val VARCHAR(100);
-    DECLARE reporter_name_val VARCHAR(100);
-    DECLARE supervisor_id_val INT;
-    DECLARE done INT DEFAULT FALSE;
-    DECLARE supervisor_cursor CURSOR FOR 
-        SELECT id FROM users 
-        WHERE role = 'supervisor' AND is_active = 1;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    
-    -- دریافت نام تجهیز
-    SELECT equipment_name INTO equipment_name_val 
-    FROM equipments 
-    WHERE id = NEW.equipment_id;
-    
-    -- دریافت نام گزارش‌دهنده
-    SELECT full_name INTO reporter_name_val 
-    FROM users 
-    WHERE id = NEW.reported_by;
-    
-    -- باز کردن CURSOR و پردازش
-    OPEN supervisor_cursor;
-    
-    read_loop: LOOP
-        FETCH supervisor_cursor INTO supervisor_id_val;
-        IF done THEN
-            LEAVE read_loop;
-        END IF;
-        
-        -- درج اعلان برای سوپروایزر
-        INSERT INTO `notifications` (
-            `user_id`, 
-            `title`, 
-            `message`, 
-            `type`, 
-            `priority`, 
-            `related_module`, 
-            `related_id`, 
-            `expires_at`
-        ) VALUES (
-            supervisor_id_val,
-            'درخواست تعمیر جدید',
-            CONCAT(
-                'درخواست تعمیر برای تجهیز ''', 
-                IFNULL(equipment_name_val, 'نامشخص'), 
-                ''' توسط ''', 
-                IFNULL(reporter_name_val, 'کاربر ناشناس'), 
-                ''' ثبت شد.\n',
-                'شماره درخواست: ', NEW.request_number, '\n',
-                'اولویت: ', 
-                CASE NEW.priority
-                    WHEN 'high' THEN 'بالا'
-                    WHEN 'medium' THEN 'متوسط'
-                    WHEN 'low' THEN 'پایین'
-                    ELSE NEW.priority
-                END, 
-                '\n',
-                'شرح مشکل: ', 
-                LEFT(IFNULL(NEW.problem_description, 'بدون شرح'), 150), 
-                '...'
-            ),
-            'maintenance_request',
-            NEW.priority,
-            'maintenance_requests',
-            NEW.id,
-            DATE_ADD(NOW(), INTERVAL 7 DAY)
-        );
-    END LOOP;
-    
-    CLOSE supervisor_cursor;
-    
-    -- ارسال اعلان به مدیر سیستم
-    INSERT INTO `notifications` (
-        `user_id`, 
-        `title`, 
-        `message`, 
-        `type`, 
-        `priority`, 
-        `related_module`, 
-        `related_id`, 
-        `expires_at`
-    ) 
-    SELECT 
-        id,
-        'درخواست تعمیر جدید (مدیریت)',
-        CONCAT(
-            'درخواست تعمیر جدید ثبت شد.\n',
-            'تجهیز: ', IFNULL(equipment_name_val, 'نامشخص'), '\n',
-            'شماره: ', NEW.request_number, '\n',
-            'اولویت: ',
-            CASE NEW.priority
-                WHEN 'high' THEN 'بالا'
-                WHEN 'medium' THEN 'متوسط'
-                WHEN 'low' THEN 'پایین'
-                ELSE NEW.priority
-            END
-        ),
-        'maintenance_request',
-        NEW.priority,
-        'maintenance_requests',
-        NEW.id,
-        DATE_ADD(NOW(), INTERVAL 7 DAY)
-    FROM users 
-    WHERE role = 'admin' AND is_active = 1;
-    
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `test_notification_trigger` AFTER INSERT ON `maintenance_requests` FOR EACH ROW BEGIN
-    DECLARE test_user_id INT;
-    
-    -- یافتن کاربر تست (admin)
-    SELECT id INTO test_user_id FROM users WHERE username = 'admin' LIMIT 1;
-    
-    -- اگر کاربر admin پیدا شد، اعلان تست ایجاد کن
-    IF test_user_id IS NOT NULL THEN
-        INSERT INTO `notifications` (
-            `user_id`, 
-            `title`, 
-            `message`, 
-            `type`, 
-            `priority`, 
-            `related_module`, 
-            `related_id`, 
-            `created_at`,
-            `expires_at`
-        ) VALUES (
-            test_user_id,
-            '✅ تست تریگر - درخواست تعمیر جدید',
-            CONCAT(
-                'این یک اعلان تستی از تریگر است.\n',
-                'شماره درخواست: ', NEW.request_number, '\n',
-                'تجهیز: ', (SELECT equipment_name FROM equipments WHERE id = NEW.equipment_id), '\n',
-                'اولویت: ', 
-                CASE NEW.priority
-                    WHEN 'high' THEN '? بالا'
-                    WHEN 'medium' THEN '? متوسط'
-                    WHEN 'low' THEN '? پایین'
-                    ELSE NEW.priority
-                END
-            ),
-            'maintenance_request',
-            NEW.priority,
-            'maintenance_requests',
-            NEW.id,
-            NOW(),
-            DATE_ADD(NOW(), INTERVAL 1 DAY)
-        );
-        
-        -- همچنین اعلانی برای تمام سوپروایزرها
-        INSERT INTO `notifications` (
-            `user_id`, 
-            `title`, 
-            `message`, 
-            `type`, 
-            `priority`, 
-            `related_module`, 
-            `related_id`,
-            `created_at`,
-            `expires_at`
-        )
-        SELECT 
-            id,
-            '? درخواست تعمیر تست',
-            CONCAT(
-                'درخواست تعمیر تستی ثبت شد.\n',
-                'تجهیز: ', (SELECT equipment_name FROM equipments WHERE id = NEW.equipment_id), '\n',
-                'توضیح: ', LEFT(NEW.problem_description, 100), '...'
-            ),
-            'maintenance_request',
-            NEW.priority,
-            'maintenance_requests',
-            NEW.id,
-            NOW(),
-            DATE_ADD(NOW(), INTERVAL 1 DAY)
-        FROM users 
-        WHERE role = 'supervisor' AND is_active = 1;
-    END IF;
-END
-$$
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --
@@ -1263,7 +958,8 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `priority`, `related_module`, `related_id`, `is_read`, `read_at`, `created_at`, `expires_at`, `target_role`, `sender_name`, `sender_role`) VALUES
-(321, 4, 'گزارش عدم انطباق جدید', 'گزارش قطعه معیوب شماره NC-20260608-819 ثبت گردید و منتظر ارزیابی کیفی شماست.', 'alert', 'high', 'defect_reports', 52, 1, '2026-06-08 07:24:58', '2026-06-08 07:24:30', NULL, NULL, '2', 'reporter');
+(327, 4, 'گزارش عدم انطباق جدید', 'گزارش قطعه معیوب شماره NC-20260608-069 ثبت گردید.\nگزارش‌دهنده: کاربر ناشناس\nقطعه: 786\nنوع عیب: مونتاژی\nوضعیت: منتظر ارزیابی کیفی', '', 'high', 'defect_reports', 64, 1, '2026-06-08 09:52:48', '2026-06-08 09:51:11', '2026-06-15 09:51:11', NULL, NULL, NULL),
+(328, 0, 'گزارش عدم انطباق جدید', 'گزارش قطعه معیوب شماره NC-20260608-069 ثبت گردید و منتظر ارزیابی کیفی شماست.', 'alert', 'high', NULL, 64, 0, NULL, '2026-06-08 09:51:11', NULL, 'quality', '876', 'operator');
 
 -- --------------------------------------------------------
 
@@ -1378,49 +1074,6 @@ INSERT INTO `spare_parts` (`id`, `part_number`, `part_name`, `description`, `cat
 (9, 'SENS-O2-FRONT', 'سنسور اکسیژن جلویی', 'سنسور لامبدای جلو - 4 سیمه', 'الکتریکال', 'Bosch', 'الکتروپارت', 145.80, 7, 2, 4, 'انبار B', 'B-06-4', '2023-10-05', '2024-01-25', 'سازگار با سیستم‌های OBD-II', '2026-01-28 09:36:11'),
 (10, 'COOLANT-RED', 'ضد یخ/ضد جوش', 'مایع خنک‌کننده موتور - رنگ قرمز - ظرفیت 1.5 لیتری', 'مایعات', 'Prestone', 'شیمی خودرو', 40.30, 35, 8, 16, 'انبار D', 'D-12-3', '2023-12-20', '2024-06-01', 'محافظت در دمای -35 تا +130 درجه سانتیگراد', '2026-01-28 09:36:11');
 
---
--- Triggers `spare_parts`
---
-DELIMITER $$
-CREATE TRIGGER `after_spare_parts_low_stock` AFTER UPDATE ON `spare_parts` FOR EACH ROW BEGIN
-    -- بررسی اگر موجودی به سطح سفارش مجدد رسیده باشد
-    IF NEW.stock_quantity <= NEW.reorder_level AND OLD.stock_quantity > NEW.reorder_level THEN
-        
-        -- ارسال اعلان به انبارداران و مدیران
-        INSERT INTO `notifications` (
-            `user_id`, 
-            `title`, 
-            `message`, 
-            `type`, 
-            `priority`, 
-            `related_module`, 
-            `related_id`, 
-            `expires_at`
-        )
-        SELECT 
-            id,
-            'موجودی قطعه کم شد',
-            CONCAT(
-                'موجودی قطعه ''', NEW.part_name, ''' (', NEW.part_number, 
-                ') به ', NEW.stock_quantity, ' عدد رسیده است.\n',
-                'سطح سفارش مجدد: ', NEW.reorder_level, ' عدد\n',
-                'حداقل موجودی: ', NEW.minimum_stock, ' عدد\n',
-                'لطفاً اقدام به سفارش نمایید.'
-            ),
-            'parts',
-            'high',
-            'spare_parts',
-            NEW.id,
-            DATE_ADD(NOW(), INTERVAL 14 DAY)
-        FROM users 
-        WHERE role IN ('admin', 'supervisor', 'technician') 
-        AND is_active = 1;
-        
-    END IF;
-END
-$$
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --
@@ -1449,10 +1102,10 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `password_hash`, `full_name`, `email`, `phone`, `role`, `department`, `profile_image`, `is_active`, `last_login`, `created_at`, `updated_at`) VALUES
 (0, 'admin1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'مدیر سیستم', 'admin@company.com', '09123456789', 'admin', 'فنی', '', 1, '2024-01-15 14:30:00', '2023-01-10 06:30:00', '2026-06-06 10:24:59'),
-(1, 'admin', '$2y$10$TYMp3ksCe50H2x20cM9ZtOOGfrC0JM1J8wsVTsh.S3BGlLSd95svq', 'محمد پورسان دلیر', 'admin@cmms.local', '09127557315', 'admin', 'کنترل کیفیت', 'http:\\\\localhost\\smgd\\images\\profiles\\admin.jpg', 1, '2026-06-08 10:58:34', '0000-00-00 00:00:00', '2026-06-08 07:28:34'),
+(1, 'admin', '$2y$10$TYMp3ksCe50H2x20cM9ZtOOGfrC0JM1J8wsVTsh.S3BGlLSd95svq', 'محمد پورسان دلیر', 'admin@cmms.local', '09127557315', 'admin', 'کنترل کیفیت', 'http:\\\\localhost\\smgd\\images\\profiles\\admin.jpg', 1, '2026-06-08 13:19:32', '0000-00-00 00:00:00', '2026-06-08 09:49:32'),
 (2, 'supervisor1', '$2y$10$NF2Q9EtxButl8RnNUB2r7.U6hiiR91fbKQEJgjCr5B8zDec0fiKgm', 'ناظر فنی', 'supervisor@company.com', '09123456788', 'supervisor', 'production', '', 1, '2024-01-14 09:15:00', '2023-02-15 07:50:00', '2026-06-06 12:05:50'),
 (3, 'tech1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین برق', 'tech1@company.com', '09123456787', 'technician', 'تعمیرات', '', 1, '2024-01-13 16:45:00', '2023-03-20 05:00:00', '2026-06-02 07:41:37'),
-(4, 'operator1', '$2y$10$YNuhtzLeesPhzuUaGzG84enPOFKPUwS3VW9vvxcrOqe6nkOPo31tG', 'اپراتور خط ۱', 'operator1@company.com', '09123456786', 'Quality-Manager', 'quality', '', 1, '2026-06-08 10:54:48', '2023-04-05 10:45:00', '2026-06-08 07:24:48'),
+(4, 'operator1', '$2y$10$YNuhtzLeesPhzuUaGzG84enPOFKPUwS3VW9vvxcrOqe6nkOPo31tG', 'اپراتور خط ۱', 'operator1@company.com', '09123456786', 'Quality-Manager', 'quality', '', 1, '2026-06-08 13:22:07', '2023-04-05 10:45:00', '2026-06-08 09:52:07'),
 (5, 'tech2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین مکانیک', 'tech2@company.com', '09123456785', 'technician', 'تعمیرات', NULL, 1, '2024-01-10 13:10:00', '2023-05-12 06:10:00', '2024-01-10 09:45:00'),
 (6, 'supervisor2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'ناظر تولید', 'supervisor2@company.com', '09123456784', 'supervisor', 'تولید', '', 1, '2024-01-09 10:05:00', '2023-06-18 12:55:00', '2026-06-02 07:41:47'),
 (7, 'operator2', '$2y$10$aF/mjZ0De3Y6lPy9qTqUuenwY2zJm0/refeY2jbHyLWzphedMIAXW', 'اپراتور خط ۲', 'operator2@company.com', '09123456783', 'Warehouse-Manager', 'warehouse', '', 1, '2026-06-07 15:54:00', '2023-07-22 09:00:00', '2026-06-07 12:24:00'),
@@ -1560,146 +1213,6 @@ INSERT INTO `work_orders` (`id`, `work_order_number`, `maintenance_request_id`, 
 (30, 'WO-2026-023', 'MR-2026-023', 'فاطمه اکبری', 'پرویز علی‌زاده', '2026-01-25 06:30:00', '2026-01-27 08:00:00', '2026-01-27 16:00:00', '2026-01-27 08:20:00', '2026-01-27 14:15:00', 8.00, 5.92, 'نصب سیستم روشنایی LED', 'کار با برق', 'دریل، سیم لخت کن', 'لامپ LED، سیم', 'completed', 'medium', '40 لامپ نصب شد', 'passed', 'محمد کریمی', '2026-01-27'),
 (31, 'WO-2026-024', 'MR-2026-024', 'مهدی قاسمی', 'پرویز علی‌زاده', '2026-02-01 05:30:00', '2026-02-03 08:00:00', '2026-02-03 16:00:00', '2026-02-03 08:30:00', '2026-02-03 17:45:00', 8.00, 9.25, 'تعمیر دستگاه CNC', 'قفل گذاری انرژی', 'آچار آلن، کولیس', 'بلبرینگ خطی', 'completed', 'critical', 'دقت دستگاه بهبود یافت', 'passed', 'محمد کریمی', '2026-02-03'),
 (32, 'WO-2026-025', 'MR-2026-025', 'سارا موسوی', 'محمد کریمی', '2026-02-05 05:00:00', '2026-02-07 09:00:00', '2026-02-07 17:00:00', '2026-02-07 09:20:00', '2026-02-07 16:30:00', 8.00, 7.17, 'سرویس ترانسفورماتور', 'کار با برق فشار قوی', 'تستر عایق، دوربین حرارتی', 'روغن ترانسفورماتور', 'completed', 'high', 'ترانس سرویس شد', 'passed', 'احمد رضایی', '2026-02-07');
-
---
--- Triggers `work_orders`
---
-DELIMITER $$
-CREATE TRIGGER `after_work_order_insert` AFTER INSERT ON `work_orders` FOR EACH ROW BEGIN
-    DECLARE equipment_name_val VARCHAR(100);
-    DECLARE assigner_name_val VARCHAR(100);
-    DECLARE request_number_val VARCHAR(50);
-    
-    -- دریافت اطلاعات مرتبط با استفاده از LIMIT 1
-    SELECT 
-        IFNULL(e.equipment_name, 'تجهیز ناشناس'),
-        IFNULL(u.full_name, 'سیستم'),
-        IFNULL(mr.request_number, NEW.work_order_number)
-    INTO 
-        equipment_name_val,
-        assigner_name_val,
-        request_number_val
-    FROM work_orders wo
-    LEFT JOIN maintenance_requests mr ON wo.maintenance_request_id = mr.id
-    LEFT JOIN equipments e ON mr.equipment_id = e.id
-    LEFT JOIN users u ON u.full_name = NEW.assigned_by
-    WHERE wo.id = NEW.id
-    LIMIT 1;  -- اضافه کردن LIMIT 1 برای اطمینان از یک ردیف
-    
-    -- ارسال اعلان به تکنسین تخصیص داده شده
-    INSERT INTO `notifications` (
-        `user_id`, 
-        `title`, 
-        `message`, 
-        `type`, 
-        `priority`, 
-        `related_module`, 
-        `related_id`, 
-        `expires_at`
-    ) 
-    SELECT 
-        id,
-        'دستورکار جدید',
-        CONCAT(
-            'یک دستورکار جدید برای تجهیز ''', equipment_name_val, 
-            ''' به شما تخصیص یافت.\n',
-            'تخصیص‌دهنده: ', assigner_name_val, '\n',
-            'شماره درخواست: ', request_number_val, '\n',
-            'شرح کار: ', LEFT(IFNULL(NEW.work_description, 'بدون شرح'), 100), '...'
-        ),
-        'work_order',
-        IFNULL(NEW.priority, 'medium'),
-        'work_orders',
-        NEW.id,
-        DATE_ADD(IFNULL(NEW.planned_end_date, DATE_ADD(NOW(), INTERVAL 7 DAY)), INTERVAL 2 DAY)
-    FROM users 
-    WHERE full_name = NEW.assigned_to
-    LIMIT 1;
-    
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `after_work_order_status_update` AFTER UPDATE ON `work_orders` FOR EACH ROW BEGIN
-    DECLARE equipment_name_val VARCHAR(100);
-    DECLARE technician_name_val VARCHAR(100);
-    
-    -- فقط اگر وضعیت تغییر کرده باشد
-    IF OLD.status != NEW.status THEN
-        
-        -- دریافت اطلاعات
-        SELECT 
-            IFNULL(e.equipment_name, 'تجهیز ناشناس'),
-            IFNULL(NEW.assigned_to, 'تکنسین ناشناس')
-        INTO 
-            equipment_name_val,
-            technician_name_val;
-        
-        -- اگر تکمیل شده باشد
-        IF NEW.status = 'completed' THEN
-            
-            -- ارسال اعلان به مدیر و سوپروایزر
-            INSERT INTO `notifications` (
-                `user_id`, 
-                `title`, 
-                `message`, 
-                `type`, 
-                `priority`, 
-                `related_module`, 
-                `related_id`, 
-                `expires_at`
-            )
-            SELECT 
-                id,
-                'دستورکار تکمیل شد',
-                CONCAT(
-                    'دستورکار ', IFNULL(NEW.work_order_number, 'بدون شماره'), ' برای تجهیز ''', 
-                    equipment_name_val, ''' تکمیل شد.\n',
-                    'تکنسین: ', technician_name_val, '\n',
-                    'تاریخ تکمیل: ', DATE_FORMAT(NEW.actual_end_date, '%Y/%m/%d')
-                ),
-                'work_order',
-                'medium',
-                'work_orders',
-                NEW.id,
-                DATE_ADD(NOW(), INTERVAL 3 DAY)
-            FROM users 
-            WHERE role IN ('admin', 'supervisor') AND is_active = 1;
-            
-        -- اگر لغو شده باشد
-        ELSEIF NEW.status = 'cancelled' THEN
-            
-            INSERT INTO `notifications` (
-                `user_id`, 
-                `title`, 
-                `message`, 
-                `type`, 
-                `priority`, 
-                `related_module`, 
-                `related_id`, 
-                `expires_at`
-            ) 
-            SELECT 
-                id,
-                'دستورکار لغو شد',
-                CONCAT(
-                    'دستورکار ', IFNULL(NEW.work_order_number, 'بدون شماره'), ' برای تجهیز ''', 
-                    equipment_name_val, ''' لغو شد.'
-                ),
-                'work_order',
-                'medium',
-                'work_orders',
-                NEW.id,
-                DATE_ADD(NOW(), INTERVAL 2 DAY)
-            FROM users 
-            WHERE full_name = NEW.assigned_to
-            LIMIT 1;
-            
-        END IF;
-    END IF;
-END
-$$
-DELIMITER ;
 
 --
 -- Indexes for dumped tables
@@ -1900,7 +1413,7 @@ ALTER TABLE `calendar_events`
 -- AUTO_INCREMENT for table `defect_reports`
 --
 ALTER TABLE `defect_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT for table `employees`
@@ -1936,13 +1449,13 @@ ALTER TABLE `kpi_data`
 -- AUTO_INCREMENT for table `login_attempts`
 --
 ALTER TABLE `login_attempts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=292;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=309;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=322;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=329;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
