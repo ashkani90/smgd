@@ -865,8 +865,20 @@
                 
                 try {
                     const offset = (this.currentPage - 1) * this.limit;
+                    const userData = localStorage.getItem('user');
+                    let userDept = '';
+                    let usernameVal = '';
+                    if (userData) {
+                        const user = JSON.parse(userData);
+                        userDept = user.department || '';
+                        usernameVal = user.username || '';
+                    }
+
                     const params = new URLSearchParams({
                         user_id: this.currentUserId,
+                        target_role: this.currentUserRole,
+                        user_department: userDept,
+                        username: usernameVal,
                         limit: this.limit,
                         offset: offset
                     });
