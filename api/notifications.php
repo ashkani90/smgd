@@ -1,8 +1,6 @@
 <?php
 /**
- * این فایل جهت مدیریت هوشمند اعلان ها است
- * وظیفه آن دریافت لیست اعلان‌های کاربر، چک کردن اعلان‌های جدید، علامت‌گذاری یک اعلان به عنوان خوانده شده
- * علامت‌گذاری همه اعلان‌ها به عنوان خوانده شده ، ایجاد اعلان جدید، ایجاد اعلان گروهی است
+ * مدیریت هوشمند اعلان ها
  */
 // api/notifications.php
 
@@ -16,7 +14,6 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
-// برای درخواست‌های OPTIONS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -60,70 +57,84 @@ class NotificationAPI {
         $priority = $_GET['priority'] ?? null;
         $type = $_GET['type'] ?? null;
         $search = $_GET['search'] ?? null;
-        $sort = $_GET['sort'] ?? 'newest'; // newest یا oldest
+        $sort = $_GET['sort'] ?? 'newest';
         
         try {
             if (!$user_id) {
                 throw new Exception('User ID is required');
             }
             
+            // بررسی وجود ستون sender_id
+            $hasSenderId = $this->checkColumnExists('notifications', 'sender_id');
+            
             // ساخت کوئری پایه
-            $query = "SELECT 
-                        n.id,
-                        n.title,
-                        n.message,
-                        n.type,
-                        n.priority,
-                        n.related_module,
-                        n.is_read,
-                        n.created_at,
-                        n.expires_at,
-                        n.read_at,
-                        u.full_name as sender_name,
-                        u.role as sender_role
-                      FROM notifications n
-                      LEFT JOIN users u ON n.user_id = u.id
-                      WHERE n.user_id = :user_id";
+            if ($hasSenderId) {
+                $query = "SELECT 
+                            n.id,
+                            n.title,
+                            n.message,
+                            n.type,
+                            n.priority,
+                            n.related_module,
+                            n.is_read,
+                            n.created_at,
+                            n.expires_at,
+                            n.read_at,
+                            sender.full_name as sender_name,
+                            sender.role as sender_role
+                          FROM notifications n
+                          LEFT JOIN users sender ON n.sender_id = sender.id
+                          WHERE n.user_id = :user_id";
+            } else {
+                // Fallback برای حالت بدون sender_id
+                $query = "SELECT 
+                            n.id,
+                            n.title,
+                            n.message,
+                            n.type,
+                            n.priority,
+                            n.related_module,
+                            n.is_read,
+                            n.created_at,
+                            n.expires_at,
+                            n.read_at,
+                            NULL as sender_name,
+                            NULL as sender_role
+                          FROM notifications n
+                          WHERE n.user_id = :user_id";
+            }
             
             $params = [':user_id' => $user_id];
             
-            // اعمال فیلتر خوانده شده/نخوانده
             if ($unread_only) {
                 $query .= " AND n.is_read = 0";
             } elseif ($read_only) {
                 $query .= " AND n.is_read = 1";
             }
             
-            // اعمال فیلتر اولویت
             if ($priority && in_array($priority, ['low', 'medium', 'high', 'critical'])) {
                 $query .= " AND n.priority = :priority";
                 $params[':priority'] = $priority;
             }
             
-            // اعمال فیلتر نوع
-            if ($type && in_array($type, ['maintenance_request', 'work_order', 'inspection', 'equipment', 'parts', 'alert', 'system'])) {
+            if ($type && in_array($type, ['maintenance_request', 'work_order', 'inspection', 'equipment', 'parts', 'alert', 'system', 'defect_report'])) {
                 $query .= " AND n.type = :type";
                 $params[':type'] = $type;
             }
             
-            // اعمال جستجو
             if ($search) {
                 $query .= " AND (n.title LIKE :search OR n.message LIKE :search)";
                 $params[':search'] = '%' . $search . '%';
             }
             
-            // اعمال مرتب‌سازی
             $orderBy = $sort === 'oldest' ? 'ASC' : 'DESC';
             $query .= " ORDER BY n.created_at $orderBy";
-            
-            // محدودیت و آفست
             $query .= " LIMIT :limit OFFSET :offset";
             $params[':limit'] = (int)$limit;
             $params[':offset'] = (int)$offset;
             
             $stmt = $this->pdo->prepare($query);
             
-            // اتصال پارامترها
             foreach ($params as $key => $value) {
                 $paramType = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
                 $stmt->bindValue($key, $value, $paramType);
@@ -132,87 +143,55 @@ class NotificationAPI {
             $stmt->execute();
             $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // شمارش کل نتایج (برای صفحه‌بندی)
-            $countQuery = "SELECT COUNT(*) as total FROM notifications n WHERE n.user_id = :user_id";
+            // اگر sender_name و sender_role نداریم و ستون sender_id وجود ندارد،
+            // سعی می‌کنیم از اطلاعات خود اعلان استفاده کنیم
+            if (!$hasSenderId && !empty($notifications)) {
+                foreach ($notifications as &$notif) {
+                    // اگر در message یا title نام فرستنده وجود دارد، استخراج کن
+                    if (preg_match('/گزارش[\s]دهنده:\s*([^\)]+)/', $notif['message'], $matches)) {
+                        $notif['sender_name'] = trim($matches[1]);
+                    }
+                    if (preg_match('/نقش:\s*([^\)\s]+)/', $notif['message'], $matches)) {
+                        $notif['sender_role'] = trim($matches[1]);
+                    }
+                }
+            }
             
+            // شمارش کل نتایج
+            $countQuery = "SELECT COUNT(*) as total FROM notifications n WHERE n.user_id = :user_id";
             if ($unread_only) {
                 $countQuery .= " AND n.is_read = 0";
             } elseif ($read_only) {
                 $countQuery .= " AND n.is_read = 1";
             }
-            
-            if ($priority) {
-                $countQuery .= " AND n.priority = :priority";
-            }
-            
-            if ($type) {
-                $countQuery .= " AND n.type = :type";
-            }
-            
-            if ($search) {
-                $countQuery .= " AND (n.title LIKE :search OR n.message LIKE :search)";
-            }
+            if ($priority) $countQuery .= " AND n.priority = :priority";
+            if ($type) $countQuery .= " AND n.type = :type";
+            if ($search) $countQuery .= " AND (n.title LIKE :search OR n.message LIKE :search)";
             
             $countStmt = $this->pdo->prepare($countQuery);
             $countParams = [':user_id' => $user_id];
-            
-            if ($priority) {
-                $countParams[':priority'] = $priority;
-            }
-            
-            if ($type) {
-                $countParams[':type'] = $type;
-            }
-            
-            if ($search) {
-                $countParams[':search'] = '%' . $search . '%';
-            }
+            if ($priority) $countParams[':priority'] = $priority;
+            if ($type) $countParams[':type'] = $type;
+            if ($search) $countParams[':search'] = '%' . $search . '%';
             
             foreach ($countParams as $key => $value) {
                 $paramType = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
                 $countStmt->bindValue($key, $value, $paramType);
             }
-            
             $countStmt->execute();
-            $totalResult = $countStmt->fetch(PDO::FETCH_ASSOC);
-            $total = $totalResult['total'];
+            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
             
             // شمارش اعلان‌های خوانده نشده
-            $unreadQuery = "SELECT COUNT(*) as unread_count FROM notifications WHERE user_id = :user_id AND is_read = 0";
-            $unreadStmt = $this->pdo->prepare($unreadQuery);
+            $unreadStmt = $this->pdo->prepare("SELECT COUNT(*) as unread_count FROM notifications WHERE user_id = :user_id AND is_read = 0");
             $unreadStmt->execute([':user_id' => $user_id]);
-            $unreadResult = $unreadStmt->fetch(PDO::FETCH_ASSOC);
-            $unreadCount = $unreadResult['unread_count'];
-            
-            // آمار بر اساس نوع
-            $typeStatsQuery = "SELECT type, COUNT(*) as count FROM notifications WHERE user_id = :user_id GROUP BY type";
-            $typeStatsStmt = $this->pdo->prepare($typeStatsQuery);
-            $typeStatsStmt->execute([':user_id' => $user_id]);
-            $typeStats = $typeStatsStmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            $byType = [];
-            foreach ($typeStats as $stat) {
-                $byType[$stat['type']] = $stat['count'];
-            }
-            
-            // آمار بر اساس اولویت
-            $priorityStatsQuery = "SELECT priority, COUNT(*) as count FROM notifications WHERE user_id = :user_id GROUP BY priority";
-            $priorityStatsStmt = $this->pdo->prepare($priorityStatsQuery);
-            $priorityStatsStmt->execute([':user_id' => $user_id]);
-            $priorityStats = $priorityStatsStmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            $byPriority = [];
-            foreach ($priorityStats as $stat) {
-                $byPriority[$stat['priority']] = $stat['count'];
-            }
+            $unreadCount = $unreadStmt->fetch(PDO::FETCH_ASSOC)['unread_count'];
             
             echo json_encode([
                 'success' => true,
                 'data' => $notifications,
                 'total' => $total,
                 'unread_count' => $unreadCount,
-                'by_type' => $byType,
-                'by_priority' => $byPriority,
+                'has_sender_id' => $hasSenderId,
                 'current_page' => floor($offset / $limit) + 1,
                 'total_pages' => ceil($total / $limit)
             ]);
@@ -223,6 +202,17 @@ class NotificationAPI {
                 'success' => false,
                 'error' => $e->getMessage()
             ]);
+        }
+    }
+    
+    // تابع کمکی برای بررسی وجود ستون
+    private function checkColumnExists($table, $column) {
+        try {
+            $stmt = $this->pdo->prepare("SHOW COLUMNS FROM `$table` LIKE :column");
+            $stmt->execute([':column' => $column]);
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            return false;
         }
     }
     
@@ -252,12 +242,6 @@ class NotificationAPI {
             case 'delete-multiple':
                 $this->deleteMultipleNotifications($data['ids'] ?? [], $data['user_id'] ?? 0);
                 break;
-            case 'create':
-                $this->createNotification($data);
-                break;
-            case 'create-group':
-                $this->createGroupNotification($data);
-                break;
             case 'check-new':
                 $this->checkNewNotifications($data['user_id'] ?? 0, $data['last_check'] ?? null);
                 break;
@@ -267,115 +251,75 @@ class NotificationAPI {
         }
     }
     
-private function markAsRead($notificationId, $userId) {
-    try {
-        // ابتدا بررسی کن که اعلان وجود دارد و متعلق به کاربر است
-        $checkQuery = "SELECT is_read FROM notifications WHERE id = :id AND user_id = :user_id";
-        $checkStmt = $this->pdo->prepare($checkQuery);
-        $checkStmt->execute([':id' => $notificationId, ':user_id' => $userId]);
-        $notification = $checkStmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$notification) {
-            throw new Exception('اعلان یافت نشد یا دسترسی ندارید');
-        }
-        
-        // اگر قبلاً خوانده شده، نیازی به آپدیت نیست
-        if ($notification['is_read'] == 1) {
+    private function markAsRead($notificationId, $userId) {
+        try {
+            $checkQuery = "SELECT is_read FROM notifications WHERE id = :id AND user_id = :user_id";
+            $checkStmt = $this->pdo->prepare($checkQuery);
+            $checkStmt->execute([':id' => $notificationId, ':user_id' => $userId]);
+            $notification = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$notification) {
+                throw new Exception('اعلان یافت نشد یا دسترسی ندارید');
+            }
+            
+            if ($notification['is_read'] == 1) {
+                echo json_encode(['success' => true, 'message' => 'اعلان قبلاً خوانده شده است', 'already_read' => true]);
+                return;
+            }
+            
+            $query = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = :id AND user_id = :user_id";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute([':id' => $notificationId, ':user_id' => $userId]);
+            
             echo json_encode([
                 'success' => true,
-                'message' => 'اعلان قبلاً خوانده شده است',
-                'already_read' => true
+                'message' => 'اعلان خوانده شد',
+                'affected_rows' => $stmt->rowCount(),
+                'timestamp' => date('Y-m-d H:i:s')
             ]);
-            return;
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
-        
-        $query = "UPDATE notifications SET is_read = 1, read_at = NOW() 
-                 WHERE id = :id AND user_id = :user_id";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':id', $notificationId, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        // گرفتن اطلاعات اعلان بروزرسانی شده برای بازگشت
-        $updatedQuery = "SELECT * FROM notifications WHERE id = :id";
-        $updatedStmt = $this->pdo->prepare($updatedQuery);
-        $updatedStmt->execute([':id' => $notificationId]);
-        $updatedNotification = $updatedStmt->fetch(PDO::FETCH_ASSOC);
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'اعلان خوانده شد',
-            'affected_rows' => $stmt->rowCount(),
-            'notification' => $updatedNotification,
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode([
-            'success' => false,
-            'error' => $e->getMessage()
-        ]);
     }
-}
-
-private function markAsUnread($notificationId, $userId) {
-    try {
-        // ابتدا بررسی کن که اعلان وجود دارد و متعلق به کاربر است
-        $checkQuery = "SELECT is_read FROM notifications WHERE id = :id AND user_id = :user_id";
-        $checkStmt = $this->pdo->prepare($checkQuery);
-        $checkStmt->execute([':id' => $notificationId, ':user_id' => $userId]);
-        $notification = $checkStmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$notification) {
-            throw new Exception('اعلان یافت نشد یا دسترسی ندارید');
-        }
-        
-        // اگر قبلاً خوانده نشده، نیازی به آپدیت نیست
-        if ($notification['is_read'] == 0) {
+    
+    private function markAsUnread($notificationId, $userId) {
+        try {
+            $checkQuery = "SELECT is_read FROM notifications WHERE id = :id AND user_id = :user_id";
+            $checkStmt = $this->pdo->prepare($checkQuery);
+            $checkStmt->execute([':id' => $notificationId, ':user_id' => $userId]);
+            $notification = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$notification) {
+                throw new Exception('اعلان یافت نشد یا دسترسی ندارید');
+            }
+            
+            if ($notification['is_read'] == 0) {
+                echo json_encode(['success' => true, 'message' => 'اعلان قبلاً خوانده نشده است', 'already_unread' => true]);
+                return;
+            }
+            
+            $query = "UPDATE notifications SET is_read = 0, read_at = NULL WHERE id = :id AND user_id = :user_id";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute([':id' => $notificationId, ':user_id' => $userId]);
+            
             echo json_encode([
                 'success' => true,
-                'message' => 'اعلان قبلاً خوانده نشده است',
-                'already_unread' => true
+                'message' => 'اعلان به حالت خوانده نشده تغییر یافت',
+                'affected_rows' => $stmt->rowCount(),
+                'timestamp' => date('Y-m-d H:i:s')
             ]);
-            return;
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
-        
-        $query = "UPDATE notifications SET is_read = 0, read_at = NULL 
-                 WHERE id = :id AND user_id = :user_id";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':id', $notificationId, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        // گرفتن اطلاعات اعلان بروزرسانی شده برای بازگشت
-        $updatedQuery = "SELECT * FROM notifications WHERE id = :id";
-        $updatedStmt = $this->pdo->prepare($updatedQuery);
-        $updatedStmt->execute([':id' => $notificationId]);
-        $updatedNotification = $updatedStmt->fetch(PDO::FETCH_ASSOC);
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'اعلان به حالت خوانده نشده تغییر یافت',
-            'affected_rows' => $stmt->rowCount(),
-            'notification' => $updatedNotification,
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode([
-            'success' => false,
-            'error' => $e->getMessage()
-        ]);
     }
-}
     
     private function markAllAsRead($userId) {
         try {
-            $query = "UPDATE notifications SET is_read = 1, read_at = NOW() 
-                     WHERE user_id = :user_id AND is_read = 0";
+            $query = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = :user_id AND is_read = 0";
             $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-            $stmt->execute();
+            $stmt->execute([':user_id' => $userId]);
             
             echo json_encode([
                 'success' => true,
@@ -384,10 +328,7 @@ private function markAsUnread($notificationId, $userId) {
             ]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
     
@@ -398,18 +339,14 @@ private function markAsUnread($notificationId, $userId) {
             }
             
             $placeholders = implode(',', array_fill(0, count($notificationIds), '?'));
-            $query = "UPDATE notifications SET is_read = 1, read_at = NOW() 
-                     WHERE id IN ($placeholders) AND user_id = ?";
-            
+            $query = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id IN ($placeholders) AND user_id = ?";
             $stmt = $this->pdo->prepare($query);
             
-            // اتصال پارامترها
             $paramIndex = 1;
             foreach ($notificationIds as $id) {
                 $stmt->bindValue($paramIndex++, $id, PDO::PARAM_INT);
             }
             $stmt->bindValue($paramIndex, $userId, PDO::PARAM_INT);
-            
             $stmt->execute();
             
             echo json_encode([
@@ -419,10 +356,7 @@ private function markAsUnread($notificationId, $userId) {
             ]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
     
@@ -430,9 +364,7 @@ private function markAsUnread($notificationId, $userId) {
         try {
             $query = "DELETE FROM notifications WHERE id = :id AND user_id = :user_id";
             $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':id', $notificationId, PDO::PARAM_INT);
-            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-            $stmt->execute();
+            $stmt->execute([':id' => $notificationId, ':user_id' => $userId]);
             
             echo json_encode([
                 'success' => true,
@@ -441,10 +373,7 @@ private function markAsUnread($notificationId, $userId) {
             ]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
     
@@ -452,8 +381,7 @@ private function markAsUnread($notificationId, $userId) {
         try {
             $query = "DELETE FROM notifications WHERE user_id = :user_id AND is_read = 1";
             $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-            $stmt->execute();
+            $stmt->execute([':user_id' => $userId]);
             
             echo json_encode([
                 'success' => true,
@@ -462,10 +390,7 @@ private function markAsUnread($notificationId, $userId) {
             ]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
     
@@ -477,16 +402,13 @@ private function markAsUnread($notificationId, $userId) {
             
             $placeholders = implode(',', array_fill(0, count($notificationIds), '?'));
             $query = "DELETE FROM notifications WHERE id IN ($placeholders) AND user_id = ?";
-            
             $stmt = $this->pdo->prepare($query);
             
-            // اتصال پارامترها
             $paramIndex = 1;
             foreach ($notificationIds as $id) {
                 $stmt->bindValue($paramIndex++, $id, PDO::PARAM_INT);
             }
             $stmt->bindValue($paramIndex, $userId, PDO::PARAM_INT);
-            
             $stmt->execute();
             
             echo json_encode([
@@ -496,110 +418,7 @@ private function markAsUnread($notificationId, $userId) {
             ]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]);
-        }
-    }
-    
-    private function createNotification($data) {
-        try {
-            $required_fields = ['user_id', 'title', 'message'];
-            foreach ($required_fields as $field) {
-                if (!isset($data[$field]) || empty($data[$field])) {
-                    throw new Exception("فیلد $field الزامی است");
-                }
-            }
-            
-            // اضافه کردن sender_id اگر موجود باشد
-            $sender_id = $data['sender_id'] ?? null;
-            
-            $query = "INSERT INTO notifications 
-                     (user_id, sender_id, title, message, type, priority, related_module, related_id, expires_at)
-                     VALUES (:user_id, :sender_id, :title, :message, :type, :priority, :related_module, :related_id, :expires_at)";
-            
-            $stmt = $this->pdo->prepare($query);
-            $stmt->execute([
-                ':user_id' => $data['user_id'],
-                ':sender_id' => $sender_id,
-                ':title' => $data['title'],
-                ':message' => $data['message'],
-                ':type' => $data['type'] ?? 'system',
-                ':priority' => $data['priority'] ?? 'medium',
-                ':related_module' => $data['related_module'] ?? null,
-                ':related_id' => $data['related_id'] ?? null,
-                ':expires_at' => isset($data['expires_at']) ? date('Y-m-d H:i:s', strtotime($data['expires_at'])) : null
-            ]);
-            
-            $notificationId = $this->pdo->lastInsertId();
-            
-            echo json_encode([
-                'success' => true,
-                'message' => 'اعلان ایجاد شد',
-                'notification_id' => $notificationId
-            ]);
-            
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]);
-        }
-    }
-    
-    private function createGroupNotification($data) {
-        try {
-            if (!isset($data['role']) || empty($data['role'])) {
-                throw new Exception("نقش کاربران الزامی است");
-            }
-            
-            // دریافت کاربران با نقش مشخص شده
-            $query = "SELECT id FROM users WHERE role = :role AND is_active = 1";
-            $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':role', $data['role'], PDO::PARAM_STR);
-            $stmt->execute();
-            $users = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            
-            if (empty($users)) {
-                throw new Exception("کاربری با این نقش یافت نشد");
-            }
-            
-            $inserted_count = 0;
-            
-            foreach ($users as $user_id) {
-                $query = "INSERT INTO notifications 
-                         (user_id, sender_id, title, message, type, priority, related_module, related_id, expires_at)
-                         VALUES (:user_id, :sender_id, :title, :message, :type, :priority, :related_module, :related_id, :expires_at)";
-                
-                $stmt = $this->pdo->prepare($query);
-                $stmt->execute([
-                    ':user_id' => $user_id,
-                    ':sender_id' => $data['sender_id'] ?? null,
-                    ':title' => $data['title'],
-                    ':message' => $data['message'],
-                    ':type' => $data['type'] ?? 'system',
-                    ':priority' => $data['priority'] ?? 'medium',
-                    ':related_module' => $data['related_module'] ?? null,
-                    ':related_id' => $data['related_id'] ?? null,
-                    ':expires_at' => isset($data['expires_at']) ? date('Y-m-d H:i:s', strtotime($data['expires_at'])) : null
-                ]);
-                
-                $inserted_count++;
-            }
-            
-            echo json_encode([
-                'success' => true,
-                'message' => "اعلان برای $inserted_count کاربر ارسال شد"
-            ]);
-            
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
     
@@ -609,23 +428,15 @@ private function markAsUnread($notificationId, $userId) {
                 throw new Exception('User ID is required');
             }
             
-            $last_check_time = $last_check ? date('Y-m-d H:i:s', strtotime($last_check)) : 
-                                           date('Y-m-d H:i:s', strtotime('-1 hour'));
+            $last_check_time = $last_check ? date('Y-m-d H:i:s', strtotime($last_check)) : date('Y-m-d H:i:s', strtotime('-1 hour'));
             
-            // شمارش اعلان‌های جدید برای کاربر
             $query = "SELECT COUNT(*) as count FROM notifications 
-                      WHERE user_id = :user_id 
-                      AND created_at > :last_check
-                      AND is_read = 0";
+                      WHERE user_id = :user_id AND created_at > :last_check AND is_read = 0";
             
             $stmt = $this->pdo->prepare($query);
-            $stmt->execute([
-                ':user_id' => $user_id,
-                ':last_check' => $last_check_time
-            ]);
+            $stmt->execute([':user_id' => $user_id, ':last_check' => $last_check_time]);
             
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $new_count = $result['count'];
+            $new_count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
             
             echo json_encode([
                 'success' => true,
@@ -635,70 +446,11 @@ private function markAsUnread($notificationId, $userId) {
             
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
 }
 
-// اجرای API
 $api = new NotificationAPI();
 $api->handleRequest();
-
-
-
-
-
-
-
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // گرفتن متغیر نقش کاربر جاری فرستاده شده از فرانت‌اند
-    $target_role = isset($_GET['target_role']) ? $_GET['target_role'] : '';
-    
-    if (!empty($target_role)) {
-        try {
-            // دریافت اعلان‌های فعال خوانده نشده متعلق به نقش مورد نظر
-            $stmt = $db->prepare("SELECT * FROM notifications WHERE target_role = ? AND is_read = 0 ORDER BY id DESC");
-            $stmt->execute([$target_role]);
-            $notifs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // ساخت فرمت خروجی هماهنگ با فرانت‌اند
-            echo json_encode([
-                "success" => true,
-                "data" => $notifs,
-                "unread_count" => count($notifs),
-                "total" => count($notifs)
-            ]);
-            exit;
-        } catch(Exception $e) {
-            echo json_encode(["success" => false, "error" => $e->getMessage()]);
-            exit;
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ?>
