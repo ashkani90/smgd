@@ -78,224 +78,221 @@ if ($method === 'POST') {
 
     $step = isset($input['step']) ? (int)$input['step'] : 1;
 
-    // --- مرحله ۱: ثبت اولیه توسط گزارش‌گر و ارجاع به کنترل کیفیت ---
-    if ($step === 1) {
-        try {
-            // دریافت user_id کاربر لاگین شده از session
-            $user_id = $_SESSION['user_id'] ?? 0;
-            
-            // اگر user_id در session نبود، از localStorage که در فرم ارسال می‌شود بگیر
-            if ($user_id == 0 && isset($input['user_id'])) {
-                $user_id = $input['user_id'];
-            }
-            
-            $sql = "INSERT INTO defect_reports (
-                report_number, report_date, reporter_name, employee_code, reporter_department,
-                vehicle_type, vehicle_model, part_code, part_name_fa, part_name_en,
-                defect_quantity, unit_of_measure, detection_location, is_replaced,
-                part_image, defect_type, defect_description, possible_cause, status, user_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting_qc', ?)";
+// --- مرحله ۱: ثبت اولیه توسط گزارش‌گر و ارجاع به کنترل کیفیت ---
+if ($step === 1) {
+    try {
+        // دریافت user_id کاربر لاگین شده از session
+        $user_id = $_SESSION['user_id'] ?? 0;
+        
+        // اگر user_id در session نبود، از localStorage که در فرم ارسال می‌شود بگیر
+        if ($user_id == 0 && isset($input['user_id'])) {
+            $user_id = $input['user_id'];
+        }
+        
+        $sql = "INSERT INTO defect_reports (
+            report_number, report_date, reporter_name, employee_code, reporter_department,
+            vehicle_type, vehicle_model, part_code, part_name_fa, part_name_en,
+            defect_quantity, unit_of_measure, detection_location, is_replaced,
+            part_image, defect_type, defect_description, possible_cause, status, user_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting_qc', ?)";
 
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
-                $input['reportNumber'], $input['reportDate'], $input['reporterName'], $input['employeeCode'], $input['reporterDepartment'],
-                $input['vehicleType'], $input['vehicleModel'], $input['partCode'], $input['partNameFa'], $input['partNameEn'] ?? '',
-                $input['defectQuantity'], $input['unitOfMeasure'] ?? '', $input['detectionLocation'], $input['isReplaced'],
-                $input['partImage'] ?? '', $input['defectType'], $input['defectDescription'], $input['possibleCause'] ?? '',
-                $user_id
-            ]);
+        $stmt = $db->prepare($sql);
+        $stmt->execute([
+            $input['reportNumber'], $input['reportDate'], $input['reporterName'], $input['employeeCode'], $input['reporterDepartment'],
+            $input['vehicleType'], $input['vehicleModel'], $input['partCode'], $input['partNameFa'], $input['partNameEn'] ?? '',
+            $input['defectQuantity'], $input['unitOfMeasure'] ?? '', $input['detectionLocation'], $input['isReplaced'],
+            $input['partImage'] ?? '', $input['defectType'], $input['defectDescription'], $input['possibleCause'] ?? '',
+            $user_id
+        ]);
 
-            $reportId = $db->lastInsertId();
-            $reportNumber = $input['reportNumber'];
+        $reportId = $db->lastInsertId();
+        $reportNumber = $input['reportNumber'];
+        
+        // دریافت نام گزارش‌دهنده از دیتابیس (برای اطمینان از صحت)
+        $reporterNameFromDb = $input['reporterName']; // مقدار مستقیم از فرم
+        $reporterRole = 'reporter';
+        
+        // ============================================
+        // اعلان شماره 1: برای خود کاربر گزارش‌دهنده (تأیید ثبت گزارش)
+        // ============================================
+        $notifSql1 = "INSERT INTO notifications (
+            user_id, title, message, type, priority, related_module, related_id, 
+            target_role, sender_id, sender_name, sender_role, reporter_name, created_at, expires_at
+        ) VALUES (
+            ?, 'تأیید ثبت گزارش عدم انطباق', ?, 'alert', 'high', 'defect_reports', ?,
+            ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY)
+        )";
 
-            // دریافت اطلاعات کامل کاربر گزارش‌دهنده
-            $sender_fullname = $input['reporterName'];
-            $sender_role = 'reporter';
-            $reporter_id = $user_id;
+        $notifStmt1 = $db->prepare($notifSql1);
+        $notifStmt1->execute([
+            $user_id,                                    // user_id گیرنده = خود گزارش‌دهنده
+            "گزارش شما با شماره " . $reportNumber . " با موفقیت ثبت و به کنترل کیفیت ارجاع شد.",
+            $reportId,                                   // related_id
+            'reporter',                                  // target_role
+            $user_id,                                    // sender_id (خود کاربر)
+            $input['reporterName'],                      // sender_name
+            'reporter',                                  // sender_role
+            $input['reporterName']                       // reporter_name (نام گزارش‌دهنده اصلی)
+        ]);
 
-            if ($reporter_id > 0) {
-                $userStmt = $db->prepare("SELECT full_name, role FROM users WHERE id = ?");
-                $userStmt->execute([$reporter_id]);
-                $userInfo = $userStmt->fetch(PDO::FETCH_ASSOC);
-                if ($userInfo) {
-                    $sender_fullname = $userInfo['full_name'];
-                    $sender_role = $userInfo['role'];
-                }
-            }
+        // ============================================
+        // اعلان شماره 2: برای مدیر کیفیت (Quality-Manager)
+        // ============================================
+        
+        // ساخت پیام کامل با نام گزارش‌دهنده اصلی
+        $fullMessage = "گزارش قطعه معیوب شماره " . $reportNumber . " ثبت گردید.\n" .
+                    "گزارش‌دهنده: " . $input['reporterName'] . "\n" .
+                    "قطعه: " . $input['partNameFa'] . "\n" .
+                    "نوع عیب: " . $input['defectType'];
 
-            // ============================================
-            // اعلان شماره 1: برای خود کاربر گزارش‌دهنده (تأیید ثبت گزارش)
-            // ============================================
-            $notifSql1 = "INSERT INTO notifications (
-                user_id, title, message, type, priority, related_module, related_id, 
-                target_role, sender_id, sender_name, sender_role, created_at, expires_at
+        // دریافت user_idهای دارای نقش Quality-Manager
+        $qualityManagersStmt = $db->prepare("SELECT id, full_name FROM users WHERE role = 'Quality-Manager' OR role = 'quality_manager'");
+        $qualityManagersStmt->execute();
+        $qualityManagers = $qualityManagersStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($qualityManagers)) {
+            // اگر کاربر خاصی با این نقش وجود نداشت، یک اعلان عمومی برای نقش Quality-Manager ایجاد کن
+            $notifSql2 = "INSERT INTO notifications (
+                title, message, type, priority, related_module, related_id, 
+                target_role, sender_id, sender_name, sender_role, reporter_name, created_at, expires_at
             ) VALUES (
-                ?, 'تأیید ثبت گزارش عدم انطباق', ?, 'alert', 'high', 'defect_reports', ?,
-                'reporter', ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY)
+                'گزارش عدم انطباق جدید', ?, 'alert', 'high', 'defect_reports', ?,
+                'Quality-Manager', ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY)
             )";
 
-            $notifStmt1 = $db->prepare($notifSql1);
-            $notifStmt1->execute([
-                $reporter_id,
-                "گزارش شما با شماره " . $reportNumber . " با موفقیت ثبت و به کنترل کیفیت ارجاع شد.",
-                $reportId,
-                $reporter_id,
-                $sender_fullname,
-                $sender_role
+            $notifStmt2 = $db->prepare($notifSql2);
+            $notifStmt2->execute([
+                $fullMessage,                            // message
+                $reportId,                               // related_id
+                $user_id,                                // sender_id
+                $input['reporterName'],                  // sender_name
+                'reporter',                              // sender_role
+                $input['reporterName']                   // reporter_name
             ]);
-
-            // ============================================
-            // اعلان شماره 2: برای مدیر کیفیت (Quality-Manager)
-            // ============================================
-            // ساخت پیام کامل با نام گزارش‌دهنده
-            $fullMessage = "گزارش قطعه معیوب شماره " . $reportNumber . " ثبت گردید.\n" .
-                        "گزارش‌دهنده: " . $sender_fullname . " (" . $sender_role . ")\n" .
-                        "قطعه: " . $input['partNameFa'] . "\n" .
-                        "نوع عیب: " . $input['defectType'];
-
-            // دریافت user_idهای دارای نقش Quality-Manager
-            $qualityManagersStmt = $db->prepare("SELECT id, full_name FROM users WHERE role = 'Quality-Manager' OR role = 'quality_manager'");
-            $qualityManagersStmt->execute();
-            $qualityManagers = $qualityManagersStmt->fetchAll(PDO::FETCH_ASSOC);
-
-            if (empty($qualityManagers)) {
-                // اگر کاربر خاصی با این نقش وجود نداشت، یک اعلان عمومی برای نقش Quality-Manager ایجاد کن
+        } else {
+            // برای هر مدیر کیفیت، یک اعلان جداگانه ایجاد کن
+            foreach ($qualityManagers as $manager) {
                 $notifSql2 = "INSERT INTO notifications (
-                    title, message, type, priority, related_module, related_id, 
-                    target_role, sender_id, sender_name, sender_role, created_at, expires_at
+                    user_id, title, message, type, priority, related_module, related_id, 
+                    target_role, sender_id, sender_name, sender_role, reporter_name, created_at, expires_at
                 ) VALUES (
-                    'گزارش عدم انطباق جدید', ?, 'alert', 'high', 'defect_reports', ?,
-                    'Quality-Manager', ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY)
+                    ?, 'گزارش عدم انطباق جدید', ?, 'alert', 'high', 'defect_reports', ?,
+                    'Quality-Manager', ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY)
                 )";
 
                 $notifStmt2 = $db->prepare($notifSql2);
                 $notifStmt2->execute([
-                    $fullMessage,
-                    $reportId,
-                    $reporter_id,
-                    $sender_fullname,
-                    $sender_role
+                    $manager['id'],                      // user_id گیرنده
+                    $fullMessage,                        // message
+                    $reportId,                           // related_id
+                    $user_id,                            // sender_id
+                    $input['reporterName'],              // sender_name
+                    'reporter',                          // sender_role
+                    $input['reporterName']               // reporter_name (نام گزارش‌دهنده اصلی)
                 ]);
-            } else {
-                // برای هر مدیر کیفیت، یک اعلان جداگانه ایجاد کن
-                foreach ($qualityManagers as $manager) {
-                    $notifSql2 = "INSERT INTO notifications (
-                        user_id, title, message, type, priority, related_module, related_id, 
-                        target_role, sender_id, sender_name, sender_role, created_at, expires_at
-                    ) VALUES (
-                        ?, 'گزارش عدم انطباق جدید', ?, 'alert', 'high', 'defect_reports', ?,
-                        'Quality-Manager', ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY)
-                    )";
-
-                    $notifStmt2 = $db->prepare($notifSql2);
-                    $notifStmt2->execute([
-                        $manager['id'],
-                        $fullMessage,
-                        $reportId,
-                        $reporter_id,
-                        $sender_fullname,
-                        $sender_role
-                    ]);
-                }
             }
-
-            echo json_encode(["success" => true, "message" => "گزارش با موفقیت ثبت و به کنترل کیفیت ارجاع شد."]);
-        } catch(Exception $e) {
-            echo json_encode(["success" => false, "error" => "خطا در ثبت اطلاعات: " . $e->getMessage()]);
         }
-        exit;
+
+        echo json_encode(["success" => true, "message" => "گزارش با موفقیت ثبت و به کنترل کیفیت ارجاع شد."]);
+    } catch(Exception $e) {
+        echo json_encode(["success" => false, "error" => "خطا در ثبت اطلاعات: " . $e->getMessage()]);
     }
+    exit;
+}
 
-    // --- مرحله ۲: ثبت توسط کنترل کیفیت (operator1) و ارجاع به انباردار ---
-    if ($step === 2) {
-        try {
-            $reportNumber = $input['reportNumber'];
-            
-            // دریافت user_id کاربر لاگین شده (کنترل کیفیت)
-            $operator1_id = $_SESSION['user_id'] ?? 0;
-            if ($operator1_id == 0 && isset($input['user_id'])) {
-                $operator1_id = $input['user_id'];
+// --- مرحله ۲: ثبت توسط کنترل کیفیت (operator1) و ارجاع به انباردار ---
+if ($step === 2) {
+    try {
+        $reportNumber = $input['reportNumber'];
+        
+        // دریافت اطلاعات اصلی گزارش (از جمله reporter_name اصلی)
+        $reportStmt = $db->prepare("SELECT id, reporter_name FROM defect_reports WHERE report_number = ?");
+        $reportStmt->execute([$reportNumber]);
+        $reportInfo = $reportStmt->fetch(PDO::FETCH_ASSOC);
+        $reportId = $reportInfo['id'];
+        $originalReporterName = $reportInfo['reporter_name'];
+        
+        // دریافت user_id کاربر لاگین شده (کنترل کیفیت)
+        $operator1_id = $_SESSION['user_id'] ?? 0;
+        if ($operator1_id == 0 && isset($input['user_id'])) {
+            $operator1_id = $input['user_id'];
+        }
+        
+        // دریافت نام و نقش کاربر کنترل کیفیت
+        $sender_fullname = 'کنترل کیفیت';
+        $sender_role = 'operator1';
+        if ($operator1_id > 0) {
+            $userStmt = $db->prepare("SELECT full_name, role FROM users WHERE id = ?");
+            $userStmt->execute([$operator1_id]);
+            $userInfo = $userStmt->fetch(PDO::FETCH_ASSOC);
+            if ($userInfo) {
+                $sender_fullname = $userInfo['full_name'];
+                $sender_role = $userInfo['role'];
             }
-            
-            // دریافت نام و نقش کاربر کنترل کیفیت
-            $sender_fullname = 'کنترل کیفیت';
-            $sender_role = 'operator1';
-            if ($operator1_id > 0) {
-                $userStmt = $db->prepare("SELECT full_name, role FROM users WHERE id = ?");
-                $userStmt->execute([$operator1_id]);
-                $userInfo = $userStmt->fetch(PDO::FETCH_ASSOC);
-                if ($userInfo) {
-                    $sender_fullname = $userInfo['full_name'];
-                    $sender_role = $userInfo['role'];
-                }
-            }
-            
-            // ۱. بروزرسانی گزارش عدم انطباق
-            $sql = "UPDATE defect_reports SET 
-                    qc_detection_location = ?, part_status = ?, defect_reason = ?, quality_notes = ?, 
-                    status = 'waiting_warehouse', qc_submitted_at = CURRENT_TIMESTAMP 
-                    WHERE report_number = ?";
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
-                $input['qcDetectionLocation'], $input['partStatus'], $input['defectReason'], $input['qualityNotes'], $reportNumber
+        }
+        
+        // ۱. بروزرسانی گزارش عدم انطباق
+        $sql = "UPDATE defect_reports SET 
+                qc_detection_location = ?, part_status = ?, defect_reason = ?, quality_notes = ?, 
+                status = 'waiting_warehouse', qc_submitted_at = CURRENT_TIMESTAMP 
+                WHERE report_number = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([
+            $input['qcDetectionLocation'], $input['partStatus'], $input['defectReason'], $input['qualityNotes'], $reportNumber
+        ]);
+
+        // ۲. علامت‌گذاری اعلان قبلی مربوط به کنترل کیفیت به عنوان خوانده شده
+        $updateNotif = $db->prepare("UPDATE notifications SET is_read = 1, read_at = CURRENT_TIMESTAMP WHERE related_id = ? AND target_role = 'operator1'");
+        $updateNotif->execute([$reportId]);
+        
+        // ۳. علامت‌گذاری اعلان Quality-Manager به عنوان خوانده شده
+        $updateNotif2 = $db->prepare("UPDATE notifications SET is_read = 1, read_at = CURRENT_TIMESTAMP WHERE related_id = ? AND target_role = 'Quality-Manager'");
+        $updateNotif2->execute([$reportId]);
+
+        // ۴. ایجاد اعلان جدید برای انباردار (operator2)
+        $warehouseStmt = $db->prepare("SELECT id FROM users WHERE role = 'Warehouse-Manager' OR role = 'operator2'");
+        $warehouseStmt->execute();
+        $warehouseUsers = $warehouseStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $messageText = "کیفیت گزارش عدم انطباق " . $reportNumber . " بررسی شد. لطفاً موجودی و پارت نامبر انبار را مشخص کنید.";
+
+        if (empty($warehouseUsers)) {
+            $notifSql = "INSERT INTO notifications (title, message, type, priority, related_id, target_role, sender_id, sender_name, sender_role, reporter_name, created_at) 
+                         VALUES (?, ?, 'parts', 'medium', ?, 'operator2', ?, ?, ?, ?, NOW())";
+            $notifStmt = $db->prepare($notifSql);
+            $notifStmt->execute([
+                "ارزیابی عدم انطباق کیفی",
+                $messageText,
+                $reportId,
+                $operator1_id,
+                $sender_fullname,
+                $sender_role,
+                $originalReporterName
             ]);
-
-            // پیدا کردن شناسه گزارش جهت ثبت در اعلان
-            $reportStmt = $db->prepare("SELECT id FROM defect_reports WHERE report_number = ?");
-            $reportStmt->execute([$reportNumber]);
-            $reportId = $reportStmt->fetchColumn();
-
-            // ۲. علامت‌گذاری اعلان قبلی مربوط به کنترل کیفیت به عنوان خوانده شده
-            $updateNotif = $db->prepare("UPDATE notifications SET is_read = 1, read_at = CURRENT_TIMESTAMP WHERE related_id = ? AND target_role = 'operator1'");
-            $updateNotif->execute([$reportId]);
-            
-            // ۳. علامت‌گذاری اعلان Quality-Manager به عنوان خوانده شده
-            $updateNotif2 = $db->prepare("UPDATE notifications SET is_read = 1, read_at = CURRENT_TIMESTAMP WHERE related_id = ? AND target_role = 'Quality-Manager'");
-            $updateNotif2->execute([$reportId]);
-
-            // ۴. ایجاد اعلان جدید برای انباردار (operator2)
-            // دریافت user_idهای دارای نقش انباردار (operator2 یا Warehouse-Manager)
-            $warehouseStmt = $db->prepare("SELECT id FROM users WHERE role = 'Warehouse-Manager' OR role = 'operator2'");
-            $warehouseStmt->execute();
-            $warehouseUsers = $warehouseStmt->fetchAll(PDO::FETCH_ASSOC);
-
-            if (empty($warehouseUsers)) {
-                // اعلان عمومی برای نقش operator2
-                $notifSql = "INSERT INTO notifications (title, message, type, priority, related_id, target_role, sender_id, sender_name, sender_role, created_at) 
-                             VALUES (?, ?, 'parts', 'medium', ?, 'operator2', ?, ?, ?, NOW())";
+        } else {
+            foreach ($warehouseUsers as $warehouseUser) {
+                $notifSql = "INSERT INTO notifications (user_id, title, message, type, priority, related_id, target_role, sender_id, sender_name, sender_role, reporter_name, created_at) 
+                             VALUES (?, ?, ?, 'parts', 'medium', ?, 'operator2', ?, ?, ?, ?, NOW())";
                 $notifStmt = $db->prepare($notifSql);
                 $notifStmt->execute([
+                    $warehouseUser['id'],
                     "ارزیابی عدم انطباق کیفی",
-                    "کیفیت گزارش عدم انطباق " . $reportNumber . " بررسی شد. لطفاً موجودی و پارت نامبر انبار را مشخص کنید.",
+                    $messageText,
                     $reportId,
                     $operator1_id,
                     $sender_fullname,
-                    $sender_role
+                    $sender_role,
+                    $originalReporterName
                 ]);
-            } else {
-                // برای هر انباردار، یک اعلان جداگانه ایجاد کن
-                foreach ($warehouseUsers as $warehouseUser) {
-                    $notifSql = "INSERT INTO notifications (user_id, title, message, type, priority, related_id, target_role, sender_id, sender_name, sender_role, created_at) 
-                                 VALUES (?, ?, ?, 'parts', 'medium', ?, 'operator2', ?, ?, ?, NOW())";
-                    $notifStmt = $db->prepare($notifSql);
-                    $notifStmt->execute([
-                        $warehouseUser['id'],
-                        "ارزیابی عدم انطباق کیفی",
-                        "کیفیت گزارش عدم انطباق " . $reportNumber . " بررسی شد. لطفاً موجودی و پارت نامبر انبار را مشخص کنید.",
-                        $reportId,
-                        $operator1_id,
-                        $sender_fullname,
-                        $sender_role
-                    ]);
-                }
             }
-
-            echo json_encode(["success" => true, "message" => "گزارش کنترل کیفیت ثبت و به انباردار ارجاع شد."]);
-        } catch(Exception $e) {
-            echo json_encode(["success" => false, "error" => "خطا: " . $e->getMessage()]);
         }
-        exit;
+
+        echo json_encode(["success" => true, "message" => "گزارش کنترل کیفیت ثبت و به انباردار ارجاع شد."]);
+    } catch(Exception $e) {
+        echo json_encode(["success" => false, "error" => "خطا: " . $e->getMessage()]);
     }
+    exit;
+}
 
     // --- مرحله ۳: ثبت توسط انباردار (operator2) و ارجاع به مدیر کارخانه ---
     if ($step === 3) {

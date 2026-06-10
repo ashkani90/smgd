@@ -80,6 +80,7 @@ class NotificationAPI {
                             n.created_at,
                             n.expires_at,
                             n.read_at,
+                            n.reporter_name,
                             sender.full_name as sender_name,
                             sender.role as sender_role
                           FROM notifications n
