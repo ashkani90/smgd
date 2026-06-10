@@ -906,6 +906,39 @@
     // متغیرهای سراسری
     let currentEditingUserId = null;
     let currentImageData = null;
+    let currentImagePath = null;   // مسیر تصویر موجود در دیتابیس
+
+
+
+
+
+
+
+
+// تابع جدید برای آپلود تصویر به سرور
+async function uploadProfileImage(file) {
+    const formData = new FormData();
+    formData.append('profile_image', file);
+    
+    try {
+        const response = await fetch('../api/upload-profile-image.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            return result.file_path; // برگرداندن مسیر ذخیره شده
+        } else {
+            alert('خطا در آپلود تصویر: ' + result.error);
+            return null;
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('خطا در آپلود تصویر');
+        return null;
+    }
+}
 
     // تابع دریافت کاربران از دیتابیس
     async function loadUsers() {
@@ -944,10 +977,7 @@
             let avatarContent = '';
             if (user.profileImage && user.profileImage !== '' && user.profileImage !== 'null') {
                 let imgSrc = user.profileImage;
-                // تصحیح مسیر تصویر
-                if (imgSrc.includes('http:\\\\')) {
-                    imgSrc = imgSrc.replace(/http:\\\\/g, 'http://').replace(/\\\\/g, '/');
-                }
+
                 avatarContent = `<img src="${imgSrc}" class="user-avatar-img" alt="${escapeHtml(user.fullname)}" 
                             onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.user-avatar-fallback').style.display='flex'">`;
             }
@@ -1099,29 +1129,32 @@ function initPasswordToggles() {
             document.getElementById('department').value = user.department || '';
             document.getElementById('isActive').checked = user.isActive === true || user.isActive === 1;
             
-            if (user.profileImage) {
-                currentImageData = user.profileImage;
-                updateUploadButtonWithImage(user.profileImage);
-            } else {
-                currentImageData = null;
-                resetUploadButton();
+        if (user.profileImage && user.profileImage !== '' && user.profileImage !== 'null') {
+            // ذخیره مسیر تصویر موجود
+            currentImagePath = user.profileImage;
+            // نمایش تصویر موجود
+            let imgSrc = user.profileImage;
+            if (imgSrc.includes('http:\\\\')) {
+                imgSrc = imgSrc.replace(/http:\\\\/g, 'http://').replace(/\\\\/g, '/');
             }
-            
-            if (user.role === 'admin') {
-                permissionsSection.style.display = 'block';
-                loadPermissionsTree();
-            } else {
-                permissionsSection.style.display = 'none';
-            }
+            updateUploadButtonWithImage(imgSrc);
         } else {
+            currentImagePath = null;
+            resetUploadButton();
+        }
+        currentImageFile = null; // ریست فایل جدید
+    } else {
             modalTitle.textContent = 'افزودن کاربر جدید';
             document.getElementById('userForm').reset();
             currentEditingUserId = null;
             currentImageData = null;
             permissionsSection.style.display = 'none';
             resetUploadButton();
-        }
+        currentImagePath = null;
+        currentImageFile = null;
+        resetUploadButton();
     }
+}
     
     function closeModal() {
         const modal = document.getElementById('userModal');
@@ -1134,6 +1167,18 @@ function initPasswordToggles() {
     
     // ذخیره کاربر
     async function saveUser() {
+            // ابتدا اگر فایل جدید انتخاب شده، آن را آپلود کن
+    let uploadedImagePath = currentImagePath; // مسیر قبلی
+    
+    if (currentImageFile) {
+        // آپلود تصویر جدید
+        const uploadedPath = await uploadProfileImage(currentImageFile);
+        if (uploadedPath) {
+            uploadedImagePath = uploadedPath;
+        } else {
+            return; // خطا در آپلود
+        }
+    }
         const formData = {
             id: currentEditingUserId,
             fullName: document.getElementById('fullName').value,
@@ -1144,7 +1189,7 @@ function initPasswordToggles() {
             department: document.getElementById('department').value,
             isActive: document.getElementById('isActive').checked,
             password: document.getElementById('password').value,
-            profileImage: currentImageData
+            profileImage: uploadedImagePath  // ← اینجا مسیر فایل است، نه Base64
         };
         
         // اعتبارسنجی
@@ -1252,26 +1297,31 @@ function initPasswordToggles() {
         setupImageUpload();
     }
     
-    function setupImageUpload() {
-        const uploadBtn = document.getElementById('uploadBtn');
-        const newUploadBtn = uploadBtn.cloneNode(true);
-        uploadBtn.parentNode.replaceChild(newUploadBtn, uploadBtn);
-        
-        const fileInput = newUploadBtn.querySelector('input[type="file"]');
-        
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    currentImageData = event.target.result;
-                    updateUploadButtonWithImage(currentImageData);
-                };
-                reader.readAsDataURL(file);
-            }
-            this.value = '';
-        });
-    }
+// اصلاح تابع setupImageUpload
+function setupImageUpload() {
+    const uploadBtn = document.getElementById('uploadBtn');
+    const newUploadBtn = uploadBtn.cloneNode(true);
+    uploadBtn.parentNode.replaceChild(newUploadBtn, uploadBtn);
+    
+    const fileInput = newUploadBtn.querySelector('input[type="file"]');
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            // ذخیره فایل برای آپلود بعدی
+            currentImageFile = file;
+            
+            // فقط برای پیش‌نمایش، از Base64 استفاده کن (نه برای ذخیره در دیتابیس)
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                // فقط برای پیش‌نمایش - این را به دیتابیس نمی‌فرستیم
+                updateUploadButtonWithImage(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+        this.value = '';
+    });
+}
     
     // بارگذاری ساختار درختی دسترسی‌ها
     function loadPermissionsTree() {
