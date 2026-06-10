@@ -13,6 +13,16 @@ if (session_status() === PHP_SESSION_NONE) {
 // دریافت داده‌های POST
 $data = json_decode(file_get_contents('php://input'), true);
 
+// پردازش تصویر پروفایل
+$profileImage = null;
+if (isset($data['profileImage']) && !empty($data['profileImage'])) {
+    // اگر تصویر جدید ارسال شده (نام فایل یا مسیر)
+    $profileImage = $data['profileImage'];
+} elseif (isset($data['oldProfileImage']) && !empty($data['oldProfileImage'])) {
+    // نگهداری تصویر قبلی
+    $profileImage = $data['oldProfileImage'];
+}
+
 if (!$data) {
     echo json_encode(['success' => false, 'message' => 'داده‌ای دریافت نشد']);
     exit;

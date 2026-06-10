@@ -50,8 +50,10 @@ try {
     $sql = "SELECT id, username, full_name, email, phone, role, department, 
                    profile_image, is_active, last_login
             FROM users 
-            WHERE id > 0
+            WHERE id > 0    
             ORDER BY id DESC";
+
+            //اگرمی خواهید که کاربر سیستم را مشاهده کنید شرط آی دی بزرگتر از صفر را از دستور بالا حذف کنید
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
@@ -63,11 +65,12 @@ foreach ($users as $user) {
     // بررسی و اصلاح آدرس تصویر
     $profileImage = null;
     if (!empty($user['profile_image'])) {
-        // اگر آدرس تصویر کامل نیست، مسیر را اصلاح کن
         $imagePath = $user['profile_image'];
-        if (!preg_match('/^(http|https|data:)/i', $imagePath)) {
-            // فرض می‌کنیم تصاویر در پوشه uploads/profiles/ ذخیره می‌شوند
-            $profileImage = '../uploads/profiles/' . $imagePath;
+        
+        // بررسی می‌کنیم آیا قبلاً مسیر کامل است؟
+        if (!preg_match('/^(http|https|data:|\/)/i', $imagePath)) {
+            // فقط یک بار مسیر کامل را بساز
+            $profileImage = '/smgd/images/profiles/' . $imagePath;
         } else {
             $profileImage = $imagePath;
         }
