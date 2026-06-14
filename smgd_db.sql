@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 08, 2026 at 12:37 PM
+-- Generation Time: Jun 14, 2026 at 11:09 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -267,70 +267,16 @@ CREATE TABLE `defect_reports` (
   `deadline_date` varchar(50) DEFAULT NULL,
   `corrective_action_no` varchar(100) DEFAULT NULL,
   `tech_submitted_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 --
 -- Dumping data for table `defect_reports`
 --
 
-INSERT INTO `defect_reports` (`id`, `report_number`, `report_date`, `reporter_name`, `employee_code`, `reporter_department`, `vehicle_type`, `vehicle_model`, `part_code`, `part_name_fa`, `part_name_en`, `defect_quantity`, `unit_of_measure`, `detection_location`, `is_replaced`, `part_image`, `defect_type`, `defect_description`, `possible_cause`, `status`, `qc_detection_location`, `part_status`, `defect_reason`, `quality_notes`, `qc_submitted_at`, `tracking_code`, `inventory_status`, `warehouse_notes`, `warehouse_submitted_at`, `tech_review_result`, `final_decision`, `responsible_party`, `deadline_date`, `corrective_action_no`, `tech_submitted_at`, `created_at`) VALUES
-(64, 'NC-20260608-069', '2026/06/08 - 12:00', '876', '786', 'quality_control', 'کامیونت', '786', '786', '786', '786', 1, 'عدد', 'بازرسی پیش از تحویل', 'خیر', '', 'مونتاژی', '786', '7896', 'waiting_qc', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-08 09:51:11');
-
---
--- Triggers `defect_reports`
---
-DELIMITER $$
-CREATE TRIGGER `after_defect_report_insert` AFTER INSERT ON `defect_reports` FOR EACH ROW BEGIN
-    DECLARE reporter_name_val VARCHAR(100);
-    DECLARE quality_manager_id INT;
-    
-    -- دریافت نام گزارش‌دهنده
-    SELECT full_name INTO reporter_name_val 
-    FROM users 
-    WHERE id = NEW.reporter_name
-    LIMIT 1;
-    
-    -- یافتن کاربر با نقش Quality-Manager
-    SELECT id INTO quality_manager_id
-    FROM users 
-    WHERE role = 'Quality-Manager' AND is_active = 1
-    LIMIT 1;
-    
-    -- اگر مدیر کیفیت وجود دارد، اعلان ارسال کن
-    IF quality_manager_id IS NOT NULL THEN
-        INSERT INTO `notifications` (
-            `user_id`, 
-            `title`, 
-            `message`, 
-            `type`, 
-            `priority`, 
-            `related_module`, 
-            `related_id`, 
-            `created_at`,
-            `expires_at`
-        ) VALUES (
-            quality_manager_id,
-            'گزارش عدم انطباق جدید',
-            CONCAT(
-                'گزارش قطعه معیوب شماره ', NEW.report_number, ' ثبت گردید.\n',
-                'گزارش‌دهنده: ', IFNULL(reporter_name_val, 'کاربر ناشناس'), '\n',
-                'قطعه: ', NEW.part_name_fa, '\n',
-                'نوع عیب: ', NEW.defect_type, '\n',
-                'وضعیت: منتظر ارزیابی کیفی'
-            ),
-            'defect_report',
-            'high',
-            'defect_reports',
-            NEW.id,
-            NOW(),
-            DATE_ADD(NOW(), INTERVAL 7 DAY)
-        );
-    END IF;
-    
-END
-$$
-DELIMITER ;
+INSERT INTO `defect_reports` (`id`, `report_number`, `report_date`, `reporter_name`, `employee_code`, `reporter_department`, `vehicle_type`, `vehicle_model`, `part_code`, `part_name_fa`, `part_name_en`, `defect_quantity`, `unit_of_measure`, `detection_location`, `is_replaced`, `part_image`, `defect_type`, `defect_description`, `possible_cause`, `status`, `qc_detection_location`, `part_status`, `defect_reason`, `quality_notes`, `qc_submitted_at`, `tracking_code`, `inventory_status`, `warehouse_notes`, `warehouse_submitted_at`, `tech_review_result`, `final_decision`, `responsible_party`, `deadline_date`, `corrective_action_no`, `tech_submitted_at`, `created_at`, `user_id`) VALUES
+(95, 'NC-20260613-598', '2026/06/13 - 12:00', 'حمید صبوری', '654', 'quality_control', 'اتوبوس', '44', '2134124', 'سنسور ترمز', 'break sensor', 1, 'عدد', 'برگشت از تولید', 'بله', '', 'عملکردی', 'عملکرد ندارد', 'خرابی قطعه', 'waiting_tech', 'کنترل ورودی', 'قطعه مورد تأیید و قابل استفاده می باشد', 'خطای اپراتور', 'توضیحات کنترل کیفیت', '2026-06-13 12:46:28', '1111111', 'قطعه سالم وجود دارد و می توان بدون ایجاد مشکل در موجودی کالا قطعه را جایگزین نمود', 'توضیحات انبار', '2026-06-13 12:47:32', NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-13 12:45:35', 1);
 
 -- --------------------------------------------------------
 
@@ -771,7 +717,80 @@ INSERT INTO `login_attempts` (`id`, `username`, `ip_address`, `attempt_time`, `s
 (305, 'admin', '::1', '2026-06-08 09:39:49', 1),
 (306, 'operator1', '::1', '2026-06-08 09:46:51', 1),
 (307, 'admin', '::1', '2026-06-08 09:49:32', 1),
-(308, 'operator1', '::1', '2026-06-08 09:52:07', 1);
+(308, 'operator1', '::1', '2026-06-08 09:52:07', 1),
+(309, 'admin', '::1', '2026-06-08 11:25:57', 1),
+(310, 'operator1', '::1', '2026-06-08 11:28:08', 1),
+(311, 'admin', '::1', '2026-06-08 11:56:56', 1),
+(312, 'operator1', '::1', '2026-06-08 11:59:26', 1),
+(313, 'admin', '::1', '2026-06-08 12:29:55', 1),
+(314, 'operator1', '::1', '2026-06-08 12:31:50', 1),
+(315, 'admin', '::1', '2026-06-08 12:49:31', 1),
+(316, 'operator1', '::1', '2026-06-08 12:51:10', 1),
+(317, 'operator1', '::1', '2026-06-08 13:02:04', 1),
+(318, 'admin', '::1', '2026-06-09 06:04:05', 1),
+(319, 'admin', '::1', '2026-06-09 07:59:30', 1),
+(320, 'admin', '::1', '2026-06-09 08:09:42', 1),
+(321, 'admin', '::1', '2026-06-09 08:13:41', 1),
+(322, 'admin', '::1', '2026-06-09 08:29:38', 1),
+(323, 'admin', '::1', '2026-06-09 08:30:37', 1),
+(324, 'admin', '::1', '2026-06-09 12:39:06', 1),
+(325, 'admin', '::1', '2026-06-09 12:56:18', 1),
+(326, 'operator2', '::1', '2026-06-09 13:40:55', 1),
+(327, 'admin', '::1', '2026-06-10 05:44:00', 1),
+(328, 'admin', '::1', '2026-06-10 07:19:08', 1),
+(329, 'operator1', '::1', '2026-06-10 07:20:55', 1),
+(330, 'admin', '::1', '2026-06-10 07:52:24', 1),
+(331, 'operator1', '::1', '2026-06-10 07:52:48', 1),
+(332, 'admin', '::1', '2026-06-10 08:05:12', 1),
+(333, 'operator1', '::1', '2026-06-10 08:07:04', 1),
+(334, 'admin', '::1', '2026-06-10 09:22:47', 1),
+(335, 'operator1', '::1', '2026-06-10 09:30:24', 1),
+(336, 'admin', '::1', '2026-06-10 09:37:08', 1),
+(337, 'operator1', '::1', '2026-06-10 09:38:26', 1),
+(338, 'admin', '::1', '2026-06-10 10:17:27', 1),
+(339, 'admin', '::1', '2026-06-10 10:41:27', 1),
+(340, 'operator1', '::1', '2026-06-10 10:41:43', 1),
+(341, 'admin', '::1', '2026-06-10 10:42:24', 1),
+(342, 'operator1', '::1', '2026-06-10 10:43:59', 1),
+(343, 'admin', '::1', '2026-06-10 10:45:22', 1),
+(344, 'operator1', '::1', '2026-06-10 10:50:57', 1),
+(345, 'admin', '::1', '2026-06-10 10:57:25', 1),
+(346, 'operator1', '::1', '2026-06-10 10:58:12', 1),
+(347, 'admin', '::1', '2026-06-10 10:58:55', 1),
+(348, 'operator1', '::1', '2026-06-10 11:11:20', 1),
+(349, 'admin', '::1', '2026-06-10 11:17:07', 1),
+(350, 'operator1', '::1', '2026-06-10 11:42:41', 1),
+(351, 'admin', '::1', '2026-06-10 11:55:02', 1),
+(352, 'operator1', '::1', '2026-06-10 11:56:34', 1),
+(353, 'admin', '::1', '2026-06-10 12:05:42', 1),
+(354, 'operator1', '::1', '2026-06-10 12:06:29', 1),
+(355, 'operator1', '::1', '2026-06-10 12:12:23', 1),
+(356, 'operator2', '::1', '2026-06-10 12:26:41', 1),
+(357, 'operator1', '::1', '2026-06-10 12:38:55', 1),
+(358, 'admin', '::1', '2026-06-13 10:32:13', 1),
+(359, 'operator1', '::1', '2026-06-13 10:39:14', 1),
+(360, 'operator1', '::1', '2026-06-13 10:44:03', 1),
+(361, 'admin', '::1', '2026-06-13 10:44:36', 1),
+(362, 'operator1', '::1', '2026-06-13 10:44:54', 1),
+(363, 'operator1', '::1', '2026-06-13 10:46:13', 1),
+(364, 'operator2', '::1', '2026-06-13 10:46:28', 1),
+(365, 'operator1', '::1', '2026-06-13 10:47:40', 1),
+(366, 'admin', '::1', '2026-06-13 10:49:02', 1),
+(367, 'admin', '::1', '2026-06-13 10:49:49', 1),
+(368, 'admin', '::1', '2026-06-13 11:24:19', 1),
+(369, 'admin', '::1', '2026-06-13 11:34:19', 1),
+(370, 'operator1', '::1', '2026-06-13 11:37:01', 1),
+(371, 'operator2', '::1', '2026-06-13 11:38:10', 1),
+(372, 'operator3', '::1', '2026-06-13 12:14:33', 1),
+(373, 'operator3', '::1', '2026-06-13 12:29:41', 1),
+(374, 'operator3', '::1', '2026-06-13 12:35:25', 1),
+(375, 'operator2', '::1', '2026-06-13 12:43:25', 1),
+(376, 'admin', '::1', '2026-06-13 12:44:10', 1),
+(377, 'operator1', '::1', '2026-06-13 12:45:49', 0),
+(378, 'operator1', '::1', '2026-06-13 12:45:54', 1),
+(379, 'operator2', '::1', '2026-06-13 12:46:56', 1),
+(380, 'operator3', '::1', '2026-06-13 12:47:47', 1),
+(381, 'admin', '::1', '2026-06-14 08:19:36', 1);
 
 -- --------------------------------------------------------
 
@@ -948,18 +967,25 @@ CREATE TABLE `notifications` (
   `read_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `expires_at` timestamp NULL DEFAULT NULL,
-  `target_role` varchar(50) DEFAULT NULL,
+  `sender_id` int(11) DEFAULT NULL,
   `sender_name` varchar(100) DEFAULT NULL,
-  `sender_role` varchar(50) DEFAULT NULL
+  `sender_role` varchar(50) DEFAULT NULL,
+  `reporter_name` varchar(100) DEFAULT NULL,
+  `target_role` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 --
 -- Dumping data for table `notifications`
 --
 
-INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `priority`, `related_module`, `related_id`, `is_read`, `read_at`, `created_at`, `expires_at`, `target_role`, `sender_name`, `sender_role`) VALUES
-(327, 4, 'گزارش عدم انطباق جدید', 'گزارش قطعه معیوب شماره NC-20260608-069 ثبت گردید.\nگزارش‌دهنده: کاربر ناشناس\nقطعه: 786\nنوع عیب: مونتاژی\nوضعیت: منتظر ارزیابی کیفی', '', 'high', 'defect_reports', 64, 1, '2026-06-08 09:52:48', '2026-06-08 09:51:11', '2026-06-15 09:51:11', NULL, NULL, NULL),
-(328, 0, 'گزارش عدم انطباق جدید', 'گزارش قطعه معیوب شماره NC-20260608-069 ثبت گردید و منتظر ارزیابی کیفی شماست.', 'alert', 'high', NULL, 64, 0, NULL, '2026-06-08 09:51:11', NULL, 'quality', '876', 'operator');
+INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `priority`, `related_module`, `related_id`, `is_read`, `read_at`, `created_at`, `expires_at`, `sender_id`, `sender_name`, `sender_role`, `reporter_name`, `target_role`) VALUES
+(389, 1, 'تأیید ثبت گزارش عدم انطباق', 'گزارش شما با شماره NC-20260613-598 با موفقیت ثبت و به کنترل کیفیت ارجاع شد.', 'alert', 'high', 'defect_reports', 95, 0, NULL, '2026-06-13 12:45:35', '2026-06-20 12:45:35', 1, 'حمید صبوری', 'reporter', 'حمید صبوری', 'reporter'),
+(390, 4, 'گزارش عدم انطباق جدید', 'گزارش قطعه معیوب شماره NC-20260613-598 ثبت گردید.\nگزارش‌دهنده: حمید صبوری\nقطعه: سنسور ترمز\nنوع عیب: عملکردی', 'alert', 'high', 'defect_reports', 95, 1, '2026-06-13 12:46:28', '2026-06-13 12:45:35', '2026-06-20 12:45:35', 1, 'حمید صبوری', 'reporter', 'حمید صبوری', 'Quality-Manager'),
+(391, 7, 'ارزیابی عدم انطباق کیفی', 'کیفیت گزارش عدم انطباق NC-20260613-598 بررسی شد. لطفاً موجودی و پارت نامبر انبار را مشخص کنید.', 'parts', 'medium', NULL, 95, 1, '2026-06-13 12:47:32', '2026-06-13 12:46:28', NULL, 4, 'محمد پورسان دلیر', 'Quality-Manager', 'حمید صبوری', 'operator2'),
+(392, 7, 'تأیید ثبت گزارش انبار', 'گزارش انبار برای قطعه معیوب NC-20260613-598 با موفقیت ثبت و به مدیر کارخانه ارجاع شد.', 'alert', 'high', 'defect_reports', 95, 0, NULL, '2026-06-13 12:47:32', '2026-06-20 12:47:32', 7, 'وحید خانی', 'Warehouse-Manager', NULL, 'operator2'),
+(393, 0, 'تعیین تکلیف عدم انطباق قطعه', 'گزارش قطعه معیوب NC-20260613-598 توسط انبار بررسی شد. منتظر تصمیم نهایی مدیر کارخانه است.', 'maintenance_request', 'critical', NULL, 95, 0, NULL, '2026-06-13 12:47:32', NULL, 7, 'وحید خانی', 'Warehouse-Manager', NULL, 'operator3'),
+(394, 1, 'تعیین تکلیف عدم انطباق قطعه', 'گزارش قطعه معیوب NC-20260613-598 توسط انبار بررسی شد. منتظر تصمیم نهایی مدیر کارخانه است.', 'maintenance_request', 'critical', NULL, 95, 0, NULL, '2026-06-13 12:47:32', NULL, 7, 'وحید خانی', 'Warehouse-Manager', NULL, 'operator3'),
+(395, 8, 'تعیین تکلیف عدم انطباق قطعه', 'گزارش قطعه معیوب NC-20260613-598 توسط انبار بررسی شد. منتظر تصمیم نهایی مدیر کارخانه است.', 'maintenance_request', 'critical', NULL, 95, 0, NULL, '2026-06-13 12:47:32', NULL, 7, 'وحید خانی', 'Warehouse-Manager', NULL, 'operator3');
 
 -- --------------------------------------------------------
 
@@ -1087,7 +1113,7 @@ CREATE TABLE `users` (
   `full_name` varchar(100) NOT NULL,
   `email` varchar(100) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
-  `role` enum('admin','Quality-Manager','Warehouse-Manager','supervisor','technician','operator') DEFAULT 'operator',
+  `role` enum('admin','Managing-Director','Factory-manager','Quality-Manager','Warehouse-Manager','supervisor','technician','operator') DEFAULT 'operator',
   `department` varchar(50) DEFAULT NULL,
   `profile_image` varchar(255) DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT 1,
@@ -1102,16 +1128,16 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `password_hash`, `full_name`, `email`, `phone`, `role`, `department`, `profile_image`, `is_active`, `last_login`, `created_at`, `updated_at`) VALUES
 (0, 'admin1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'مدیر سیستم', 'admin@company.com', '09123456789', 'admin', 'فنی', '', 1, '2024-01-15 14:30:00', '2023-01-10 06:30:00', '2026-06-06 10:24:59'),
-(1, 'admin', '$2y$10$TYMp3ksCe50H2x20cM9ZtOOGfrC0JM1J8wsVTsh.S3BGlLSd95svq', 'محمد پورسان دلیر', 'admin@cmms.local', '09127557315', 'admin', 'کنترل کیفیت', 'http:\\\\localhost\\smgd\\images\\profiles\\admin.jpg', 1, '2026-06-08 13:19:32', '0000-00-00 00:00:00', '2026-06-08 09:49:32'),
+(1, 'admin', '$2y$10$TYMp3ksCe50H2x20cM9ZtOOGfrC0JM1J8wsVTsh.S3BGlLSd95svq', 'محمد پورسان دلیر', 'admin@cmms.local', '09127557315', 'admin', 'کنترل کیفیت', 'http://localhost/smgd/images/profiles/admin.jpg', 1, '2026-06-14 11:49:36', '0000-00-00 00:00:00', '2026-06-14 08:19:36'),
 (2, 'supervisor1', '$2y$10$NF2Q9EtxButl8RnNUB2r7.U6hiiR91fbKQEJgjCr5B8zDec0fiKgm', 'ناظر فنی', 'supervisor@company.com', '09123456788', 'supervisor', 'production', '', 1, '2024-01-14 09:15:00', '2023-02-15 07:50:00', '2026-06-06 12:05:50'),
 (3, 'tech1', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین برق', 'tech1@company.com', '09123456787', 'technician', 'تعمیرات', '', 1, '2024-01-13 16:45:00', '2023-03-20 05:00:00', '2026-06-02 07:41:37'),
-(4, 'operator1', '$2y$10$YNuhtzLeesPhzuUaGzG84enPOFKPUwS3VW9vvxcrOqe6nkOPo31tG', 'اپراتور خط ۱', 'operator1@company.com', '09123456786', 'Quality-Manager', 'quality', '', 1, '2026-06-08 13:22:07', '2023-04-05 10:45:00', '2026-06-08 09:52:07'),
+(4, 'operator1', '$2y$10$cezQ4mgA6aP68ir7H4ISoe5kKG.86hzxWh79seXPnZgdM9tHRgHRS', 'محمد پورسان دلیر', 'operator1@company.com', '09123456786', 'Quality-Manager', 'quality', 'http://localhost/smgd/images/profiles/operator.jpg', 1, '2026-06-13 16:15:54', '2023-04-05 10:45:00', '2026-06-13 12:45:54'),
 (5, 'tech2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'تکنسین مکانیک', 'tech2@company.com', '09123456785', 'technician', 'تعمیرات', NULL, 1, '2024-01-10 13:10:00', '2023-05-12 06:10:00', '2024-01-10 09:45:00'),
-(6, 'supervisor2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'ناظر تولید', 'supervisor2@company.com', '09123456784', 'supervisor', 'تولید', '', 1, '2024-01-09 10:05:00', '2023-06-18 12:55:00', '2026-06-02 07:41:47'),
-(7, 'operator2', '$2y$10$aF/mjZ0De3Y6lPy9qTqUuenwY2zJm0/refeY2jbHyLWzphedMIAXW', 'اپراتور خط ۲', 'operator2@company.com', '09123456783', 'Warehouse-Manager', 'warehouse', '', 1, '2026-06-07 15:54:00', '2023-07-22 09:00:00', '2026-06-07 12:24:00'),
+(6, 'supervisor2', '$2y$10$bU6h3i55eoOSH.Fk28T3tuHUvVLjMjV9jA0LLltjuZGsB7CLb.SAy', 'ناظر تولید', 'supervisor2@company.com', '09123456784', 'supervisor', 'facilities', '/smgd/images/profiles/6a290ef5441a2_1781075701.jpg', 1, '2024-01-09 10:05:00', '2023-06-18 12:55:00', '2026-06-10 07:15:19'),
+(7, 'operator2', '$2y$10$/KfEuXOmjZn8nsa1IjtSceOAhkfhd0kxtSif03V7sbMqlnpOBTY6W', 'وحید خانی', 'operator2@company.com', '09123456789', 'Warehouse-Manager', 'warehouse', '/smgd/images/profiles/6a290eccda925_1781075660.jpg', 1, '2026-06-13 16:16:56', '2023-07-22 09:00:00', '2026-06-13 12:46:56'),
 (8, 'admin2', '$2y$10$abcdefghijklmnopqrstuvwxyz123456', 'مدیر فنی', 'admin2@company.com', '09123456782', 'admin', 'فنی', '', 1, '2024-01-08 15:40:00', '2023-08-30 06:40:00', '2026-06-02 07:41:54'),
 (9, 'tech3', '$2y$10$PpnpyfoS5JZBT63Dn/yMC.cgwbFWrLlab4N.oO/gncGKfu.LhRv6S', 'تکنسین ابزار دقیق', 'tech3@company.com', '09123456781', 'technician', 'maintenance', '', 1, '2024-01-07 11:25:00', '2023-09-14 10:20:00', '2026-06-06 10:17:28'),
-(10, 'operator3', '$2y$10$oKMa4TSaki/fAMCvVlUcOeD73tHa8C7Io5TvbKKaV.ERLGb7DMGly', 'اپراتور انبار', 'operator3@company.com', '09123456780', 'operator', 'warehouse', 'http:\\\\localhost\\smgd\\images\\profiles\\انبار.png', 1, '2026-06-02 17:02:26', '2023-10-28 03:50:00', '2026-06-06 11:53:35');
+(10, 'operator3', '$2y$10$mBJmMWGIv35KSmOAFgUVE.llxY08CE.WIKvQ.kQha.gW9VQckoC4m', 'فضل الله جمالی', 'operator3@company.com', '09123456780', 'Factory-manager', 'Management', 'http://localhost/smgd/images/profiles/انبار.png', 1, '2026-06-13 16:17:47', '2023-10-28 03:50:00', '2026-06-13 12:47:47');
 
 -- --------------------------------------------------------
 
@@ -1248,7 +1274,8 @@ ALTER TABLE `calendar_events`
 --
 ALTER TABLE `defect_reports`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `report_number` (`report_number`);
+  ADD UNIQUE KEY `report_number` (`report_number`),
+  ADD KEY `idx_user_id` (`user_id`);
 
 --
 -- Indexes for table `employees`
@@ -1341,7 +1368,9 @@ ALTER TABLE `notifications`
   ADD KEY `user_id` (`user_id`),
   ADD KEY `is_read` (`is_read`),
   ADD KEY `type` (`type`),
-  ADD KEY `created_at` (`created_at`);
+  ADD KEY `created_at` (`created_at`),
+  ADD KEY `idx_sender_id` (`sender_id`),
+  ADD KEY `idx_reporter_name` (`reporter_name`);
 
 --
 -- Indexes for table `old_users`
@@ -1413,7 +1442,7 @@ ALTER TABLE `calendar_events`
 -- AUTO_INCREMENT for table `defect_reports`
 --
 ALTER TABLE `defect_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
 -- AUTO_INCREMENT for table `employees`
@@ -1449,13 +1478,23 @@ ALTER TABLE `kpi_data`
 -- AUTO_INCREMENT for table `login_attempts`
 --
 ALTER TABLE `login_attempts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=309;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=382;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=329;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=396;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `fk_notifications_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
