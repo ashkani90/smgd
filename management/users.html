@@ -224,6 +224,16 @@
             color: #58af1e;
         }
 
+        .role-Managing-Director {
+            background: #fbdbfe;
+            color: #af1ea3;
+        }  
+        
+        .role-Factory-manager {
+            background: #dbdefe;
+            color: #1e34af;
+        }           
+
         .role-supervisor {
             background: #f0f9ff;
             color: #0c4a6e;
@@ -760,6 +770,8 @@
                             <label for="role">نقش کاربری</label>
                             <select id="role">
                                 <option value="admin">مدیر سیستم</option>
+                                <option value="Managing-Director">مدیر عامل</option>
+                                <option value="Factory-manager">مدیر کارخانه</option>
                                 <option value="Quality-Manager">مدیر کیفیت</option>
                                 <option value="Warehouse-Manager">مدیر انبار</option>
                                 <option value="supervisor">سرپرست</option>
@@ -770,6 +782,7 @@
                         <div class="form-group">
                             <label for="department">دپارتمان</label>
                             <select id="department">
+                                <option value="Management">مدیریت</option>
                                 <option value="production">تولید</option>
                                 <option value="quality">کنترل کیفیت</option>
                                 <option value="maintenance">تعمیرات</option>
@@ -1038,6 +1051,8 @@ async function uploadProfileImage(file) {
     function getRoleName(role) {
         const roles = {
             'admin': 'مدیر سیستم',
+            'Managing-Director': 'مدیر عامل',
+            'Factory-manager': 'مدیر کارخانه',
             'Quality-Manager': 'مدیر کیفیت',
             'Warehouse-Manager': 'مدیر انبار',
             'supervisor': 'سرپرست',
@@ -1049,6 +1064,7 @@ async function uploadProfileImage(file) {
     
     function getDepartmentName(dept) {
         const departments = {
+            'Management': 'مدیریت',
             'production': 'تولید',
             'quality': 'کنترل کیفیت',
             'maintenance': 'تعمیرات',
