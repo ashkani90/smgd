@@ -24,22 +24,37 @@ $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 // ==================== بخش پردازش درخواست‌های GET ====================
 if ($method === 'GET') {
-    // دریافت یک گزارش خاص بر اساس شماره یا شناسه
-    if (isset($_GET['report_number'])) {
-        try {
-            $stmt = $db->prepare("SELECT * FROM defect_reports WHERE report_number = ?");
-            $stmt->execute([$_GET['report_number']]);
-            $report = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($report) {
-                echo json_encode(["success" => true, "data" => $report]);
-            } else {
-                echo json_encode(["success" => false, "error" => "گزارش یافت نشد."]);
-            }
-        } catch(Exception $e) {
-            echo json_encode(["success" => false, "error" => $e->getMessage()]);
-        }
+// دریافت لیست کامل کارتابل معوقه هر نقش
+if (isset($_GET['pending_list_for_role'])) {
+    $role = $_GET['pending_list_for_role'];
+    $statusMap = [
+        'operator1' => 'waiting_qc',
+        'operator2' => 'waiting_warehouse',
+        'operator3' => 'waiting_tech'
+    ];
+    $targetStatus = isset($statusMap[$role]) ? $statusMap[$role] : '';
+
+    // همچنین پشتیبانی از نقش‌های مستقیم دیتابیس
+    if ($role === 'Quality-Manager') $targetStatus = 'waiting_qc';
+    if ($role === 'Warehouse-Manager') $targetStatus = 'waiting_warehouse';
+    if ($role === 'Factory-manager') $targetStatus = 'waiting_tech';
+
+    if (empty($targetStatus)) {
+        echo json_encode(["success" => true, "data" => []]);
         exit;
     }
+
+    try {
+        // دریافت همه گزارش‌های در انتظار برای این نقش
+        $stmt = $db->prepare("SELECT * FROM defect_reports WHERE status = ? ORDER BY id DESC");
+        $stmt->execute([$targetStatus]);
+        $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(["success" => true, "data" => $reports]);
+    } catch(Exception $e) {
+        echo json_encode(["success" => false, "error" => $e->getMessage()]);
+    }
+    exit;
+}
 
     // دریافت اولین کارتابل معوقه هر نقش جهت لود مستقیم در فرم
     if (isset($_GET['pending_for_role'])) {
@@ -50,7 +65,12 @@ if ($method === 'GET') {
             'operator3' => 'waiting_tech'
         ];
         $targetStatus = isset($statusMap[$role]) ? $statusMap[$role] : '';
-        
+
+    // همچنین پشتیبانی از نقش‌های مستقیم دیتابیس
+    if ($role === 'Quality-Manager') $targetStatus = 'waiting_qc';
+    if ($role === 'Warehouse-Manager') $targetStatus = 'waiting_warehouse';
+    if ($role === 'Factory-manager') $targetStatus = 'waiting_tech';
+            
         if (empty($targetStatus)) {
             echo json_encode(["success" => true, "data" => null]);
             exit;
@@ -77,6 +97,11 @@ if ($method === 'POST') {
     }
 
     $step = isset($input['step']) ? (int)$input['step'] : 1;
+
+
+//========================== مرحله 1 =======================================
+
+
 
 // --- مرحله ۱: ثبت اولیه توسط گزارش‌گر و ارجاع به کنترل کیفیت ---
 if ($step === 1) {
@@ -200,6 +225,10 @@ if ($step === 1) {
     exit;
 }
 
+
+//=========================== مرجله 2 =======================================
+
+
 // --- مرحله ۲: ثبت توسط کنترل کیفیت (operator1) و ارجاع به انباردار ---
 if ($step === 2) {
     try {
@@ -294,11 +323,23 @@ if ($step === 2) {
     exit;
 }
 
-    // --- مرحله ۳: ثبت توسط انباردار (operator2) و ارجاع به مدیر کارخانه ---
+
+
+//============================== مرحله 3 ========================================
+
+
+    // --- مرحله ۳: ثبت توسط انباردار (operator3) و ارجاع به مدیر کارخانه ---
     if ($step === 3) {
         try {
             $reportNumber = $input['reportNumber'];
-            
+
+            // دریافت اطلاعات اصلی گزارش (از جمله reporter_name اصلی)
+            $reportStmt = $db->prepare("SELECT id, reporter_name FROM defect_reports WHERE report_number = ?");
+            $reportStmt->execute([$reportNumber]);
+            $reportInfo = $reportStmt->fetch(PDO::FETCH_ASSOC);
+            $reportId = $reportInfo['id'];
+            $originalReporterName = $reportInfo['reporter_name'];
+
             // دریافت user_id کاربر لاگین شده (انباردار)
             $operator2_id = $_SESSION['user_id'] ?? 0;
             if ($operator2_id == 0 && isset($input['user_id'])) {
@@ -307,7 +348,7 @@ if ($step === 2) {
             
             // دریافت نام و نقش کاربر انباردار
             $sender_fullname = 'انباردار';
-            $sender_role = 'operator2';
+            $sender_role = 'operator3';
             if ($operator2_id > 0) {
                 $userStmt = $db->prepare("SELECT full_name, role FROM users WHERE id = ?");
                 $userStmt->execute([$operator2_id]);
@@ -337,40 +378,56 @@ if ($step === 2) {
 
             // ایجاد اعلان جدید برای مدیر کارخانه / کمیته فنی (operator3)
             // دریافت user_idهای دارای نقش مدیر کارخانه یا operator3
-            $techStmt = $db->prepare("SELECT id FROM users WHERE role = 'operator3' OR role = 'manager' OR role = 'factory_manager'");
+            $techStmt = $db->prepare("SELECT id, full_name FROM users WHERE  role = 'Factory-manager'");
             $techStmt->execute();
             $techUsers = $techStmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if (empty($techUsers)) {
-                // اعلان عمومی برای نقش operator3
-                $notifSql = "INSERT INTO notifications (title, message, type, priority, related_id, target_role, sender_id, sender_name, sender_role, created_at) 
-                             VALUES (?, ?, 'maintenance_request', 'critical', ?, 'operator3', ?, ?, ?, NOW())";
+        $messageText = "گزارش قطعه معیوب " . $reportNumber . " توسط انبار بررسی شد.\n" .
+                      "لطفاً تصمیم نگیرید:\n" .
+                      "- نتیجه بررسی فنی\n" .
+                      "- تعیین تکلیف نهایی\n" .
+                      "- مسئول اجرا و مهلت";
+
+        if (empty($techUsers)) {
+            // اعلان عمومی برای نقش operator3
+            $notifSql = "INSERT INTO notifications (
+                title, message, type, priority, related_id, target_role, 
+                sender_id, sender_name, sender_role, reporter_name, created_at
+            ) VALUES (
+                'تعیین تکلیف عدم انطباق قطعه', ?, 'alert', 'high', ?, 'operator3', 
+                ?, ?, ?, ?, NOW()
+            )";
+            $notifStmt = $db->prepare($notifSql);
+            $notifStmt->execute([
+                $messageText,
+                $reportId,
+                $operator2_id,
+                $sender_fullname,
+                $sender_role,
+                $originalReporterName
+            ]);
+        } else {
+            // برای هر مدیر فنی، یک اعلان جداگانه ایجاد کن
+            foreach ($techUsers as $techUser) {
+                $notifSql = "INSERT INTO notifications (
+                    user_id, title, message, type, priority, related_id, target_role, 
+                    sender_id, sender_name, sender_role, reporter_name, created_at
+                ) VALUES (
+                    ?, 'تعیین تکلیف عدم انطباق قطعه', ?, 'alert', 'high', ?, 'operator3', 
+                    ?, ?, ?, ?, NOW()
+                )";
                 $notifStmt = $db->prepare($notifSql);
                 $notifStmt->execute([
-                    "تعیین تکلیف عدم انطباق قطعه",
-                    "گزارش قطعه معیوب " . $reportNumber . " توسط انبار بررسی شد. منتظر تصمیم نهایی مدیر کارخانه است.",
+                    $techUser['id'],
+                    $messageText,
                     $reportId,
                     $operator2_id,
                     $sender_fullname,
-                    $sender_role
+                    $sender_role,
+                    $originalReporterName
                 ]);
-            } else {
-                // برای هر کاربر فنی، یک اعلان جداگانه ایجاد کن
-                foreach ($techUsers as $techUser) {
-                    $notifSql = "INSERT INTO notifications (user_id, title, message, type, priority, related_id, target_role, sender_id, sender_name, sender_role, created_at) 
-                                 VALUES (?, ?, ?, 'maintenance_request', 'critical', ?, 'operator3', ?, ?, ?, NOW())";
-                    $notifStmt = $db->prepare($notifSql);
-                    $notifStmt->execute([
-                        $techUser['id'],
-                        "تعیین تکلیف عدم انطباق قطعه",
-                        "گزارش قطعه معیوب " . $reportNumber . " توسط انبار بررسی شد. منتظر تصمیم نهایی مدیر کارخانه است.",
-                        $reportId,
-                        $operator2_id,
-                        $sender_fullname,
-                        $sender_role
-                    ]);
-                }
             }
+        }
 
             echo json_encode(["success" => true, "message" => "گزارش انبار ثبت و به مدیر کارخانه ارجاع شد."]);
         } catch(Exception $e) {

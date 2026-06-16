@@ -34,7 +34,8 @@ try {
                 'email' => '',
                 'phone' => '',  // استفاده از phone به جای phoneNumber
                 'department' => '',
-                'role' => 'guest'
+                'role' => 'guest',
+                'profile_image' => null
             ]
         ], JSON_UNESCAPED_UNICODE);
         exit;
@@ -46,7 +47,7 @@ try {
     }
     
     // حذف فیلد avatar از کوئری
-    $sql = "SELECT id, username, full_name as fullname, email, phone, department, role 
+    $sql = "SELECT id, username, full_name as fullname, email, phone, department, role, profile_image 
             FROM users WHERE id = ? OR username = ?";
     
     $stmt = $pdo->prepare($sql);
@@ -54,6 +55,20 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($user) {
+
+        // ========== اصلاح مسیر تصویر پروفایل ==========
+        // اگر تصویر وجود دارد و مسیر کامل نیست، مسیر کامل را بساز
+        if (!empty($user['profile_image'])) {
+            $imagePath = $user['profile_image'];
+            
+            // اگر مسیر با http یا https یا / شروع نمی‌شود، فقط نام فایل است
+            if (!preg_match('/^(https?:\/\/|\/)/i', $imagePath)) {
+                // مسیر کامل را بساز (مشابه کاری که در get-users.php انجام شده)
+                $user['profile_image'] = '/smgd/images/profiles/' . $imagePath;
+            }
+        }
+        //=========================================================
+
         echo json_encode([
             'success' => true,
             'data' => $user
@@ -68,7 +83,8 @@ try {
                 'email' => '',
                 'phone' => '09123456789',
                 'department' => 'انتخاب کنید',
-                'role' => 'operator'
+                'role' => 'operator',
+                'profile_image' => null
             ]
         ], JSON_UNESCAPED_UNICODE);
     }
