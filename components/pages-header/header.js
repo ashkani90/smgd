@@ -601,8 +601,69 @@ function updateUserAvatar() {
     loadUserInfo();
 }
 
+
+// در header.js، تابع بارگذاری اطلاعات کاربر
+async function loadUserProfile() {
+    try {
+        const response = await fetch('../api/get-user-profile.php');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const user = result.data;
+            
+            // نمایش نام کاربر
+            const userNameElement = document.querySelector('.user-name');
+            if (userNameElement) {
+                userNameElement.textContent = user.fullname || user.username;
+            }
+            
+            // نمایش نقش کاربر (اختیاری)
+            const userRoleElement = document.querySelector('.user-role');
+            if (userRoleElement && user.role) {
+                const roleNames = {
+                    'admin': 'مدیر سیستم',
+                    'Quality-Manager': 'مدیر کیفیت',
+                    'Warehouse-Manager': 'مدیر انبار',
+                    'Factory-manager': 'مدیر کارخانه',
+                    'supervisor': 'سرپرست',
+                    'technician': 'تکنسین',
+                    'operator': 'اپراتور'
+                };
+                userRoleElement.textContent = roleNames[user.role] || user.role;
+            }
+            
+            // نمایش تصویر پروفایل
+            const userAvatar = document.querySelector('.user-avatar');
+            if (userAvatar) {
+                if (user.profile_image && user.profile_image !== '') {
+                    // تصویر وجود دارد
+                    userAvatar.innerHTML = `<img src="${user.profile_image}" alt="${user.fullname}" 
+                        class="user-avatar-img"
+                        onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.fallback-icon').style.display='flex';">`;
+                    
+                    // اضافه کردن آیکون fallback در صورت خطا
+                    if (!userAvatar.querySelector('.fallback-icon')) {
+                        const fallbackIcon = document.createElement('i');
+                        fallbackIcon.className = 'fas fa-user-circle fallback-icon';
+                        fallbackIcon.style.cssText = 'font-size: 40px; color: #94a3b8; display: none;';
+                        userAvatar.appendChild(fallbackIcon);
+                    }
+                } else {
+                    // بدون تصویر، آیکون پیش‌فرض
+                    userAvatar.innerHTML = `<i class="fas fa-user-circle" style="font-size: 40px; color: #94a3b8;"></i>`;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user profile:', error);
+    }
+}
+
+
 // فراخوانی تابع هنگام بارگذاری
 document.addEventListener('DOMContentLoaded', function() {
+    loadUserProfile();
+    
     console.log('DOMContentLoaded - شروع بارگذاری هدر');
     
     // عنوان صفحه را از meta tag یا data attribute بگیر
