@@ -477,6 +477,59 @@
         .toast-error { background-color: #e74c3c; }
         .toast-info { background-color: #3498db; }
         .toast-warning { background-color: #f39c12; }
+
+
+/* استایل لیست گزارش‌های معوقه در کارتابل */
+.pending-list-item {
+    transition: all 0.2s ease;
+    border-right: 3px solid #3182ce;
+    cursor: pointer;
+}
+
+.pending-list-item:hover {
+    transform: translateX(-3px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#pending-list-container {
+    animation: fadeIn 0.3s ease;
+}
+
+#pending-list {
+    scrollbar-width: thin;
+}
+
+#pending-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+#pending-list::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 4px;
+}
+
+#pending-list::-webkit-scrollbar-thumb {
+    background: #3182ce;
+    border-radius: 4px;
+}
+
+.empty-pending-message {
+    text-align: center;
+    padding: 20px;
+    color: #718096;
+    font-size: 13px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.empty-pending-message i {
+    font-size: 32px;
+    color: #cbd5e1;
+    margin-bottom: 10px;
+    display: block;
+}
+
     </style>
 
 </head>
@@ -498,41 +551,17 @@
                 <p>ثبت دقیق اطلاعات قطعات غیرمطابق جهت آنالیز و بهبود فرآیندهای تولید و کنترل کیفیت</p>
             </div>
 
-            <!-- سیستم شبیه‌سازی ورود کاربران هماهنگ با درخواست کاربر -->
-            <div class="form-section" style="background: #ffffff; border: 1px solid #cbd5e1; margin-bottom: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-                <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-user-lock" style="color: #1e3c72; font-size: 24px;"></i>
-                        <div>
-                            <span style="font-weight: bold; font-size: 14px; color: #1e293b; display: block;">سیستم شبیه‌سازی ورود کاربران (تست جریان کار بین چند کامپیوتر)</span>
-                            <small style="color: #64748b; font-size: 12px;">با تغییر کاربر، تعداد اعلان‌ها در زنگوله بالای صفحه تغییر می‌کند.</small>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <label for="userRoleSelect" style="font-size: 13px; font-weight: bold; color: #475569; white-space: nowrap;">کاربر وارد شده:</label>
-                        <select id="userRoleSelect" class="form-control" style="width: 260px; padding: 8px 12px; font-weight: bold; border-color: #cbd5e1; background: #f8fafc;">
-                            <option value="reporter">اپراتور تولید (ثبت اولیه)</option>
-                            <option value="operator1">اپراتور کنترل کیفیت (operator1)</option>
-                            <option value="operator2">اپراتور انباردار (operator2)</option>
-                            <option value="operator3">عضو کمیته فنی/مدیر کارخانه (operator3)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
             <!-- کارتابل و پیام‌های ارجاع کار مستقیم (داخل صفحه) -->
             <div id="workflow-inbox" style="display: none; background: #ebf8ff; border-right: 5px solid #3182ce; color: #2b6cb0; padding: 15px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div style=" align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-envelope-open-text" style="font-size: 22px;"></i>
                         <div>
-                            <strong style="display: block; font-size: 14px; margin-bottom: 3px;">کارتابل کارهای ورودی:</strong>
+                            <strong style="font-size: 14px; margin-bottom: 3px;">کارتابل کارهای ورودی:</strong>
                             <span id="inbox-message-text" style="font-size: 13px;">شما یک گزارش ارجاع شده جدید برای تکمیل دارید.</span>
                         </div>
                     </div>
-                    <button type="button" id="btn-load-task" class="btn btn-primary" style="padding: 6px 16px; font-size: 13px;">
-                        <i class="fas fa-file-signature"></i> بررسی و تکمیل فرم
-                    </button>
+                    <!-- دکمه "بررسی و تکمیل فرم" حذف شد -->
                 </div>
             </div>
 
@@ -776,7 +805,7 @@
                 <!-- Step2: گزارش کنترل کیفیت -->
                 <div class="form-step" id="step2">
                     <div class="form-section">
-                        <h2 class="form-section-title"><i class="fas fa-clipboard-list"></i> گزارش کنترل کیفیت (operator1)</h2>
+                        <h2 class="form-section-title"><i class="fas fa-clipboard-list"></i> گزارش کنترل کیفیت (Quality-Manager)</h2>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="qcDetectionLocation">محل شناسایی کیفی <span class="required">*</span></label>
@@ -829,7 +858,7 @@
                 <!-- Step3: گزارش انبار -->
                 <div class="form-step" id="step3">
                     <div class="form-section">
-                        <h2 class="form-section-title"><i class="fas fa-warehouse"></i> گزارش انبار (operator2)</h2>
+                        <h2 class="form-section-title"><i class="fas fa-warehouse"></i> گزارش انبار (Warehouse-Manager)</h2>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="trackingCode">کد ردیابی / پارت نامبر <span class="required">*</span></label>
@@ -857,7 +886,7 @@
                 <!-- Step4: کمیته فنی -->
                 <div class="form-step" id="step4">
                     <div class="form-section">
-                        <h2 class="form-section-title"><i class="fas fa-users"></i> نظر کمیته فنی / مدیر کارخانه (operator3)</h2>
+                        <h2 class="form-section-title"><i class="fas fa-users"></i> نظر کمیته فنی / مدیر کارخانه (Factory-manager)</h2>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="techReviewResult">نتیجه بررسی <span class="required">*</span></label>
@@ -970,7 +999,7 @@
     <!-- اسکریپت‌های اختصاصی صفحه -->
     <script>
         // ==================== مدیریت وضعیت سیستم و نقش‌ها ====================
-        let currentRole = 'reporter'; // reporter, operator1 (QC), operator2 (Warehouse), operator3 (Technical)
+        let currentRole = 'reporter'; // reporter, Quality-Manager (QC), Warehouse-Manager (Warehouse), Factory-manager (Technical)
         let activeTaskReport = null;  // گزارش در حال ویرایش جاری
 
         // تبدیل تاریخ میلادی به شمسی
@@ -1114,70 +1143,366 @@
 
         // ==================== مکانیزم گردش کار و کارتابل ورودی اتصال به دیتابیس ====================
         function getStatusForRole(role) {
-            if (role === 'operator1') return 'waiting_qc';
-            if (role === 'operator2') return 'waiting_warehouse';
-            if (role === 'operator3') return 'waiting_tech';
+            if (role === 'Quality-Manager') return 'waiting_qc';
+            if (role === 'Warehouse-Manager') return 'waiting_warehouse';
+            if (role === 'admin' || role === 'Factory-manager') return 'waiting_tech';
             return '';
         }
 
-        async function checkPendingTasks() {
-            const inbox = document.getElementById('workflow-inbox');
-            const emptyState = document.getElementById('empty-inbox-state');
-            const mainForm = document.getElementById('defectReportForm');
+// ==================== مکانیزم گردش کار و کارتابل ورودی اتصال به دیتابیس ====================
+async function checkPendingTasks() {
+    const inbox = document.getElementById('workflow-inbox');
+    const emptyState = document.getElementById('empty-inbox-state');
+    const mainForm = document.getElementById('defectReportForm');
+    
+    // انتخابگرهای کارتابل (این المان‌ها را بعداً اضافه می‌کنیم)
+    let pendingListContainer = document.getElementById('pending-list-container');
+    let pendingCountBadge = document.getElementById('pending-count-badge');
+    //let pendingListElement = document.getElementById('pending-list');
 
-            // بررسی حضور کاربر واقعی لاگین شده
-            const loggedUser = getLoggedInUserData();
-            if (loggedUser) {
-                // نگاشت دپارتمان یا نقش به ساختار فرآیند
-                if (loggedUser.department === 'quality') currentRole = 'operator1';
-                else if (loggedUser.department === 'warehouse') currentRole = 'operator2';
-                else if (loggedUser.department === 'technical' || loggedUser.role === 'manager') currentRole = 'operator3';
-                else currentRole = 'reporter';
-                
-                // آپدیت دراپ‌داون شبیه‌ساز جهت هماهنگی ظاهری با کاربر واقعی وارد شده
-                document.getElementById('userRoleSelect').value = currentRole;
-            }
-
-            localStorage.setItem('currentUserRole', currentRole);
-            updateHeaderNotificationBell();
-
-            if (currentRole === 'reporter') {
-                inbox.style.display = 'none';
-                emptyState.style.display = 'none';
-                mainForm.style.display = 'block';
-                resetFormToReporter();
-                return;
-            }
-
-            mainForm.style.display = 'none';
-
-            try {
-                const response = await fetch(`../api/defect_reports.php?pending_for_role=${currentRole}`);
-                const resData = await response.json();
-
-                if (resData.success && resData.data) {
-                    activeTaskReport = resData.data;
-                    inbox.style.display = 'block';
-                    emptyState.style.display = 'none';
-                    
-                    let stepLabel = '';
-                    if (currentRole === 'operator1') stepLabel = 'کنترل کیفیت';
-                    if (currentRole === 'operator2') stepLabel = 'انبار';
-                    if (currentRole === 'operator3') stepLabel = 'مدیر کارخانه/کمیته فنی';
-
-                    document.getElementById('inbox-message-text').innerHTML = 
-                        `یک گزارش ارجاع شده با شماره <strong>${activeTaskReport.reportNumber || activeTaskReport.report_number}</strong> منتظر بررسی و تکمیل اطلاعات بخش <strong>${stepLabel}</strong> است.`;
-                } else {
-                    activeTaskReport = null;
-                    inbox.style.display = 'none';
-                    emptyState.style.display = 'block';
-                }
-            } catch(err) {
-                console.error("خطا در ارتباط با وب‌سرویس کارتابل:", err);
-                inbox.style.display = 'none';
-                emptyState.style.display = 'block';
-            }
+    // بررسی حضور کاربر واقعی لاگین شده
+    const loggedUser = getLoggedInUserData();
+    let targetRoleForApi = null;
+    if (loggedUser && loggedUser.id) {
+        // نگاشت نقش واقعی دیتابیس به نقش‌های فرآیند در API
+        if (loggedUser.role === 'Quality-Manager') {
+            currentRole = 'Quality-Manager';
+            targetRoleForApi = 'operator1';  // API با operator1 کار می‌کند
+        } else if (loggedUser.role === 'Warehouse-Manager') {
+            currentRole = 'Warehouse-Manager';
+            targetRoleForApi = 'operator2';  // API با operator2 کار می‌کند
+        } else if (loggedUser.role === 'Factory-manager') {
+            currentRole = 'Factory-manager';
+            targetRoleForApi = 'operator3';  // API با operator3 کار می‌کند
+        } else {
+            currentRole = 'reporter';
+            targetRoleForApi = null;
         }
+    } else {
+        currentRole = 'reporter';
+        targetRoleForApi = null;
+    }
+
+    localStorage.setItem('currentUserRole', currentRole);
+    updateHeaderNotificationBell();
+
+    if (currentRole === 'reporter') {
+        inbox.style.display = 'none';
+        emptyState.style.display = 'none';
+        mainForm.style.display = 'block';
+        resetFormToReporter();
+        return;
+    }
+
+    mainForm.style.display = 'none';
+
+    try {
+        // دریافت لیست همه گزارش‌های معوقه
+        const response = await fetch(`../api/defect_reports.php?pending_list_for_role=${currentRole}`);
+        const resData = await response.json();
+
+        if (resData.success && resData.data && resData.data.length > 0) {
+            // ذخیره لیست کامل گزارش‌ها
+            const pendingReports = resData.data;
+            
+            // نمایش کارتابل
+            inbox.style.display = 'block';
+            emptyState.style.display = 'none';
+            
+            let stepLabel = '';
+            if (currentRole === 'Quality-Manager') stepLabel = 'کنترل کیفیت';
+            if (currentRole === 'Warehouse-Manager') stepLabel = 'مدیر انبار';
+            if (currentRole === 'Factory-manager') stepLabel = 'مدیر کارخانه/کمیته فنی';
+            
+            // به‌روزرسانی متن کارتابل با تعداد موارد
+            const inboxMessageText = document.getElementById('inbox-message-text');
+            if (inboxMessageText) {
+                inboxMessageText.innerHTML = `شما <strong>${pendingReports.length}</strong> گزارش ارجاع شده برای بررسی بخش <strong>${stepLabel}</strong> دارید.`;
+            }
+            
+            // به‌روزرسانی Badge تعداد (اگر وجود داشته باشد)
+            if (pendingCountBadge) {
+                pendingCountBadge.textContent = pendingReports.length;
+                pendingCountBadge.style.display = 'inline-block';
+            }
+            
+            // ساخت لیست گزارش‌های معوقه
+            buildPendingList(pendingReports);
+            
+            // ذخیره لیست کامل در یک متغیر سراسری برای استفاده در دکمه "بررسی و تکمیل فرم"
+            window.pendingReportsList = pendingReports;
+            
+        } else {
+            // هیچ گزارش معوقه‌ای وجود ندارد
+            window.pendingReportsList = [];
+            inbox.style.display = 'block';
+            emptyState.style.display = 'none';
+            
+            // نمایش پیام در لیست گزارش‌ها
+            buildEmptyPendingList();
+        }
+    } catch(err) {
+        console.error("خطا در ارتباط با وب‌سرویس کارتابل:", err);
+        inbox.style.display = 'block';
+        emptyState.style.display = 'none';
+        window.pendingReportsList = [];
+        buildEmptyPendingList();
+    }
+}
+
+// ساخت پیام خالی بودن لیست گزارش‌ها
+function buildEmptyPendingList() {
+    let pendingListContainer = document.getElementById('pending-list-container');
+    let inboxContent = document.querySelector('#workflow-inbox > div');
+    
+    if (!pendingListContainer) {
+        // اگر کانتینر لیست وجود ندارد، آن را ایجاد کن
+        pendingListContainer = document.createElement('div');
+        pendingListContainer.id = 'pending-list-container';
+        pendingListContainer.style.cssText = 'margin-top: 15px; border-top: 1px solid #bee0f7; padding-top: 12px;';
+        
+        // عنوان لیست
+        const listTitle = document.createElement('div');
+        listTitle.style.cssText = 'font-size: 13px; font-weight: bold; margin-bottom: 10px; color: #2b6cb0;';
+        listTitle.innerHTML = '<i class="fas fa-list-ul"></i> لیست گزارش‌های در انتظار:';
+        pendingListContainer.appendChild(listTitle);
+        
+        // کانتینر آیتم‌های لیست
+        const pendingList = document.createElement('div');
+        pendingList.id = 'pending-list';
+        pendingList.style.cssText = 'max-height: 250px; overflow-y: auto;';
+        pendingListContainer.appendChild(pendingList);
+        
+        // اضافه کردن به کارتابل
+        if (inboxContent) {
+            inboxContent.appendChild(pendingListContainer);
+        }
+    }
+    
+    // پر کردن لیست با پیام خالی
+    const pendingList = document.getElementById('pending-list');
+    if (!pendingList) return;
+    
+    pendingList.innerHTML = '';
+    
+    const emptyMessage = document.createElement('div');
+    emptyMessage.className = 'empty-pending-message';
+    emptyMessage.innerHTML = `
+        <i class="fas fa-inbox"></i>
+        <span>هیچ گزارشی برای بررسی وجود ندارد</span>
+    `;
+    pendingList.appendChild(emptyMessage);
+    
+    // نمایش کانتینر لیست
+    pendingListContainer.style.display = 'block';
+}
+
+// ساخت لیست گزارش‌های معوقه در کارتابل
+function buildPendingList(reports) {
+    // بررسی وجود یا ایجاد کانتینر لیست در کارتابل
+    let pendingListContainer = document.getElementById('pending-list-container');
+    let inboxContent = document.querySelector('#workflow-inbox > div');
+    
+    if (!pendingListContainer) {
+        // اگر کانتینر لیست وجود ندارد، آن را ایجاد کن
+        pendingListContainer = document.createElement('div');
+        pendingListContainer.id = 'pending-list-container';
+        pendingListContainer.style.cssText = 'margin-top: 15px; border-top: 1px solid #bee0f7; padding-top: 12px;';
+        
+        // عنوان لیست
+        const listTitle = document.createElement('div');
+        listTitle.style.cssText = 'font-size: 13px; font-weight: bold; margin-bottom: 10px; color: #2b6cb0;';
+        listTitle.innerHTML = '<i class="fas fa-list-ul"></i> لیست گزارش‌های در انتظار:';
+        pendingListContainer.appendChild(listTitle);
+        
+        // کانتینر آیتم‌های لیست
+        const pendingList = document.createElement('div');
+        pendingList.id = 'pending-list';
+        pendingList.style.cssText = 'max-height: 250px; overflow-y: auto;';
+        pendingListContainer.appendChild(pendingList);
+        
+        // اضافه کردن به کارتابل
+        if (inboxContent) {
+            inboxContent.appendChild(pendingListContainer);
+        }
+    }
+    
+    // پر کردن لیست
+    const pendingList = document.getElementById('pending-list');
+    if (!pendingList) return;
+    
+    pendingList.innerHTML = '';
+    
+    reports.forEach((report, index) => {
+        const reportNumber = report.report_number || report.reportNumber;
+        const partName = report.part_name_fa || report.partNameFa || 'نامشخص';
+        const reportDate = report.report_date || report.reportDate || 'نامشخص';
+        const reporterName = report.reporter_name || report.reporterName || 'نامشخص';
+        
+        // تعیین مرحله مورد نیاز بر اساس نقش فعلی
+        let requiredStep = '';
+        if (currentRole === 'Quality-Manager') requiredStep = 'کنترل کیفیت';
+        else if (currentRole === 'Warehouse-Manager') requiredStep = 'مدیر انبار';
+        else if (currentRole === 'Factory-manager') requiredStep = 'مدیر کارخانه/ کمیته فنی';
+        
+        const listItem = document.createElement('div');
+        listItem.className = 'pending-list-item';
+        listItem.style.cssText = `
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-right: 3px solid #3182ce;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        `;
+        listItem.onmouseover = () => { listItem.style.backgroundColor = '#f0f9ff'; };
+        listItem.onmouseout = () => { listItem.style.backgroundColor = 'white'; };
+        listItem.onclick = () => {
+            // بارگذاری گزارش انتخاب شده
+            loadSpecificReport(report);
+        };
+        
+        listItem.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <strong style="color: #2c3e50;">${escapeHtml(reportNumber)}</strong>
+                    <span style="font-size: 12px; color: #64748b; margin-right: 10px;">${escapeHtml(partName)}</span>
+                </div>
+                <span style="font-size: 11px; color: #718096;">تاریخ: ${escapeHtml(reportDate)}</span>
+            </div>
+            <div style="font-size: 12px; color: #4a5568; margin-top: 5px;">
+                <i class="fas fa-user"></i> گزارش‌دهنده: ${escapeHtml(reporterName)}
+            </div>
+            <div style="font-size: 11px; color: #3182ce; margin-top: 8px;">
+                <i class="fas fa-arrow-left"></i> برای تکمیل بخش ${requiredStep} کلیک کنید
+                <i class="fas fa-arrow-right"></i>
+            </div>
+        `;
+        
+        pendingList.appendChild(listItem);
+    });
+    
+    // نمایش کانتینر لیست
+    pendingListContainer.style.display = 'block';
+}
+
+// تابع escapeHtml برای جلوگیری از XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// تابع بارگذاری گزارش خاص
+async function loadSpecificReport(report) {
+    if (!report) return;
+    
+    try {
+        activeTaskReport = report;
+        loadTaskIntoForm();
+        
+        // اسکرول نرم به فرم
+        document.getElementById('defectReportForm').scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+        
+        showToast(`گزارش ${report.report_number || report.reportNumber} بارگذاری شد`, 'success');
+    } catch(err) {
+        console.error("خطا در بارگذاری گزارش:", err);
+        showToast("خطا در بارگذاری گزارش", "error");
+    }
+}
+
+// اصلاح تابع loadTaskIntoForm برای پشتیبانی از reportهای مختلف
+function loadTaskIntoForm() {
+    if (!activeTaskReport) {
+        // اگر activeTaskReport خالی است و لیست گزارش‌ها وجود دارد، اولین را انتخاب کن
+        if (window.pendingReportsList && window.pendingReportsList.length > 0) {
+            activeTaskReport = window.pendingReportsList[0];
+        } else {
+            showToast('هیچ گزارشی برای بارگذاری وجود ندارد', 'warning');
+            return;
+        }
+    }
+
+    const data = activeTaskReport;
+    // ... بقیه کد loadTaskIntoForm قبلی (که از خط 490 تا 560 وجود دارد) را همانまま نگه دارید
+    // (من فقط قسمت اول را نشان می‌دهم، بقیه کد قبلی شما باید حفظ شود)
+    
+    document.getElementById('reportNumber').value = data.report_number || data.reportNumber || '';
+    document.getElementById('reportDate').value = data.report_date || data.reportDate || '';
+    document.getElementById('reporterName').value = data.reporter_name || data.reporterName || '';
+    document.getElementById('employeeCode').value = data.employee_code || data.employeeCode || '';
+    document.getElementById('reporterDepartment').value = data.reporter_department || data.reporterDepartment || '';
+    document.getElementById('vehicleType').value = data.vehicle_type || data.vehicleType || '';
+    document.getElementById('vehicleModel').value = data.vehicle_model || data.vehicleModel || '';
+    document.getElementById('partCode').value = data.part_code || data.partCode || '';
+    document.getElementById('partNameFa').value = data.part_name_fa || data.partNameFa || '';
+    document.getElementById('partNameEn').value = data.part_name_en || data.partNameEn || '';
+    document.getElementById('defectQuantity').value = data.defect_quantity || data.defectQuantity || '1';
+    document.getElementById('unitOfMeasure').value = data.unit_of_measure || data.unitOfMeasure || '';
+    document.getElementById('detectionLocation').value = data.detection_location || data.detectionLocation || '';
+    
+    if (data.is_replaced === 'بله' || data.isReplaced === 'بله') {
+        document.getElementById('replacedYes').checked = true;
+    } else {
+        document.getElementById('replacedNo').checked = true;
+    }
+    
+    document.getElementById('defectType').value = data.defect_type || data.defectType || '';
+    document.getElementById('defectDescription').value = data.defect_description || data.defectDescription || '';
+    document.getElementById('possibleCause').value = data.possible_cause || data.possibleCause || '';
+
+    // پرکردن اطلاعات مرحله ۲ (اگر وجود داشت)
+    document.getElementById('qcDetectionLocation').value = data.qc_detection_location || data.qcDetectionLocation || '';
+    document.getElementById('partStatus').value = data.part_status || data.partStatus || '';
+    document.getElementById('defectReason').value = data.defect_reason || data.defectReason || '';
+    document.getElementById('qualityNotes').value = data.quality_notes || data.qualityNotes || '';
+
+    // پرکردن اطلاعات مرحله ۳ (اگر وجود داشت)
+    document.getElementById('trackingCode').value = data.tracking_code || data.trackingCode || '';
+    document.getElementById('inventoryStatus').value = data.inventory_status || data.inventoryStatus || '';
+    document.getElementById('warehouseNotes').value = data.warehouse_notes || data.warehouseNotes || '';
+
+    // پرکردن اطلاعات مرحله ۴ (اگر وجود داشت)
+    document.getElementById('techReviewResult').value = data.tech_review_result || data.techReviewResult || '';
+    document.getElementById('finalDecision').value = data.final_decision || data.finalDecision || '';
+    document.getElementById('responsibleParty').value = data.responsible_party || data.responsibleParty || '';
+    document.getElementById('deadlineDate').value = data.deadline_date || data.deadlineDate || '';
+    document.getElementById('correctiveActionNo').value = data.corrective_action_no || data.correctiveActionNo || '';
+
+    // تصویر قطعه
+    const partImageValue = data.part_image || data.partImage;
+    if (partImageValue) {
+        document.getElementById('partImagePreview').innerHTML = `
+            <div class="preview-item">
+                <i class="fas fa-image" style="font-size: 24px; color: #3498db;"></i>
+                <div class="file-info">
+                    <span>${escapeHtml(partImageValue)}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        document.getElementById('partImagePreview').innerHTML = '';
+    }
+
+    // تعیین مرحله فعال برای نمایش
+    let activeStep = 1;
+    const currentStatus = data.status;
+    if (currentStatus === 'waiting_qc') activeStep = 2;
+    if (currentStatus === 'waiting_warehouse') activeStep = 3;
+    if (currentStatus === 'waiting_tech') activeStep = 4;
+
+    document.getElementById('defectReportForm').style.display = 'block';
+    setStepsVisibility(activeStep);
+
+    // اسکرول نرم به بخش فعال فرم
+    document.getElementById(`step${activeStep}`).scrollIntoView({ behavior: 'smooth' });
+    showToast(`گزارش ${data.report_number || data.reportNumber} بارگذاری شد. بخش مربوط به خود را تکمیل کنید.`, 'info');
+}
 
         // بارگذاری اطلاعات کار ورودی درون فیلدهای مربوطه
         function loadTaskIntoForm() {
@@ -1820,17 +2145,6 @@
             document.getElementById('nextToStep4').addEventListener('click', submitStep3);
             document.getElementById('finalSubmitBtn').addEventListener('click', submitStep4);
 
-            // اجرای عملکرد دکمه «بررسی و تکمیل فرم» کارتابل
-            document.getElementById('btn-load-task').addEventListener('click', loadTaskIntoForm);
-
-            // مدیریت شبیه‌ساز انتخاب یوزر و تغییر نقش با دراپ‌داون
-            const userSelector = document.getElementById('userRoleSelect');
-            userSelector.addEventListener('change', function() {
-                currentRole = this.value;
-                checkPendingTasks();
-                showToast(`ورود شبیه‌سازی شده با موفقیت به نقش "${userSelector.options[userSelector.selectedIndex].text}" تغییر یافت.`, 'info');
-            });
-
             // بارگذاری پیش‌نویس در صورت وجود
             if (localStorage.getItem('defectReportDraft')) {
                 setTimeout(() => {
@@ -1845,23 +2159,40 @@
         });
 
         // تابع خواندن مشخصات کاربر واقعی لاگین شده از لوکال استوریج سیستم شما
-        function getLoggedInUserData() {
-            const userData = localStorage.getItem('user');
-            if (userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    return {
-                        id: user.id || user.user_id || '',
-                        username: user.username || '',
-                        department: user.department || '',
-                        role: user.role || ''
-                    };
-                } catch(e) {
-                    console.error("خطا در پارس اطلاعات کاربر از لوکال استوریج", e);
-                }
-            }
-            return null;
+function getLoggedInUserData() {
+    // ابتدا از sessionStorage که در login.php ذخیره می‌شود بررسی کن
+    let userData = sessionStorage.getItem('user');
+    if (!userData) {
+        userData = localStorage.getItem('user');
+    }
+    
+    if (userData) {
+        try {
+            const user = JSON.parse(userData);
+            console.log("User data loaded:", user); // برای دیباگ
+            return {
+                id: user.id || user.user_id || 0,
+                username: user.username || '',
+                department: user.department || '',
+                role: user.role || ''
+            };
+        } catch(e) {
+            console.error("خطا در پارس اطلاعات کاربر از لوکال استوریج", e);
         }
+    }
+    
+    // اگر کاربر لاگین نیست، از session_start استفاده کن
+    fetch('../api/get-user-profile.php')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.data && data.data.id > 0) {
+                return data.data;
+            }
+        })
+        .catch(err => console.error("Error fetching user profile:", err));
+    
+    return null;
+}
     </script>
 </body>
 </html>
